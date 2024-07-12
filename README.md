@@ -1,1 +1,1 @@
-# chess-variants-game
+# Chess Variants Game
