@@ -1,0 +1,3 @@
+
+Addons used are:
+	- GUT: Godot Unit Testing - https://github.com/bitwes/Gut
