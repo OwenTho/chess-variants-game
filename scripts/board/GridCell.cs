@@ -27,30 +27,41 @@ public partial class GridCell: GodotObject
 
 
 
-    internal bool AddItem(GridItem item)
+    public bool AddItem(GridItem item)
     {
+        // If item already has a cell, and it's not this one,
+        // then remove it from that cell.
+        if (item.cell != null)
+        {
+            item.cell.RemoveItem(item);
+        }
         if (HasItem(item))
         {
             return false;
         }
         items.Add(item);
         item.cell = this;
+        item.grid = grid;
         return true;
     }
 
-    internal bool RemoveItem(GridItem item)
+    public bool RemoveItem(GridItem item)
     {
-        if (!HasItem(item))
+        if (!items.Remove(item))
         {
             return false;
         }
-        items.Remove(item);
         item.cell = null;
         item.grid = null;
+        // If this cell has no more items, remove it from the grid
+        if (ItemCount() == 0)
+        {
+            grid.RemoveCell(this);
+        }
         return true;
     }
 
-    internal void RemovedFromGrid()
+    internal void RemoveFromGrid()
     {
         grid = null;
     }

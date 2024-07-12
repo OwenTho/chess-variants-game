@@ -1,6 +1,5 @@
 using Godot;
 using Godot.Collections;
-using System.Linq;
 
 public partial class Grid : GodotObject
 {
@@ -28,6 +27,11 @@ public partial class Grid : GodotObject
     // Get a cell by the item held in it
     public GridCell GetCellByItem(GridItem item)
     {
+        if (item == null)
+        {
+            return null;
+        }
+
         foreach (GridCell cell in gridCells)
         {
             if (cell.HasItem(item))
@@ -42,6 +46,11 @@ public partial class Grid : GodotObject
     // Check if this grid holds a certain cell
     public bool HasCell(GridCell cell)
     {
+        if (cell == null)
+        {
+            return false;
+        }
+
         return gridCells.Contains(cell);
     }
 
@@ -53,7 +62,12 @@ public partial class Grid : GodotObject
 
     public bool RemoveCell(GridCell cell)
     {
-        cell.RemovedFromGrid();
+        // Only remove if it's on this grid
+        if (cell == null || cell.grid != this)
+        {
+            return false;
+        }
+        cell.RemoveFromGrid();
         return gridCells.Remove(cell);
     }
 
@@ -75,7 +89,7 @@ public partial class Grid : GodotObject
     public bool HasItem(GridItem item)
     {
         // Only continue if the item is on this grid
-        if (item.grid != this)
+        if (item == null || item.grid != this)
         {
             return false;
         }
@@ -93,7 +107,7 @@ public partial class Grid : GodotObject
     public bool RemoveItem(GridItem item)
     {
         // Only continue if the item is on this grid
-        if (item.grid != this)
+        if (item == null || item.grid != this)
         {
             return false;
         }
@@ -168,6 +182,7 @@ public partial class Grid : GodotObject
             }
             // Now add the item to the cell.
             cell.AddItem(item);
+            item.cell = cell;
             return cell;
         }
 
@@ -205,6 +220,14 @@ public partial class Grid : GodotObject
         {
             RemoveCell(cell1);
             RemoveCell(cell2);
+            return;
+        }
+
+        // If either cell is on another grid, throw an error.
+        if ((cell1 != null && cell1.grid != this) || (cell2 != null && cell2.grid != this))
+        {
+            GD.PushError("Cells should be on this grid if non-null.");
+            return;
         }
 
         int x1 = cell1.x;
