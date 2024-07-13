@@ -15,7 +15,7 @@ internal partial class PawnMoveRule : RuleBase
         Vector2I thisPosition = new Vector2I(piece.cell.x, piece.cell.y);
         for (int i = 0; i < maxForward; i++)
         {
-            possibleMoves.Add(thisPosition + (piece.info.forwardDirection * i));
+            possibleMoves.Add(thisPosition + (piece.forwardDirection * i));
         }
         return possibleMoves;
     }
