@@ -1,5 +1,5 @@
 ﻿using Godot;
-using Godot.Collections;
+using System.Collections.Generic;
 
 public partial class GridCell: GodotObject
 {
@@ -7,7 +7,7 @@ public partial class GridCell: GodotObject
     internal int y;
 
     public Grid grid { get; internal set; }
-    public Array<GridItem> items { get; internal set; } = new Array<GridItem>();
+    public List<GridItem> items { get; internal set; } = new List<GridItem>();
 
     public void SetPos(int x, int y)
     {

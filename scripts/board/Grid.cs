@@ -1,9 +1,9 @@
 using Godot;
-using Godot.Collections;
+using System.Collections.Generic;
 
 public partial class Grid : GodotObject
 {
-    internal Array<GridCell> gridCells = new Array<GridCell>();
+    internal List<GridCell> gridCells = new List<GridCell>();
 
     // Get a cell at a specific location
     public GridCell GetCellAt(int x, int y)
