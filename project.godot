@@ -16,7 +16,7 @@ config/features=PackedStringArray("4.2", "C#", "Mobile")
 
 [autoload]
 
-Game="*res://scripts/game/Game.cs"
+GameManager="*res://scripts/game/game_manager.gd"
 
 [dotnet]
 

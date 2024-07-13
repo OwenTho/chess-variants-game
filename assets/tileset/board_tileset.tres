@@ -1,0 +1,13 @@
+[gd_resource type="TileSet" load_steps=3 format=3 uid="uid://de3uupic4da2f"]
+
+[ext_resource type="Texture2D" uid="uid://dtfifedio52by" path="res://assets/texture/tilemaps/temp board.png" id="1_yojcv"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_x3bh3"]
+texture = ExtResource("1_yojcv")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+1:0/0 = 0
+
+[resource]
+tile_size = Vector2i(128, 128)
+sources/0 = SubResource("TileSetAtlasSource_x3bh3")

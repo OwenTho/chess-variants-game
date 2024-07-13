@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://de3wktgc8oh51"]
+
+[ext_resource type="Script" path="res://scripts/pieces/Piece.cs" id="1_t8krt"]
+[ext_resource type="Texture2D" uid="uid://b8oc5gbybx4w2" path="res://assets/texture/piece/pawn.png" id="2_41fgg"]
+
+[node name="Piece" type="Node2D"]
+script = ExtResource("1_t8krt")
+
+[node name="SprPiece" type="Sprite2D" parent="."]
+texture = ExtResource("2_41fgg")

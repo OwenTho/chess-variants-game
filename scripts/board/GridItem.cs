@@ -1,6 +1,6 @@
 ﻿using Godot;
 
-public partial class GridItem : GodotObject
+public partial class GridItem : Node2D
 {
     public Grid grid { get; internal set; }
     private GridCell myCell;
