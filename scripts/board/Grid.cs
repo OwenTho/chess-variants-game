@@ -182,7 +182,6 @@ public partial class Grid : GodotObject
             }
             // Now add the item to the cell.
             cell.AddItem(item);
-            item.cell = cell;
             return cell;
         }
 

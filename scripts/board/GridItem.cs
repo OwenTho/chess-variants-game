@@ -1,6 +1,6 @@
 ﻿using Godot;
 
-public partial class GridItem : Node2D
+public partial class GridItem : GodotObject
 {
     public Grid grid { get; internal set; }
     private GridCell myCell;
@@ -10,10 +10,10 @@ public partial class GridItem : Node2D
         }
         internal set {
             myCell = value;
-            EmitSignal(SignalName.ChangedCell);
+            EmitSignal(SignalName.ChangedCell, value);
         }
     }
 
     [Signal]
-    public delegate void ChangedCellEventHandler();
+    public delegate void ChangedCellEventHandler(GridCell cell);
 }

@@ -1,10 +1,20 @@
-[gd_scene load_steps=3 format=3 uid="uid://de3wktgc8oh51"]
+[gd_scene load_steps=4 format=3 uid="uid://de3wktgc8oh51"]
 
 [ext_resource type="Script" path="res://scripts/pieces/Piece.cs" id="1_t8krt"]
-[ext_resource type="Texture2D" uid="uid://b8oc5gbybx4w2" path="res://assets/texture/piece/pawn.png" id="2_41fgg"]
+[ext_resource type="Script" path="res://scripts/pieces/visual/piece.gd" id="1_y4q1a"]
+[ext_resource type="Texture2D" uid="uid://doewls0xy2qhi" path="res://assets/texture/piece/default.png" id="2_5orig"]
 
-[node name="Piece" type="Node2D"]
-script = ExtResource("1_t8krt")
+[node name="Piece" type="Node2D" groups=["piece"]]
+script = ExtResource("1_y4q1a")
 
 [node name="SprPiece" type="Sprite2D" parent="."]
-texture = ExtResource("2_41fgg")
+top_level = true
+texture = ExtResource("2_5orig")
+
+[node name="PieceData" type="Node" parent="."]
+script = ExtResource("1_t8krt")
+
+[node name="RemoteTransform2D" type="RemoteTransform2D" parent="."]
+remote_path = NodePath("../SprPiece")
+update_rotation = false
+update_scale = false

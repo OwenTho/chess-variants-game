@@ -11,8 +11,16 @@ public partial class GridCell: GodotObject
 
     public void SetPos(int x, int y)
     {
+        // If position is the same, ignore
+        if (this.x == x && this.y == y) return;
+
         this.x = x;
         this.y = y;
+        // Update all items, as they have "moved" from one cell to another
+        foreach (GridItem item in items)
+        {
+            item.cell = this;
+        }
     }
 
     public bool HasItem(GridItem item)

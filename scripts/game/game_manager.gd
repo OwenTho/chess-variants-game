@@ -6,12 +6,18 @@ var game_controller: Object
 var board_scene: PackedScene = preload("res://scenes/game/board.tscn")
 var piece_scene: PackedScene = preload("res://scenes/game/piece.tscn")
 
-func start() -> void:
+var grid
+var board: Board2D
+
+func start(board: Board2D) -> void:
+	self.board = board
+	
 	# First, make a new GameController
 	game_controller = game_controller_script.new()
 	
 	# Initialise the game
 	game_controller.FullInit()
+	self.grid = game_controller.grid
 	
 	# Load the game scene
 	init_board()
@@ -32,24 +38,23 @@ func place_piece(piece_id: String, id: int, x: int, y: int) -> void:
 		push_error("Tried to place piece '%s', but the piece isn't registered." % [piece_id])
 		return
 	# Make a new piece
-	var new_piece: Node2D = piece_scene.instantiate()
+	var new_piece: Piece2D = piece_scene.instantiate()
+	new_piece.board = board
 	
 	# Add node to tree
-	
 	get_tree().get_first_node_in_group("piece_holder").add_child(new_piece)
 	
-	new_piece.info = info
-	new_piece.pieceId = id
-	game_controller.grid.PlaceItemAt(new_piece, x, y)
-	new_piece.position = Vector2(x * 128, y * 128)
+	new_piece.piece_data.info = info
+	new_piece.piece_data.pieceId = id
+	game_controller.grid.PlaceItemAt(new_piece.piece_data, x, y)
 	var image_loc: String = "assets/texture/piece/" + info.textureLoc
-	#var piece_sprite: Texture2D = ImageTexture.create_from_image(Image.load_from_file(image_path))
 	var piece_sprite: Texture
-	if FileAccess.file_exists(image_loc):
+	if FileAccess.file_exists("res://" + image_loc):
 		piece_sprite = load("res://" + image_loc)
 	else:
 		push_warning("Could not find sprite at path '%s', so defalt is being used." % [image_loc])
 		piece_sprite = load("res://assets/texture/piece/default.png")
-	new_piece.get_node("SprPiece").texture = piece_sprite
+	
+	new_piece.set_sprite(piece_sprite)
 	
 	print("Placed %s (id: %s) at %s,%s" % [piece_id, id, x, y])
