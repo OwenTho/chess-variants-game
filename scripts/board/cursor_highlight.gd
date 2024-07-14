@@ -15,6 +15,15 @@ func _process(event):
 		
 		return
 	
+	# For Controller, check on each input + with a small
+	# delay to allow more control
+	
+
+func _input(event) -> void:
+	pass
+
+
+
 func check_mouse() -> void:
 	# Find the cell the mouse is hovering
 	var mouse_pos: Vector2 = get_global_mouse_position()
