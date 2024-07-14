@@ -24,13 +24,22 @@ func start(board: Board2D) -> void:
 
 func init_board() -> void:
 	# Add all of the pieces
-	place_piece("pawn", 0, -3, 0)
-	place_piece("knight", 1, -2, 0)
-	place_piece("bishop", 2, -1, 0)
-	place_piece("bad_id", -1, 0, 0)
-	place_piece("knight", 3, 1, 0)
-	place_piece("queen", 4, 2, 0)
-	place_piece("king", 4, 3, 0)
+	place_piece("pawn", 0, 0, 1)
+	place_piece("pawn", 0, 1, 1)
+	place_piece("pawn", 0, 2, 1)
+	place_piece("pawn", 0, 3, 1)
+	place_piece("pawn", 0, 4, 1)
+	place_piece("pawn", 0, 5, 1)
+	place_piece("pawn", 0, 6, 1)
+	place_piece("pawn", 0, 7, 1)
+	place_piece("rook", 0, 0, 0)
+	place_piece("knight", 0, 1, 0)
+	place_piece("bishop", 0, 2, 0)
+	place_piece("queen", 0, 3, 0)
+	place_piece("king", 0, 4, 0)
+	place_piece("bishop", 0, 5, 0)
+	place_piece("knight", 0, 6, 0)
+	place_piece("rook", 0, 7, 0)
 
 func place_piece(piece_id: String, id: int, x: int, y: int) -> void:
 	var info = game_controller.GetPieceInfo(piece_id)
