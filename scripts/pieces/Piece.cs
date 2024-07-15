@@ -27,17 +27,4 @@ public partial class Piece : GridItem
 		}
 		return allPossibleActions;
 	}
-
-	public List<Vector2I> GetPossibleAttacks()
-	{
-		List<Vector2I> allPossibleAttacks = new List<Vector2I>();
-		foreach (PieceRule pieceRule in info.rules)
-		{
-			if (pieceRule.isEnabled)
-			{
-				allPossibleAttacks.AddRange(pieceRule.rule.GetPossibleAttacks(this));
-			}
-		}
-		return allPossibleAttacks;
-	}
 }

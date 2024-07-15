@@ -12,9 +12,9 @@ board = NodePath("Board2D")
 cursor_highlight = NodePath("Board2D/CursorHighlight")
 
 [node name="DebugOverlay" parent="." instance=ExtResource("2_o62sx")]
-offset_left = -903.0
+offset_left = -1099.0
 offset_top = -728.0
-offset_right = -903.0
+offset_right = -1099.0
 offset_bottom = -728.0
 
 [node name="TileMap" type="TileMap" parent="."]
