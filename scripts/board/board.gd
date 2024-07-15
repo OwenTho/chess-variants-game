@@ -1,11 +1,17 @@
 extends Node2D
 
 @export var board: Board2D
-@export var cursor_highlight: BoardItem2D
+@export var cursor: BoardItem2D
+
+@export var action_highlights: Node2D
+@export var highlight_scene: PackedScene
+
+var selected_piece: Piece2D
+var possible_actions: Array
 
 func _ready() -> void:
 	GameManager.start(board)
-	cursor_highlight.board = board
+	cursor.board = board
 
 func _process(delta) -> void:
 	if Input.is_action_pressed("mouse_right"):
@@ -13,6 +19,54 @@ func _process(delta) -> void:
 
 func _input(event) -> void:
 	if event is InputEventMouseButton and event.is_action_pressed("mouse_left"):
-		for piece in get_tree().get_nodes_in_group("piece"):
-			var cell = piece.piece_data.cell
-			GameManager.grid.PlaceItemAt(piece.piece_data, cell.x, cell.y + 1)
+		
+		# Get the piece the player is selecting
+		var cell_pos: Vector2i = cursor.last_cell
+		
+		select_cell(cell_pos)
+
+func remove_selection() -> void:
+	selected_piece = null
+	possible_actions = []
+	for child in action_highlights.get_children():
+		child.queue_free()
+
+func select_cell(cell_pos: Vector2i):
+	# First check if the player is selecting an action
+	var actions_to_take: Array = []
+	for action in possible_actions:
+		if action.actionLocation == cell_pos:
+			actions_to_take.append(action)
+	
+	if actions_to_take.size() > 0:
+		for action in actions_to_take:
+			action.ActOn(selected_piece.piece_data)
+		remove_selection()
+		return
+	
+	# If not any of the above, check if there is a cell on the Grid
+	var cell = GameManager.grid.GetCellAt(cell_pos.x, cell_pos.y)
+	
+	# Remove existing selection before moving on	
+	remove_selection()
+	
+	# If cell doesn't exist, ignore
+	if cell == null:
+		return
+	
+	# Get the first piece
+	var item = cell.Get(0)
+	var item_node = item.get_parent()
+	
+	select_item(item_node)
+
+func select_item(piece: Piece2D) -> void:
+	selected_piece = piece
+	possible_actions = piece.piece_data.GetPossibleActions()
+	
+	for action in possible_actions:
+		var new_highlight: Node2D = highlight_scene.instantiate()
+		
+		new_highlight.board = board
+		new_highlight.set_pos(action.actionLocation.x, action.actionLocation.y)
+		action_highlights.add_child.call_deferred(new_highlight)

@@ -55,6 +55,22 @@ public partial class GridCell: GodotObject
         return true;
     }
 
+    public GridItem Get(int index)
+    {
+        return items[index];
+    }
+
+    public bool TryGet(int index, out GridItem item)
+    {
+        if (index >= 0 && index < items.Count)
+        {
+            item = items[index];
+            return true;
+        }
+        item = null;
+        return false;
+    }
+
     public bool RemoveItem(GridItem item)
     {
         if (!items.Remove(item))

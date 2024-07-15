@@ -11,5 +11,6 @@ public partial class MoveAction : ActionBase
     public override void ActOn(Piece piece)
     {
         piece.cell.grid.PlaceItemAt(piece, actionLocation.X, actionLocation.Y);
+        piece.timesMoved += 1;
     }
 }

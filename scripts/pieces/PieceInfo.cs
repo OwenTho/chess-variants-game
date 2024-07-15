@@ -5,7 +5,7 @@ public partial class PieceInfo : GodotObject
 {
     internal List<PieceRule> rules;
 
-    internal string pieceId;
+    public string pieceId { get; internal set; }
     public string textureLoc { get; internal set; }
 
     public int level { get; internal set; } = 1;

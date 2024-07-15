@@ -1,4 +1,5 @@
 using Godot;
+using Godot.Collections;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -11,16 +12,18 @@ public partial class Piece : GridItem
 	public int timesMoved = 0;
 	public PieceInfo info { get; internal set; }
 	public int pieceId;
-	public Vector2I forwardDirection = Vector2I.Up;
+	public Vector2I forwardDirection = Vector2I.Down;
 
 	public HashSet<string> tags = new HashSet<string>();
 
-	public List<ActionBase> GetPossibleActions()
+	public Array<ActionBase> GetPossibleActions()
 	{
-		List<ActionBase> allPossibleActions = new List<ActionBase>();
+		GD.Print($"Looking through rules: {info.rules.Count}");
+        Array<ActionBase> allPossibleActions = new Array<ActionBase>();
 		foreach (PieceRule pieceRule in info.rules)
-		{
-			if (pieceRule.isEnabled)
+        {
+            GD.Print($"Rule: {pieceRule}");
+            if (pieceRule.isEnabled)
 			{
 				pieceRule.rule.AddPossibleActions(this, allPossibleActions);
 			}

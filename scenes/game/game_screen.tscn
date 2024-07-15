@@ -1,15 +1,18 @@
-[gd_scene load_steps=6 format=3 uid="uid://cssq752gr7m3k"]
+[gd_scene load_steps=7 format=3 uid="uid://cssq752gr7m3k"]
 
 [ext_resource type="Script" path="res://scripts/board/board.gd" id="1_871tu"]
+[ext_resource type="PackedScene" uid="uid://isv1sog82mq8" path="res://scenes/game/highlight.tscn" id="2_c2xco"]
 [ext_resource type="PackedScene" uid="uid://2y6uf3dq2362" path="res://scenes/debug/debug_overlay.tscn" id="2_o62sx"]
 [ext_resource type="TileSet" uid="uid://de3uupic4da2f" path="res://assets/tileset/board_tileset.tres" id="3_fosrn"]
 [ext_resource type="Script" path="res://scripts/game/visual/Board2D.gd" id="4_03kst"]
 [ext_resource type="PackedScene" uid="uid://dkoglthgg2tyq" path="res://scenes/game/cursor_highlight.tscn" id="5_w7pci"]
 
-[node name="GameScreen" type="Node2D" node_paths=PackedStringArray("board", "cursor_highlight")]
+[node name="GameScreen" type="Node2D" node_paths=PackedStringArray("board", "cursor", "action_highlights")]
 script = ExtResource("1_871tu")
-board = NodePath("Board2D")
-cursor_highlight = NodePath("Board2D/CursorHighlight")
+board = NodePath("BoardHolder/Board2D")
+cursor = NodePath("BoardHolder/Board2D/CursorHighlight")
+action_highlights = NodePath("BoardHolder/Board2D/CellHighlights")
+highlight_scene = ExtResource("2_c2xco")
 
 [node name="DebugOverlay" parent="." instance=ExtResource("2_o62sx")]
 offset_left = -1099.0
@@ -17,22 +20,26 @@ offset_top = -728.0
 offset_right = -1099.0
 offset_bottom = -728.0
 
-[node name="TileMap" type="TileMap" parent="."]
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(0.38, 0.38)
+
+[node name="BoardHolder" type="Node2D" parent="."]
+
+[node name="TileMap" type="TileMap" parent="BoardHolder"]
 tile_set = ExtResource("3_fosrn")
 format = 2
 layer_0/tile_data = PackedInt32Array(65535, 0, 0, 0, 65536, 0, -65536, 0, 0, -1, 65536, 0, 65536, 0, 0, 131070, 0, 0, 65533, 0, 0, -2, 0, 0, -65539, 0, 0, -131074, 0, 0, -65537, 0, 0, -196608, 0, 0, -131071, 0, 0, -65534, 0, 0, 1, 0, 0, 65538, 0, 0, 131068, 0, 0, 3, 0, 0, -131069, 0, 0, 196607, 0, 0, 196608, 0, 0, 262142, 0, 0, 196605, 0, 0, 262140, 0, 0, 131073, 0, 0, 196610, 0, 0, 131075, 0, 0, -4, 0, 0, -131076, 0, 0, -196606, 0, 0, -262143, 0, 0, -262141, 0, 0, -196609, 0, 0, -196611, 0, 0, 262141, 65536, 0, 196604, 65536, 0, 131069, 65536, 0, 196606, 65536, 0, 131071, 65536, 0, 262143, 65536, 0, 131072, 65536, 0, 196609, 65536, 0, 65537, 65536, 0, 131074, 65536, 0, 196611, 65536, 0, 65539, 65536, 0, 2, 65536, 0, 65534, 65536, 0, 65532, 65536, 0, -3, 65536, 0, -65540, 65536, 0, -131075, 65536, 0, -196612, 65536, 0, -196610, 65536, 0, -65538, 65536, 0, -131073, 65536, 0, -262144, 65536, 0, -131072, 65536, 0, -196607, 65536, 0, -262142, 65536, 0, -65535, 65536, 0, -131070, 65536, 0, -65533, 65536, 0, -196605, 65536, 0)
 
-[node name="Camera2D" type="Camera2D" parent="."]
-zoom = Vector2(0.38, 0.38)
-
-[node name="Board2D" type="Node2D" parent="."]
+[node name="Board2D" type="Node2D" parent="BoardHolder"]
 position = Vector2(-512, 512)
 script = ExtResource("4_03kst")
 
-[node name="CursorHighlight" parent="Board2D" instance=ExtResource("5_w7pci")]
+[node name="Pieces" type="Node2D" parent="BoardHolder/Board2D" groups=["piece_holder"]]
 
-[node name="Pieces" type="Node2D" parent="Board2D" groups=["piece_holder"]]
+[node name="CellHighlights" type="Node2D" parent="BoardHolder/Board2D"]
 
-[node name="CellHighlights" type="Node2D" parent="Board2D"]
+[node name="CursorHighlight" parent="BoardHolder/Board2D" instance=ExtResource("5_w7pci")]
+
+[node name="Node2D" type="Node2D" parent="BoardHolder"]
 
 [editable path="DebugOverlay"]

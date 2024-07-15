@@ -1,9 +1,10 @@
 ﻿using Godot;
+using Godot.Collections;
 using System.Collections.Generic;
 
 internal partial class PawnMoveRule : RuleBase
 {
-    public override List<ActionBase> AddPossibleActions(Piece piece, List<ActionBase> possibleActions)
+    public override Array<ActionBase> AddPossibleActions(Piece piece, Array<ActionBase> possibleActions)
     {
         /// Movement
         // Allow moving forward a number of spaces
@@ -35,7 +36,7 @@ internal partial class PawnMoveRule : RuleBase
         return possibleActions;
     }
 
-    private void CheckEnPassant(Piece piece, Vector2I position, List<ActionBase> possibleActions)
+    private void CheckEnPassant(Piece piece, Vector2I position, Array<ActionBase> possibleActions)
     {
         if (piece.cell.grid.TryGetCellAt(position.X, position.Y, out GridCell cell))
         {

@@ -8,7 +8,10 @@ func _ready() -> void:
 	piece_data.ChangedCell.connect(_on_move)
 
 func _on_move(new_cell) -> void:
-	set_pos(new_cell.x, new_cell.y)
+	if new_cell != null:
+		set_pos(new_cell.x, new_cell.y)
+	else:
+		queue_free()
 
 func set_sprite(new_sprite: Texture2D):
 	$SprPiece.texture = new_sprite

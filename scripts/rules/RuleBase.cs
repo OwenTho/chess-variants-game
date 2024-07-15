@@ -1,14 +1,15 @@
 using Godot;
+using Godot.Collections;
 using System.Collections.Generic;
 
 public abstract partial class RuleBase : GodotObject
 {
 
-    public abstract List<ActionBase> AddPossibleActions(Piece piece, List<ActionBase> possibleActions);
+    public abstract Array<ActionBase> AddPossibleActions(Piece piece, Array<ActionBase> possibleActions);
 
-    public List<ActionBase> GetPossibleActions(Piece piece)
+    public Array<ActionBase> GetPossibleActions(Piece piece)
     {
-        return AddPossibleActions(piece, new List<ActionBase>());
+        return AddPossibleActions(piece, new Array<ActionBase>());
     }
 
     public abstract void NewTurn(Piece piece);

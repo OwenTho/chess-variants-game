@@ -197,9 +197,8 @@ public partial class Grid : GodotObject
             }
         }
 
-        // If it's on a grid, remove it.
-        // This applies to the current grid too.
-        if (item.grid != null)
+        // If it's on another grid, remove it.
+        if (item.grid != this && item.grid != null)
         {
             item.grid.RemoveItem(item);
         }
