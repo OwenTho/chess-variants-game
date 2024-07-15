@@ -3,7 +3,7 @@ extends Node
 var game_controller_script: CSharpScript = preload("res://scripts/game/GameController.cs")
 var game_controller: Object
 
-var board_scene: PackedScene = preload("res://scenes/game/board.tscn")
+var game_screen: PackedScene = preload("res://scenes/game/game_screen.tscn")
 var piece_scene: PackedScene = preload("res://scenes/game/piece.tscn")
 
 var grid

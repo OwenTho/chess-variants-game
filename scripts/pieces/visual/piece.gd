@@ -17,7 +17,7 @@ func set_sprite(new_sprite: Texture2D):
 	if board == null:
 		return
 	
-	var tex_scale_x: float = board.board_width / new_sprite.get_width()
-	var tex_scale_y: float = board.board_height / new_sprite.get_height()
+	var tex_scale_x: float = (board.board_width as float) / new_sprite.get_width()
+	var tex_scale_y: float = (board.board_height as float) / new_sprite.get_height()
 	
 	$SprPiece.scale = Vector2(tex_scale_x, tex_scale_y)

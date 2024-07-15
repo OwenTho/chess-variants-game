@@ -8,8 +8,8 @@ var last_cell: Vector2i = Vector2.ZERO
 signal cell_updated(new_cell: Vector2i)
 
 func _ready():
-	Debug.stats.add_property(self, "x")
-	Debug.stats.add_property(self, "y")
+	Debug.stats.add_property(self, "pos:x")
+	Debug.stats.add_property(self, "pos:y")
 
 func _update_cell(new_cell: Vector2i):
 	if new_cell != last_cell:

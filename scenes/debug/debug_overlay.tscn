@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3 uid="uid://2y6uf3dq2362"]
+
+[ext_resource type="Script" path="res://scripts/debug/debug_overlay.gd" id="1_p7b82"]
+[ext_resource type="Script" path="res://scripts/debug/debug_menu.gd" id="1_rh6pu"]
+
+[sub_resource type="SystemFont" id="SystemFont_3h7uj"]
+
+[sub_resource type="Theme" id="Theme_e6x1w"]
+default_font = SubResource("SystemFont_3h7uj")
+default_font_size = 30
+
+[node name="DebugOverlay" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_p7b82")
+
+[node name="DebugMenu" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_rh6pu")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="DebugMenu"]
+layout_mode = 2
+theme = SubResource("Theme_e6x1w")
