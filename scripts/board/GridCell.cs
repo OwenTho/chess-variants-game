@@ -8,7 +8,16 @@ public partial class GridCell: GodotObject
 
     public Vector2I pos { get { return new Vector2I(x, y); } }
 
-    public Grid grid { get; internal set; }
+    private Grid _grid;
+    public Grid grid { get { return _grid; } internal set
+        {
+            _grid = value;
+            foreach (GridItem item in items)
+            {
+                item.grid = value;
+            }
+        }
+    }
     public List<GridItem> items { get; internal set; } = new List<GridItem>();
 
     public void SetPos(int x, int y)
@@ -43,7 +52,7 @@ public partial class GridCell: GodotObject
         // then remove it from that cell.
         if (item.cell != null)
         {
-            item.cell.RemoveItem(item);
+            item.cell.RemoveItem(item, false);
         }
         if (HasItem(item))
         {
@@ -71,20 +80,28 @@ public partial class GridCell: GodotObject
         return false;
     }
 
-    public bool RemoveItem(GridItem item)
+    internal bool RemoveItem(GridItem item, bool updateItem)
     {
         if (!items.Remove(item))
         {
             return false;
         }
-        item.cell = null;
-        item.grid = null;
+        if (updateItem)
+        {
+            item.cell = null;
+            item.grid = null;
+        }
         // If this cell has no more items, remove it from the grid
         if (ItemCount() == 0)
         {
             grid.RemoveCell(this);
         }
         return true;
+    }
+
+    public bool RemoveItem(GridItem item)
+    {
+        return RemoveItem(item, true);
     }
 
     internal void RemoveFromGrid()

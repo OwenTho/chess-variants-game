@@ -26,8 +26,8 @@ internal partial class PawnMoveRule : RuleBase
         // Attacking is possible at diagonals
         for (int i = 1; i <= maxForward; i++)
         {
-            // possibleActions.Add(new AttackAction(thisPosition + (piece.forwardDirection * i) + Vector2I.Right));
-            // possibleActions.Add(new AttackAction(thisPosition + (piece.forwardDirection * i) + Vector2I.Left));
+            Attack(piece.grid, thisPosition + ((piece.forwardDirection + Vector2I.Right) * i), possibleActions);
+            Attack(piece.grid, thisPosition + ((piece.forwardDirection + Vector2I.Left) * i), possibleActions);
         }
 
         // If next to a piece that moved twice, allow En passant
@@ -48,7 +48,8 @@ internal partial class PawnMoveRule : RuleBase
                     Piece thisPiece = (Piece)item;
                     if (thisPiece.tags.Contains("pawn_initial"))
                     {
-                        possibleActions.Add(new AttackAction(cell.pos, thisPiece));
+                        possibleActions.Add(new AttackAction(cell.pos + piece.forwardDirection, thisPiece));
+                        possibleActions.Add(new MoveAction(cell.pos + piece.forwardDirection));
                     }
                 }
             }

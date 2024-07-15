@@ -11,5 +11,6 @@ public partial class AttackAction : ActionBase
     public override void ActOn(Piece piece)
     {
         // Attack the piece
+        piece.cell.grid.RemoveItem(victim);
     }
 }

@@ -37,8 +37,10 @@ script = ExtResource("4_03kst")
 [node name="Pieces" type="Node2D" parent="BoardHolder/Board2D" groups=["piece_holder"]]
 
 [node name="CellHighlights" type="Node2D" parent="BoardHolder/Board2D"]
+z_index = 1
 
 [node name="CursorHighlight" parent="BoardHolder/Board2D" instance=ExtResource("5_w7pci")]
+z_index = 2
 
 [node name="Node2D" type="Node2D" parent="BoardHolder"]
 

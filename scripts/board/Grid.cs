@@ -117,11 +117,6 @@ public partial class Grid : GodotObject
             if (cell.HasItem(item))
             {
                 cell.RemoveItem(item);
-                // If the cell has no more items, remove it
-                if (cell.ItemCount() == 0)
-                {
-                    RemoveCell(cell);
-                }
                 return true;
             }
         }
@@ -176,7 +171,7 @@ public partial class Grid : GodotObject
             }
 
             // If the item is on another grid, remove it from that grid
-            if (item.grid != null)
+            if (item.grid != this && item.grid != null)
             {
                 item.grid.RemoveItem(item);
             }
@@ -198,7 +193,7 @@ public partial class Grid : GodotObject
         }
 
         // If it's on another grid, remove it.
-        if (item.grid != this && item.grid != null)
+        if (item.grid != null && item.grid != this)
         {
             item.grid.RemoveItem(item);
         }
