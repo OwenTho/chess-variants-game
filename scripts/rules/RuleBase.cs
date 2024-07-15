@@ -1,7 +1,5 @@
 using Godot;
 using Godot.Collections;
-using System.Collections.Generic;
-using System.Reflection.Metadata;
 
 public abstract partial class RuleBase : GodotObject
 {

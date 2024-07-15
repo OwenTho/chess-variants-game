@@ -12,7 +12,12 @@ public partial class GameController : Node
 
         // Register Rules
         MakeNewRule("pawn_move", new PawnMoveRule());
-        
+        MakeNewRule("rook_move", new RookMoveRule());
+        MakeNewRule("knight_move", new KnightMoveRule());
+        MakeNewRule("bishop_move", new BishopMoveRule());
+        MakeNewRule("queen_move", new QueenMoveRule());
+        MakeNewRule("king_move", new KingMoveRule());
+
     }
 
     internal void InitPieceInfo()
@@ -22,11 +27,11 @@ public partial class GameController : Node
 
         // Register Piece Info
         MakeNewPieceInfo("pawn", 1, "pawn.png").AddRule(ruleRegistry.GetValue("pawn_move"));
-        MakeNewPieceInfo("rook", 8, "rook.png");
-        MakeNewPieceInfo("knight", 4, "knight.png");
-        MakeNewPieceInfo("bishop", 8, "bishop.png");
-        MakeNewPieceInfo("queen", 8, "queen.png");
-        MakeNewPieceInfo("king", 2, "king.png");
+        MakeNewPieceInfo("rook", 7, "rook.png").AddRule(ruleRegistry.GetValue("rook_move"));
+        MakeNewPieceInfo("knight", 4, "knight.png").AddRule(ruleRegistry.GetValue("knight_move"));
+        MakeNewPieceInfo("bishop", 7, "bishop.png").AddRule(ruleRegistry.GetValue("bishop_move"));
+        MakeNewPieceInfo("queen", 7, "queen.png").AddRule(ruleRegistry.GetValue("queen_move"));
+        MakeNewPieceInfo("king", 2, "king.png").AddRule(ruleRegistry.GetValue("king_move"));
     }
 
     private void MakeNewRule(string id, RuleBase newRule)
