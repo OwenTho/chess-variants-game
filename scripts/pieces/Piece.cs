@@ -13,17 +13,17 @@ public partial class Piece : GridItem
 	public int pieceId;
 	public Vector2I forwardDirection = Vector2I.Up;
 
-	public List<Vector2I> GetPossibleMoves()
+	public List<ActionBase> GetPossibleActions()
 	{
-		List<Vector2I> allPossibleMoves = new List<Vector2I>();
+		List<ActionBase> allPossibleActions = new List<ActionBase>();
 		foreach (PieceRule pieceRule in info.rules)
 		{
 			if (pieceRule.isEnabled)
 			{
-				allPossibleMoves.AddRange(pieceRule.rule.GetPossibleMoves(this));
+				pieceRule.rule.AddPossibleActions(this, allPossibleActions);
 			}
 		}
-		return allPossibleMoves;
+		return allPossibleActions;
 	}
 
 	public List<Vector2I> GetPossibleAttacks()
