@@ -11,6 +11,8 @@ public abstract partial class RuleBase : GodotObject
         return AddPossibleActions(piece, new List<ActionBase>());
     }
 
+    public abstract void NewTurn(Piece piece);
+
     public string ruleId { get; internal set; }
 
 }

@@ -13,6 +13,8 @@ public partial class Piece : GridItem
 	public int pieceId;
 	public Vector2I forwardDirection = Vector2I.Up;
 
+	public HashSet<string> tags = new HashSet<string>();
+
 	public List<ActionBase> GetPossibleActions()
 	{
 		List<ActionBase> allPossibleActions = new List<ActionBase>();

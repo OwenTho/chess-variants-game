@@ -6,6 +6,8 @@ public partial class GridCell: GodotObject
     internal int x;
     internal int y;
 
+    public Vector2I pos { get { return new Vector2I(x, y); } }
+
     public Grid grid { get; internal set; }
     public List<GridItem> items { get; internal set; } = new List<GridItem>();
 
