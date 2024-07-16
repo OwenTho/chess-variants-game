@@ -4,7 +4,7 @@ using System;
 
 public partial class KnightMoveRule : ActionRuleBase
 {
-    public override Array<ActionBase> AddPossibleActions(Piece piece, Array<ActionBase> possibleActions)
+    public override Array<ActionBase> AddPossibleActions(GameController game, Piece piece, Array<ActionBase> possibleActions)
     {
         Vector2I thisPosition = piece.cell.pos;
 

@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 public abstract partial class ActionRuleBase : RuleBase
 {
-    public abstract Array<ActionBase> AddPossibleActions(Piece piece, Array<ActionBase> possibleActions);
+    public abstract Array<ActionBase> AddPossibleActions(GameController game, Piece piece, Array<ActionBase> possibleActions);
 
-    public Array<ActionBase> GetPossibleActions(Piece piece)
+    public Array<ActionBase> GetPossibleActions(GameController game, Piece piece)
     {
-        return AddPossibleActions(piece, new Array<ActionBase>());
+        return AddPossibleActions(game, piece, new Array<ActionBase>());
     }
 
     public enum AttackType

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 internal partial class PawnMoveRule : ActionRuleBase
 {
-    public override Array<ActionBase> AddPossibleActions(Piece piece, Array<ActionBase> possibleActions)
+    public override Array<ActionBase> AddPossibleActions(GameController game, Piece piece, Array<ActionBase> possibleActions)
     {
         /// Movement
         // Allow moving forward a number of spaces

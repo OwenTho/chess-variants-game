@@ -5,6 +5,8 @@ public partial class GameController : Node
 {
     public Grid grid { get; private set; }
 
+    public Vector2I gridSize = new Vector2I(8, 8);
+
     public Grid InitGrid()
     {
         grid = new Grid();

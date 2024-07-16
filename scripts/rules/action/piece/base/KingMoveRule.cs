@@ -4,7 +4,7 @@ using Godot.Collections;
 
 internal partial class KingMoveRule : ActionRuleBase
 {
-    public override Array<ActionBase> AddPossibleActions(Piece piece, Array<ActionBase> possibleActions)
+    public override Array<ActionBase> AddPossibleActions(GameController game, Piece piece, Array<ActionBase> possibleActions)
     {
         Vector2I thisPosition = piece.cell.pos;
         Attack(piece.grid, thisPosition + Vector2I.Down + Vector2I.Left, possibleActions, AttackType.AlsoMove); // Up Left

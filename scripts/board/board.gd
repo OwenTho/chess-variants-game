@@ -62,7 +62,7 @@ func select_cell(cell_pos: Vector2i):
 
 func select_item(piece: Piece2D) -> void:
 	selected_piece = piece
-	possible_actions = piece.piece_data.GetPossibleActions()
+	possible_actions = piece.piece_data.GetPossibleActions(GameManager.game_controller)
 	
 	for action in possible_actions:
 		var new_highlight: Node2D = highlight_scene.instantiate()

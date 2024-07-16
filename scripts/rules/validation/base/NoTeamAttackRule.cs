@@ -1,6 +1,6 @@
-﻿internal partial class NoTeamAttack : ValidationRuleBase
+﻿internal partial class NoTeamAttackRule : ValidationRuleBase
 {
-    public override void CheckAction(Piece piece, ActionBase action, Tags invalidTags, Tags extraTags)
+    public override void CheckAction(GameController game, Piece piece, ActionBase action, Tags invalidTags, Tags extraTags)
     {
         // Only continue if action is an attack action
         if (action is not AttackAction)

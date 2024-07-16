@@ -12,7 +12,7 @@ public partial class Piece : GridItem
 
 	public Tags tags = new Tags();
 
-	public Array<ActionBase> GetPossibleActions()
+	public Array<ActionBase> GetPossibleActions(GameController game)
 	{
 		GD.Print($"Looking through rules: {info.rules.Count}");
         Array<ActionBase> allPossibleActions = new Array<ActionBase>();
@@ -21,9 +21,9 @@ public partial class Piece : GridItem
             GD.Print($"Rule: {pieceRule}");
             if (pieceRule.isEnabled)
 			{
-                Array<ActionBase> possibleActions = pieceRule.rule.GetPossibleActions(this);
+                Array<ActionBase> possibleActions = pieceRule.rule.GetPossibleActions(game, this);
 
-				possibleActions = ValidateActions(possibleActions);
+				possibleActions = ValidateActions(game, possibleActions);
 				if (possibleActions.Count > 0)
 				{
 					allPossibleActions.AddRange(possibleActions);
@@ -34,7 +34,7 @@ public partial class Piece : GridItem
 		return allPossibleActions;
 	}
 
-	public Array<ActionBase> ValidateActions(Array<ActionBase> actions)
+	public Array<ActionBase> ValidateActions(GameController game, Array<ActionBase> actions)
 	{
 		Array<ActionBase> validActions = new Array<ActionBase>();
         bool foundInvalid = false;
@@ -45,7 +45,7 @@ public partial class Piece : GridItem
 			Tags extraTags = new Tags();
 			foreach (ValidationRuleBase rule in info.validationRules)
 			{
-				rule.CheckAction(this, action, invalidTags, extraTags);
+				rule.CheckAction(game, this, action, invalidTags, extraTags);
 			}
 			// If there are no invalid tags, then it's a valid action
 			if (invalidTags.Count == 0)

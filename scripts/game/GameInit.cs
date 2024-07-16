@@ -13,8 +13,9 @@ public partial class GameController : Node
         validationRuleRegistry.Clear();
 
         // Register Rules
-        MakeNewValidationRule("no_team_attack", new NoTeamAttack());
-        MakeNewValidationRule("no_team_overlap", new NoTeamOverlap());
+        MakeNewValidationRule("no_team_attack", new NoTeamAttackRule());
+        MakeNewValidationRule("no_team_overlap", new NoTeamOverlapRule());
+        MakeNewValidationRule("inside_board", new InsideBoardRule());
     }
     
     internal void InitActionRules()
@@ -77,6 +78,7 @@ public partial class GameController : Node
 
         newInfo.AddValidationRule(validationRuleRegistry.GetValue("no_team_attack"));
         newInfo.AddValidationRule(validationRuleRegistry.GetValue("no_team_overlap"));
+        newInfo.AddValidationRule(validationRuleRegistry.GetValue("inside_board"));
 
         newInfo.textureLoc = textureLocation;
         pieceInfoRegistry.Register(id, newInfo);
