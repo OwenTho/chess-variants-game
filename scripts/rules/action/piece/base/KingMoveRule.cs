@@ -2,7 +2,7 @@
 using Godot.Collections;
 
 
-internal partial class KingMoveRule : RuleBase
+internal partial class KingMoveRule : ActionRuleBase
 {
     public override Array<ActionBase> AddPossibleActions(Piece piece, Array<ActionBase> possibleActions)
     {

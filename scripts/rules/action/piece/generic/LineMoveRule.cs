@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-internal abstract partial class LineMoveRule : RuleBase
+internal abstract partial class LineMoveRule : ActionRuleBase
 {
 
     public override Array<ActionBase> AddPossibleActions(Piece piece, Array<ActionBase> possibleActions)

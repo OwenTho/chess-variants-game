@@ -4,20 +4,31 @@ using System.Collections.Generic;
 
 public partial class GameController : Node
 {
-    
-    internal void InitRules()
+    Registry<PieceInfo> pieceInfoRegistry = new Registry<PieceInfo>();
+    Registry<ActionRuleBase> actionRuleRegistry = new Registry<ActionRuleBase>();
+    Registry<ValidationRuleBase> validationRuleRegistry = new Registry<ValidationRuleBase>();
+    internal void InitValidationRules()
     {
         // Make sure registry is cleared
-        ruleRegistry.Clear();
+        validationRuleRegistry.Clear();
 
         // Register Rules
-        MakeNewRule("pawn_move", new PawnMoveRule());
-        MakeNewRule("rook_move", new RookMoveRule());
-        MakeNewRule("knight_move", new KnightMoveRule());
-        MakeNewRule("bishop_move", new BishopMoveRule());
-        MakeNewRule("queen_move", new QueenMoveRule());
-        MakeNewRule("king_move", new KingMoveRule());
+        MakeNewValidationRule("no_team_attack", new NoTeamAttack());
+        MakeNewValidationRule("no_team_overlap", new NoTeamOverlap());
+    }
+    
+    internal void InitActionRules()
+    {
+        // Make sure registry is cleared
+        actionRuleRegistry.Clear();
 
+        // Register Rules
+        MakeNewActionRule("pawn_move", new PawnMoveRule());
+        MakeNewActionRule("rook_move", new RookMoveRule());
+        MakeNewActionRule("knight_move", new KnightMoveRule());
+        MakeNewActionRule("bishop_move", new BishopMoveRule());
+        MakeNewActionRule("queen_move", new QueenMoveRule());
+        MakeNewActionRule("king_move", new KingMoveRule());
     }
 
     internal void InitPieceInfo()
@@ -26,18 +37,25 @@ public partial class GameController : Node
         pieceInfoRegistry.Clear();
 
         // Register Piece Info
-        MakeNewPieceInfo("pawn", 1, "pawn.png").AddRule(ruleRegistry.GetValue("pawn_move"));
-        MakeNewPieceInfo("rook", 7, "rook.png").AddRule(ruleRegistry.GetValue("rook_move"));
-        MakeNewPieceInfo("knight", 4, "knight.png").AddRule(ruleRegistry.GetValue("knight_move"));
-        MakeNewPieceInfo("bishop", 7, "bishop.png").AddRule(ruleRegistry.GetValue("bishop_move"));
-        MakeNewPieceInfo("queen", 7, "queen.png").AddRule(ruleRegistry.GetValue("queen_move"));
-        MakeNewPieceInfo("king", 2, "king.png").AddRule(ruleRegistry.GetValue("king_move"));
+        MakeNewPieceInfo("pawn", 1, "pawn.png").AddActionRule(actionRuleRegistry.GetValue("pawn_move"));
+        MakeNewPieceInfo("rook", 7, "rook.png").AddActionRule(actionRuleRegistry.GetValue("rook_move"));
+        MakeNewPieceInfo("knight", 4, "knight.png").AddActionRule(actionRuleRegistry.GetValue("knight_move"));
+        MakeNewPieceInfo("bishop", 7, "bishop.png").AddActionRule(actionRuleRegistry.GetValue("bishop_move"));
+        MakeNewPieceInfo("queen", 7, "queen.png").AddActionRule(actionRuleRegistry.GetValue("queen_move"));
+        MakeNewPieceInfo("king", 2, "king.png").AddActionRule(actionRuleRegistry.GetValue("king_move"));
     }
 
-    private void MakeNewRule(string id, RuleBase newRule)
+    private void MakeNewValidationRule(string id, ValidationRuleBase newRule)
     {
         newRule.ruleId = id;
-        ruleRegistry.Register(id, newRule);
+        validationRuleRegistry.Register(id, newRule);
+        GD.Print($"Made new Rule: {id}");
+    }
+
+    private void MakeNewActionRule(string id, ActionRuleBase newRule)
+    {
+        newRule.ruleId = id;
+        actionRuleRegistry.Register(id, newRule);
         GD.Print($"Made new Rule: {id}");
     }
 
@@ -56,6 +74,10 @@ public partial class GameController : Node
             }
         }*/
         PieceInfo newInfo = new PieceInfo(id, initialLevel);
+
+        newInfo.AddValidationRule(validationRuleRegistry.GetValue("no_team_attack"));
+        newInfo.AddValidationRule(validationRuleRegistry.GetValue("no_team_overlap"));
+
         newInfo.textureLoc = textureLocation;
         pieceInfoRegistry.Register(id, newInfo);
         GD.Print($"Made new Piece Info: {id} (initialLeveL: {initialLevel}, textureLocation: {textureLocation})");

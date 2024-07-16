@@ -14,13 +14,10 @@ public partial class GameController : Node
     public void FullInit()
     {
         InitGrid();
-        InitRules();
+        InitValidationRules();
+        InitActionRules();
         InitPieceInfo();
     }
-
-
-    Registry<PieceInfo> pieceInfoRegistry = new Registry<PieceInfo>();
-    Registry<RuleBase> ruleRegistry = new Registry<RuleBase>();
 
     public PieceInfo GetPieceInfo(string key)
     {
@@ -29,7 +26,7 @@ public partial class GameController : Node
 
     public RuleBase GetRule(string key)
     {
-        return ruleRegistry.GetValue(key);
+        return actionRuleRegistry.GetValue(key);
     }
 
 }

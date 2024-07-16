@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 internal partial class PawnMoveAction : MoveAction
 {
-    public PawnMoveAction(Vector2I moveLocation) : base(moveLocation) { }
+    public PawnMoveAction(Vector2I actionLocation, Vector2I moveLocation) : base(actionLocation, moveLocation) { }
 
     public override void ActOn(Piece piece)
     {

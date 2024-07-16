@@ -3,9 +3,9 @@ public struct PieceRule
 {
     public bool isEnabled = true;
     internal int count = 1;
-    public RuleBase rule;
+    public ActionRuleBase rule;
 
-    public PieceRule(RuleBase rule)
+    public PieceRule(ActionRuleBase rule)
     {
         this.rule = rule;
     }

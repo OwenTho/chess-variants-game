@@ -55,7 +55,7 @@ func select_cell(cell_pos: Vector2i):
 		return
 	
 	# Get the first piece
-	var item = cell.Get(0)
+	var item = cell.GetItem(0)
 	var item_node = item.get_parent()
 	
 	select_item(item_node)

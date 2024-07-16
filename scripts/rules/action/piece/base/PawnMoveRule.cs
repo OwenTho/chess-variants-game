@@ -2,7 +2,7 @@
 using Godot.Collections;
 using System.Collections.Generic;
 
-internal partial class PawnMoveRule : RuleBase
+internal partial class PawnMoveRule : ActionRuleBase
 {
     public override Array<ActionBase> AddPossibleActions(Piece piece, Array<ActionBase> possibleActions)
     {
@@ -12,14 +12,16 @@ internal partial class PawnMoveRule : RuleBase
         Vector2I thisPosition = new Vector2I(piece.cell.x, piece.cell.y);
         for (int i = 1; i <= maxForward; i++)
         {
-            possibleActions.Add(new MoveAction(thisPosition + (piece.forwardDirection * i)));
+            Vector2I actionPos = thisPosition + (piece.forwardDirection * i);
+            possibleActions.Add(new MoveAction(actionPos, actionPos));
         }
 
         // Allow an extra space forward for the first turn
         if (piece.timesMoved == 0)
         {
+            Vector2I actionPos = thisPosition + (piece.forwardDirection * (maxForward + 1));
             // The action is unique, due to needing to allow En passant
-            possibleActions.Add(new PawnMoveAction(thisPosition + (piece.forwardDirection * (maxForward + 1))));
+            possibleActions.Add(new PawnMoveAction(actionPos, actionPos));
         }
 
         /// Attacking
@@ -49,7 +51,7 @@ internal partial class PawnMoveRule : RuleBase
                     if (thisPiece.tags.Contains("pawn_initial"))
                     {
                         possibleActions.Add(new AttackAction(cell.pos + piece.forwardDirection, thisPiece));
-                        possibleActions.Add(new MoveAction(cell.pos + piece.forwardDirection));
+                        possibleActions.Add(new MoveAction(cell.pos + piece.forwardDirection, cell.pos + piece.forwardDirection));
                     }
                 }
             }

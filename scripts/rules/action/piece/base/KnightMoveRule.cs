@@ -2,7 +2,7 @@ using Godot;
 using Godot.Collections;
 using System;
 
-public partial class KnightMoveRule : RuleBase
+public partial class KnightMoveRule : ActionRuleBase
 {
     public override Array<ActionBase> AddPossibleActions(Piece piece, Array<ActionBase> possibleActions)
     {

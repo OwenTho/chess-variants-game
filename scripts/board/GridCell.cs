@@ -64,7 +64,7 @@ public partial class GridCell: GodotObject
         return true;
     }
 
-    public GridItem Get(int index)
+    public GridItem GetItem(int index)
     {
         return items[index];
     }
