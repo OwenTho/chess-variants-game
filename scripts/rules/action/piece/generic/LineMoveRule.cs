@@ -14,11 +14,23 @@ internal abstract partial class LineMoveRule : ActionRuleBase
         int maxForward = piece.info.level;
         Vector2I thisPosition = new Vector2I(piece.cell.x, piece.cell.y);
 
-        for (int i = 1; i <= maxForward; i++)
+        foreach (Vector2I dir in GetDirs())
         {
-            foreach (Vector2I dir in GetDirs())
+            Array<ActionBase> previousActions = null;
+            for (int i = 1; i <= maxForward; i++)
             {
-                Attack(piece.grid, thisPosition + (dir * i), possibleActions, AttackType.AlsoMove);
+                Array<ActionBase> newActions = Attack(piece.grid, thisPosition + (dir * i), possibleActions, moveType: AttackType.AlsoMove);
+                if (previousActions != null)
+                {
+                    foreach (ActionBase prevAction in previousActions)
+                    {
+                        foreach (ActionBase newAction in newActions)
+                        {
+                            newAction.DependsOn(prevAction);
+                        }
+                    }
+                }
+                previousActions = newActions;
             }
         }
         return possibleActions;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public partial class MoveAction : ActionBase
 {
-    private Vector2I moveLocation;
+    public Vector2I moveLocation;
     public MoveAction(Vector2I actionLocation, Vector2I moveLocation) : base(actionLocation)
     {
         this.moveLocation = moveLocation;

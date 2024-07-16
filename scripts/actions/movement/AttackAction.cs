@@ -2,7 +2,7 @@
 
 public partial class AttackAction : ActionBase
 {
-    Piece victim;
+    public Piece victim;
     public AttackAction(Vector2I actionLocation, Piece victim) : base(actionLocation)
     {
         this.victim = victim;

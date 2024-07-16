@@ -3,23 +3,15 @@
     public override void CheckAction(Piece piece, ActionBase action, Tags invalidTags, Tags extraTags)
     {
         // Only continue if action is an attack action
-        if (action is AttackAction)
+        if (action is not AttackAction)
         {
             return;
         }
-        if (piece.grid.TryGetCellAt(action.actionLocation.X, action.actionLocation.Y, out GridCell cell))
+        AttackAction attackAction = (AttackAction)action;
+        // If the victim and attacker are on the same side, make the attack invalid
+        if (attackAction.victim != null && attackAction.victim.teamId == piece.teamId)
         {
-            // If there is a cell, and the piece is a teammate, then make invalid
-            GridItem item = cell.GetItem(0);
-            if (item is Piece)
-            {
-                Piece otherPiece = (Piece)item;
-                if (otherPiece.teamId == piece.teamId)
-                {
-                    invalidTags.Add("team_attack");
-                }
-            }
-            // If nothing there, ignore
+            invalidTags.Add("team_attack");
         }
     }
 }

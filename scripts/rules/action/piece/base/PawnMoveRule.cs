@@ -50,8 +50,12 @@ internal partial class PawnMoveRule : ActionRuleBase
                     Piece thisPiece = (Piece)item;
                     if (thisPiece.tags.Contains("pawn_initial"))
                     {
-                        possibleActions.Add(new AttackAction(cell.pos + piece.forwardDirection, thisPiece));
-                        possibleActions.Add(new MoveAction(cell.pos + piece.forwardDirection, cell.pos + piece.forwardDirection));
+                        Vector2I attackPos = cell.pos + piece.forwardDirection;
+                        AttackAction newAttack = new AttackAction(attackPos, thisPiece);
+                        possibleActions.Add(newAttack);
+                        MoveAction newMove = new MoveAction(attackPos, attackPos);
+                        newMove.DependsOn(newAttack);
+                        possibleActions.Add(newMove);
                     }
                 }
             }

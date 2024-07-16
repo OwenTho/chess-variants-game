@@ -9,8 +9,8 @@ var piece_scene: PackedScene = preload("res://scenes/game/piece.tscn")
 var grid
 var board: Board2D
 
-func start(board: Board2D) -> void:
-	self.board = board
+func start(new_board: Board2D) -> void:
+	board = new_board
 	
 	# First, make a new GameController
 	game_controller = game_controller_script.new()

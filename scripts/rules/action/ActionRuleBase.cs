@@ -23,27 +23,44 @@ public abstract partial class ActionRuleBase : RuleBase
         AlsoMove // Move
     }
 
-    internal Array<ActionBase> Attack(Grid grid, Vector2I attackLocation, Array<ActionBase> possibleActions, AttackType moveType = AttackType.AndMove)
+    // Returns the newly created rules
+    internal Array<ActionBase> Attack(Grid grid, Vector2I attackLocation, Array<ActionBase> possibleActions, AttackType moveType = AttackType.AndMove, ActionBase dependentRule = null)
     {
+        Array<ActionBase> newRules = new Array<ActionBase>();
         if (grid.TryGetCellAt(attackLocation.X, attackLocation.Y, out GridCell cell))
         {
             foreach (GridItem item in cell.items)
             {
                 if (item is Piece)
                 {
-                    possibleActions.Add(new AttackAction(attackLocation, (Piece)item));
+                    AttackAction newAttack = new AttackAction(attackLocation, (Piece)item);
+                    if (dependentRule != null)
+                    {
+                        newAttack.DependsOn(newAttack);
+                    }
+                    possibleActions.Add(newAttack);
+                    newRules.Add(newAttack);
                     if (moveType == AttackType.AndMove)
                     {
-                        possibleActions.Add(new MoveAction(attackLocation, attackLocation));
+                        MoveAction newMove = new MoveAction(attackLocation, attackLocation);
+                        newMove.DependsOn(newAttack);
+                        possibleActions.Add(newMove);
+                        newRules.Add(newMove);
                     }
                 }
             }
         }
         if (moveType == AttackType.AlsoMove)
         {
-            possibleActions.Add(new MoveAction(attackLocation, attackLocation));
+            MoveAction newMove = new MoveAction(attackLocation, attackLocation);
+            if (dependentRule != null)
+            {
+                newMove.DependsOn(dependentRule);
+            }
+            possibleActions.Add(newMove);
+            newRules.Add(newMove);
         }
-        return possibleActions;
+        return newRules;
     }
     
     public abstract void NewTurn(Piece piece);

@@ -6,7 +6,9 @@ public abstract partial class ActionBase : GodotObject
     public Vector2I actionLocation;
     internal bool valid = true;
 
-    internal List<ActionBase> dependentActions = new List<ActionBase>();
+    // Rules that this rule depends on. If these are invalid, this one should
+    // also be invalid.
+    internal List<ActionBase> dependsOn = new List<ActionBase>();
 
     public ActionBase(Vector2I actionLocation)
     {
@@ -14,4 +16,13 @@ public abstract partial class ActionBase : GodotObject
     }
 
     public abstract void ActOn(Piece piece);
+
+    public void DependsOn(ActionBase action)
+    {
+        if (action == null)
+        {
+            return;
+        }
+        dependsOn.Add(action);
+    }
 }

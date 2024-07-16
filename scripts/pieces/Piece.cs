@@ -59,6 +59,29 @@ public partial class Piece : GridItem
             }
 		}
 
+		// Now, after going through all the actions, go through again and
+		// remove actions that rely on other actions
+		// Has to repeat until no invalid actions are found
+		while (foundInvalid)
+		{
+			foundInvalid = false;
+			for (int i = validActions.Count - 1; i >= 0; i--)
+            {
+                ActionBase action = validActions[i];
+                GD.Print($"Checking {action.GetClass().GetBaseName()}");
+				foreach (ActionBase dependentAction in action.dependsOn)
+				{
+					if (!dependentAction.valid)
+					{
+						foundInvalid = true;
+						action.valid = false;
+						validActions.RemoveAt(i);
+						break;
+					}
+				}
+			}
+		}
+
 		return validActions;
 	}
 }
