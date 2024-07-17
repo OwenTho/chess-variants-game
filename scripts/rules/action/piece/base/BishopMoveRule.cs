@@ -13,9 +13,4 @@ internal partial class BishopMoveRule : LineMoveRule
             Vector2I.Up + Vector2I.Left // Down Left
         };
     }
-
-    public override void NewTurn(Piece piece)
-    {
-        return;
-    }
 }

@@ -73,9 +73,11 @@ func _on_player_nums_changed(id: int, player_num: int):
 
 func close_lobby():
 	get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
+	pass
 
 func _on_server_disconnected():
-	close_lobby()
+	# close_lobby()
+	pass
 
 func _on_name_edit_text_changed(text: String):
 	if text.is_empty():

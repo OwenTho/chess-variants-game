@@ -14,7 +14,7 @@ func board_to_world_coord(board_cell: Vector2i) -> Vector2:
 	return Vector2(board_cell.x * board_width + coord_offset_x, -1 * board_cell.y * board_height + coord_offset_y)
 
 func global_board_to_world_coord(board_cell: Vector2i) -> Vector2:
-	return global_position + board_to_world_coord(board_cell).rotated(rotation)
+	return global_position + board_to_world_coord(board_cell).rotated(rotation) * global_scale
 
 func _world_to_board_coord(world_coord: Vector2, pivot_point: Vector2, offset: Vector2):
 	# Rotate the world coordinate to effectively make the board horizontal
@@ -23,7 +23,7 @@ func _world_to_board_coord(world_coord: Vector2, pivot_point: Vector2, offset: V
 	rotated_coord = rotated_coord.rotated(-global_rotation)
 	rotated_coord += pivot_point
 	
-	return Vector2i(floor((rotated_coord.x - offset.x) / board_width), floor(-1 * (rotated_coord.y - offset.y) / board_height))
+	return Vector2i(floor((rotated_coord.x - offset.x) / board_width / global_scale.x), floor(-1 * (rotated_coord.y - offset.y) / board_height / global_scale.y))
 
 
 func world_to_board_coord(world_coord: Vector2) -> Vector2i:

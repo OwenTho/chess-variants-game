@@ -9,7 +9,7 @@ public partial class MoveAction : ActionBase
         this.moveLocation = moveLocation;
     }
 
-    public override void ActOn(Piece piece)
+    public override void ActOn(GameController game, Piece piece)
     {
         piece.cell.grid.PlaceItemAt(piece, actionLocation.X, actionLocation.Y);
         piece.timesMoved += 1;

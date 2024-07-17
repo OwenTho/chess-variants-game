@@ -69,5 +69,8 @@ public abstract partial class ActionRuleBase : RuleBase
         return newRules;
     }
     
-    public abstract void NewTurn(Piece piece);
+    public virtual void NewTurn(GameController game, Piece piece)
+    {
+
+    }
 }

@@ -19,9 +19,4 @@ internal partial class KingMoveRule : ActionRuleBase
         Attack(piece.grid, thisPosition + Vector2I.Up + Vector2I.Right, possibleActions, AttackType.AlsoMove); // Down Right
         return possibleActions;
     }
-
-    public override void NewTurn(Piece piece)
-    {
-        throw new System.NotImplementedException();
-    }
 }

@@ -2,23 +2,50 @@
 
 [ext_resource type="Script" path="res://scripts/menu/main_menu.gd" id="1_3st2t"]
 
-[node name="MainMenu" type="Control"]
+[node name="MainMenu" type="Control" node_paths=PackedStringArray("ip_entry")]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_3st2t")
+ip_entry = NodePath("ServerControls/VBoxContainer/IPEntry")
 
-[node name="BtnServer" type="Button" parent="."]
-offset_left = 272.0
-offset_top = 254.0
-offset_right = 466.0
-offset_bottom = 301.0
+[node name="ServerControls" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 881.0
+offset_top = 452.0
+offset_right = 1131.0
+offset_bottom = 627.0
+
+[node name="BtnServer" type="Button" parent="ServerControls"]
+custom_minimum_size = Vector2(0, 55)
+layout_mode = 2
 text = "Create Server"
 
-[node name="BtnJoin" type="Button" parent="."]
-offset_left = 676.0
-offset_top = 256.0
-offset_right = 870.0
-offset_bottom = 303.0
+[node name="MarginContainer" type="MarginContainer" parent="ServerControls"]
+layout_mode = 2
+theme_override_constants/margin_top = 9
+theme_override_constants/margin_bottom = 9
+
+[node name="HSeparator" type="HSeparator" parent="ServerControls/MarginContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ServerControls"]
+layout_mode = 2
+
+[node name="Label" type="RichTextLabel" parent="ServerControls/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/italics_font_size = 14
+bbcode_enabled = true
+text = "[i]Leave blank for localhost[/i]"
+fit_content = true
+scroll_active = false
+
+[node name="IPEntry" type="LineEdit" parent="ServerControls/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "IP Address"
+alignment = 1
+
+[node name="BtnJoin" type="Button" parent="ServerControls/VBoxContainer"]
+layout_mode = 2
 text = "Join Lobby"
 
 [node name="BtnPlay" type="Button" parent="."]
@@ -27,8 +54,7 @@ offset_left = 472.0
 offset_top = 381.0
 offset_right = 666.0
 offset_bottom = 428.0
-disabled = true
-text = "Play Game"
+text = "Play Offline Game"
 
 [node name="BtnQuit" type="Button" parent="."]
 layout_mode = 0
@@ -38,7 +64,7 @@ offset_right = 666.0
 offset_bottom = 491.0
 text = "Quit Game"
 
-[connection signal="pressed" from="BtnServer" to="." method="_on_btn_server_pressed"]
-[connection signal="pressed" from="BtnJoin" to="." method="_on_btn_join_pressed"]
+[connection signal="pressed" from="ServerControls/BtnServer" to="." method="_on_btn_server_pressed"]
+[connection signal="pressed" from="ServerControls/VBoxContainer/BtnJoin" to="." method="_on_btn_join_pressed"]
 [connection signal="pressed" from="BtnPlay" to="." method="_on_btn_play_pressed"]
 [connection signal="pressed" from="BtnQuit" to="." method="_on_btn_quit_pressed"]

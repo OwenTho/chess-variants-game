@@ -6,7 +6,7 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_74vv6"]
 shader = ExtResource("2_yjwma")
-shader_parameter/highlight_color = Color(0.858824, 0, 0, 1)
+shader_parameter/highlight_color = Color(0.376471, 0.905882, 0, 1)
 
 [node name="CursorHighlight" type="Node2D"]
 script = ExtResource("1_1nj8s")

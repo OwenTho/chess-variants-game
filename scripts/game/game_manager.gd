@@ -17,9 +17,11 @@ func _ready():
 
 func _on_server_disconnect():
 	reset_game()
-	get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
+	#get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
 
 func reset_game():
+	if game != null:
+		game.close_game()
 	board = null
 	game = null
 	# game.queue_free()
@@ -40,11 +42,17 @@ func init() -> void:
 	# Initialise the game controller
 	game_controller = game_controller_script.new()
 	
+	setup_signals()
+	
 	# Initialise the game
 	game_controller.FullInit()
 	grid = game_controller.grid
 	
 	has_init.emit()
+
+func setup_signals():
+	game_controller.NewTurn.connect(game._on_next_turn)
+	game_controller.RequestedActionAt.connect(game._on_requested_action)
 
 func start(new_board: Board2D) -> void:
 	board = new_board
@@ -92,21 +100,23 @@ func board_to_array() -> Array:
 			this_item.append(item.info.pieceId)
 			# Then add the link ID
 			this_item.append(item.linkId)
-			# Finally, the team
+			# The team of the piece
 			this_item.append(item.teamId)
 			# The position of the item
 			this_item.append(cell_pos)
+			# The id of the item
+			this_item.append(item.id)
 			
 			ret_array.append(this_item)
 	return ret_array
 
 func load_board(board_data: Array):
 	for item in board_data:
-		place_piece(item[0], item[1], item[2], item[3].x, item[3].y)
+		place_piece(item[0], item[1], item[2], item[3].x, item[3].y, item[4])
 
-func place_piece(piece_id: String, id: int, team: int, x: int, y: int) -> bool:
+func place_piece(piece_id: String, link_id: int, team: int, x: int, y: int, id: int = -1) -> bool:
 	# Request the game controller to make the piece
-	var new_piece_data = game_controller.PlacePiece(piece_id, id, team, x, y)
+	var new_piece_data = game_controller.PlacePiece(piece_id, link_id, team, x, y, id)
 	
 	# If it failed to place the piece, return false
 	if new_piece_data == null:
@@ -134,3 +144,7 @@ func place_piece(piece_id: String, id: int, team: int, x: int, y: int) -> bool:
 func place_matching(piece_id: String, id: int, x: int, y: int) -> void:
 	place_piece(piece_id, id, 0, x, y)
 	place_piece(piece_id, id, 1, x, game_controller.gridSize.y - y - 1)
+
+
+
+

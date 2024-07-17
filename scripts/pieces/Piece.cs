@@ -4,58 +4,58 @@ using System.Collections.Generic;
 
 public partial class Piece : GridItem
 {
-	public int timesMoved = 0;
-	internal int teamId = 0;
-	public PieceInfo info { get; internal set; }
-	public int pieceId { get; internal set; }
-	public int linkId { get; internal set; }
-	public Vector2I forwardDirection = Vector2I.Down;
+    public int timesMoved = 0;
+    internal int teamId = 0;
+    public PieceInfo info { get; internal set; }
+    public int id { get; internal set; }
+    public int linkId { get; internal set; }
+    public Vector2I forwardDirection = Vector2I.Down;
 
-	public Tags tags = new Tags();
+    public Tags tags = new Tags();
 
-	public Array<ActionBase> GetPossibleActions(GameController game)
-	{
-		// GD.Print($"Looking through rules: {info.rules.Count}");
+    public Array<ActionBase> GetPossibleActions(GameController game)
+    {
+        // GD.Print($"Looking through rules: {info.rules.Count}");
         Array<ActionBase> allPossibleActions = new Array<ActionBase>();
-		foreach (PieceRule pieceRule in info.rules)
+        foreach (PieceRule pieceRule in info.rules)
         {
             // GD.Print($"Rule: {pieceRule}");
             if (pieceRule.isEnabled)
-			{
+            {
                 Array<ActionBase> possibleActions = pieceRule.rule.GetPossibleActions(game, this);
 
-				possibleActions = ValidateActions(game, possibleActions);
-				if (possibleActions.Count > 0)
-				{
-					allPossibleActions.AddRange(possibleActions);
-				}
-			}
-		}
-		return allPossibleActions;
-	}
+                possibleActions = ValidateActions(game, possibleActions);
+                if (possibleActions.Count > 0)
+                {
+                    allPossibleActions.AddRange(possibleActions);
+                }
+            }
+        }
+        return allPossibleActions;
+    }
 
-	public Array<ActionBase> ValidateActions(GameController game, Array<ActionBase> actions)
-	{
-		Array<ActionBase> validActions = new Array<ActionBase>();
+    public Array<ActionBase> ValidateActions(GameController game, Array<ActionBase> actions)
+    {
+        Array<ActionBase> validActions = new Array<ActionBase>();
         bool foundInvalid = false;
 
         foreach (ActionBase action in actions)
-		{
-			// If it's already invalid, skip
-			if (!action.valid)
-			{
-				continue;
-			}
-			foreach (ValidationRuleBase rule in info.validationRules)
-			{
-				// GD.Print($"Checking {rule.GetType().Name} validation.");
-				rule.CheckAction(game, this, action);
+        {
+            // If it's already invalid, skip
+            if (!action.valid)
+            {
+                continue;
+            }
+            foreach (ValidationRuleBase rule in info.validationRules)
+            {
+                // GD.Print($"Checking {rule.GetType().Name} validation.");
+                rule.CheckAction(game, this, action);
             }
         }
 
-		// Check for invalid tags afterwards
-		foreach (ActionBase action in actions)
-		{
+        // Check for invalid tags afterwards
+        foreach (ActionBase action in actions)
+        {
             // If there are no invalid tags, then it's a valid action
             if (action.invalidTags.Count == 0)
             {
@@ -68,6 +68,14 @@ public partial class Piece : GridItem
             }
         }
 
-		return validActions;
-	}
+        return validActions;
+    }
+
+    public void NewTurn(GameController game)
+    {
+        foreach (PieceRule pieceRule in info.rules)
+        {
+            pieceRule.rule.NewTurn(game, this);
+        }
+    }
 }

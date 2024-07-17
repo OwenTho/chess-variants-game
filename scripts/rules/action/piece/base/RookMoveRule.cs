@@ -3,11 +3,6 @@ using Godot.Collections;
 
 internal partial class RookMoveRule : LineMoveRule
 {
-    public override void NewTurn(Piece piece)
-    {
-        return;
-    }
-
     internal override Vector2I[] GetDirs()
     {
         return new Vector2I[] {

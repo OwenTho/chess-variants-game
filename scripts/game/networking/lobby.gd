@@ -39,11 +39,15 @@ func join_game(address: String = ""):
 		return error
 	multiplayer.multiplayer_peer = peer
 
-func create_game():
-	var peer = ENetMultiplayerPeer.new()
-	var error = peer.create_server(PORT, MAX_CONNECTIONS)
-	if error:
-		return error
+func create_game(online: bool = true):
+	var peer
+	if online:
+		peer = ENetMultiplayerPeer.new()
+		var error = peer.create_server(PORT, MAX_CONNECTIONS)
+		if error:
+			return error
+	else:
+		peer = OfflineMultiplayerPeer.new()
 	multiplayer.multiplayer_peer = peer
 	
 	players_loaded = 0
@@ -137,7 +141,7 @@ func _update_name(id, name):
 	players[id]["name"] = name
 	player_data_received.emit(id, players[id])
 
-# Starting the game
+
 @rpc("call_remote", "authority", "reliable", 1)
 func _change_name(id, name):
 	name = verify_name(name)
@@ -154,11 +158,17 @@ func change_name(name):
 	_change_name.rpc(other_id, name)
 
 @rpc("authority", "call_local", "reliable")
-func _update_player_num(id: int, player_num: int):
+func _update_player_num(id: int, player_num: int) -> void:
 	player_nums[player_num] = id
 	player_num_updated.emit(id, player_num)
 
-func set_player(id: int, player_num: int):
+func get_player_num(id: int) -> int:
+	for i in range(player_nums.size()):
+		if player_nums[i] == id:
+			return i
+	return -1
+
+func set_player(id: int, player_num: int) -> void:
 	if not is_multiplayer_authority():
 		return
 	
@@ -232,6 +242,10 @@ func player_loaded():
 		if players_loaded == players.size():
 			# Start game
 			players_loaded = 0
+
+
+
+
 
 
 ### Game RPCs

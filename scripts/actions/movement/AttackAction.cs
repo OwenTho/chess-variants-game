@@ -10,9 +10,9 @@ public partial class AttackAction : ActionBase
         this.moveAction = moveAction;
     }
 
-    public override void ActOn(Piece piece)
+    public override void ActOn(GameController game, Piece piece)
     {
         // Attack the piece
-        piece.cell.grid.RemoveItem(victim);
+        game.TakePiece(victim);
     }
 }

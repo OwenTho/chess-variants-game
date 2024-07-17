@@ -16,6 +16,15 @@ func _on_move(new_cell) -> void:
 func update_pos() -> void:
 	set_pos(piece_data.cell.x, piece_data.cell.y)
 
+func _enter_tree():
+	update_scale()
+
+func update_scale():
+	var tex_scale_x: float = (board.board_width as float) / $SprPiece.texture.get_width() * global_scale.x
+	var tex_scale_y: float = (board.board_height as float) / $SprPiece.texture.get_height() * global_scale.y
+	
+	$SprPiece.scale = Vector2(tex_scale_x, tex_scale_y)
+
 func set_sprite(new_sprite: Texture2D):
 	$SprPiece.texture = new_sprite
 	
@@ -25,10 +34,7 @@ func set_sprite(new_sprite: Texture2D):
 		$SprPiece.scale = Vector2(1,1)
 		return
 	
-	var tex_scale_x: float = (board.board_width as float) / new_sprite.get_width()
-	var tex_scale_y: float = (board.board_height as float) / new_sprite.get_height()
-	
-	$SprPiece.scale = Vector2(tex_scale_x, tex_scale_y)
+	update_scale()
 
 func update_sprite() -> void:
 	var image_loc: String = "assets/texture/piece/" + piece_data.info.textureLoc

@@ -21,9 +21,4 @@ public partial class KnightMoveRule : ActionRuleBase
         Attack(piece.grid, thisPosition + new Vector2I(2, 1), possibleActions, AttackType.AlsoMove); // Down Right (Upper)
         return possibleActions;
     }
-
-    public override void NewTurn(Piece piece)
-    {
-        throw new NotImplementedException();
-    }
 }

@@ -31,6 +31,7 @@ text = "Leave Lobby
 "
 
 [node name="BtnPlay" type="Button" parent="."]
+layout_mode = 0
 offset_left = 416.0
 offset_top = 279.0
 offset_right = 666.0

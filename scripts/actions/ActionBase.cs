@@ -4,6 +4,8 @@ using System.Runtime.CompilerServices;
 
 public abstract partial class ActionBase : GodotObject
 {
+    public string id { get; internal set; }
+
     public Vector2I actionLocation;
     public bool valid { get; private set; } = true;
 
@@ -29,7 +31,7 @@ public abstract partial class ActionBase : GodotObject
         this.actionLocation = actionLocation;
     }
 
-    public abstract void ActOn(Piece piece);
+    public abstract void ActOn(GameController game, Piece piece);
 
     public void MakeDependentsInvalid()
     {
