@@ -11,6 +11,7 @@ public partial class GameController : Node
 
     public void FullInit()
     {
+        lastId = 0;
         InitGrid();
         InitValidationRules();
         InitActionRules();

@@ -7,7 +7,8 @@ public partial class Piece : GridItem
 	public int timesMoved = 0;
 	internal int teamId = 0;
 	public PieceInfo info { get; internal set; }
-	public int pieceId;
+	public int pieceId { get; internal set; }
+	public int linkId { get; internal set; }
 	public Vector2I forwardDirection = Vector2I.Down;
 
 	public Tags tags = new Tags();
