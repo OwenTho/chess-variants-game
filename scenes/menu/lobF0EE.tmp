@@ -1,0 +1,59 @@
+[gd_scene load_steps=4 format=3 uid="uid://c7em1ejmjj51d"]
+
+[ext_resource type="Script" path="res://scripts/menu/lobby_menu.gd" id="1_iuvy1"]
+[ext_resource type="PackedScene" uid="uid://cpmsc0ctcivxq" path="res://scenes/menu/lobby/player_name_label.tscn" id="2_8rvbx"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_nl78v"]
+font_size = 21
+outline_size = 5
+outline_color = Color(0, 0, 0, 1)
+
+[node name="LobbyMenu" type="Control" node_paths=PackedStringArray("name_container")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_iuvy1")
+player_name_scene = ExtResource("2_8rvbx")
+name_container = NodePath("VSplitContainer/NameContainer")
+
+[node name="BtnLeave" type="Button" parent="."]
+layout_mode = 0
+offset_left = 417.0
+offset_top = 325.0
+offset_right = 667.0
+offset_bottom = 365.0
+text = "Leave Lobby
+"
+
+[node name="NameEdit" type="TextEdit" parent="."]
+layout_mode = 0
+offset_left = 62.0
+offset_top = 245.0
+offset_right = 234.0
+offset_bottom = 274.0
+placeholder_text = "Player Name"
+
+[node name="VSplitContainer" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 773.0
+offset_top = 30.0
+offset_right = 1108.0
+offset_bottom = 415.0
+
+[node name="NameLabel" type="Label" parent="VSplitContainer"]
+layout_mode = 2
+text = "Player names:"
+label_settings = SubResource("LabelSettings_nl78v")
+
+[node name="HSeparator" type="HSeparator" parent="VSplitContainer"]
+layout_mode = 2
+
+[node name="NameContainer" type="VBoxContainer" parent="VSplitContainer"]
+layout_mode = 2
+
+[connection signal="pressed" from="BtnLeave" to="." method="_on_btn_leave_pressed"]
+[connection signal="text_changed" from="NameEdit" to="." method="_on_text_edit_text_changed"]
+[connection signal="text_changed" from="NameEdit" to="." method="_on_name_edit_text_changed"]

@@ -7,16 +7,13 @@ var last_cell: Vector2i = Vector2.ZERO
 
 signal cell_updated(new_cell: Vector2i)
 
-func _ready():
-	pass
-
 func _update_cell(new_cell: Vector2i):
 	if new_cell != last_cell:
 		last_cell = new_cell
 		cell_updated.emit(new_cell)
 		set_pos(new_cell.x, new_cell.y)
 
-func _process(event):
+func _process(_delta):
 	# For mouse, do every frame (as that's what the player will see)
 	if input_mouse:
 		# Find the cell the mouse is hovering
@@ -25,12 +22,6 @@ func _process(event):
 	
 	# For Controller, check on each input + with a small
 	# delay to allow more control
-	
-
-func _input(event) -> void:
-	pass
-
-
 
 func check_mouse() -> void:
 	# Find the cell the mouse is hovering
