@@ -20,13 +20,14 @@ internal abstract partial class LineMoveRule : ActionRuleBase
             for (int i = 1; i <= maxForward; i++)
             {
                 Array<ActionBase> newActions = Attack(piece.grid, thisPosition + (dir * i), possibleActions, moveType: AttackType.AlsoMove);
-                if (previousActions != null)
+                foreach (ActionBase newAction in newActions)
                 {
-                    foreach (ActionBase prevAction in previousActions)
+                    newAction.tags.Add("line_move");
+                    if (previousActions != null)
                     {
-                        foreach (ActionBase newAction in newActions)
+                        foreach (ActionBase prevAction in previousActions)
                         {
-                            newAction.DependsOn(prevAction);
+                            newAction.AddDependency(prevAction);
                         }
                     }
                 }

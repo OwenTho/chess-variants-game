@@ -3,9 +3,11 @@
 public partial class AttackAction : ActionBase
 {
     public Piece victim;
-    public AttackAction(Vector2I actionLocation, Piece victim) : base(actionLocation)
+    public MoveAction moveAction;
+    public AttackAction(Vector2I actionLocation, Piece victim, MoveAction moveAction = null) : base(actionLocation)
     {
         this.victim = victim;
+        this.moveAction = moveAction;
     }
 
     public override void ActOn(Piece piece)

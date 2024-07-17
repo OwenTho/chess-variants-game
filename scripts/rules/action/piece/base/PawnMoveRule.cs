@@ -10,24 +10,37 @@ internal partial class PawnMoveRule : ActionRuleBase
         // Allow moving forward a number of spaces
         int maxForward = piece.info.level;
         Vector2I thisPosition = new Vector2I(piece.cell.x, piece.cell.y);
+        MoveAction lastMove = null;
         for (int i = 1; i <= maxForward; i++)
         {
             Vector2I actionPos = thisPosition + (piece.forwardDirection * i);
-            possibleActions.Add(new MoveAction(actionPos, actionPos));
+            MoveAction newMove = new MoveAction(actionPos, actionPos);
+            if (lastMove != null)
+            {
+                newMove.AddDependency(lastMove);
+            }
+            possibleActions.Add(newMove);
+            lastMove = newMove;
         }
 
         // Allow an extra space forward for the first turn
         if (piece.timesMoved == 0)
         {
             Vector2I actionPos = thisPosition + (piece.forwardDirection * (maxForward + 1));
+            PawnMoveAction newMove = new PawnMoveAction(actionPos, actionPos);
+            if (lastMove != null)
+            {
+                newMove.AddDependency(lastMove);
+            }
             // The action is unique, due to needing to allow En passant
-            possibleActions.Add(new PawnMoveAction(actionPos, actionPos));
+            possibleActions.Add(newMove);
         }
 
         /// Attacking
         // Attacking is possible at diagonals
         for (int i = 1; i <= maxForward; i++)
         {
+            // TODO: Does not currently add dependencies to the previous attack (so pawn can jump over pieces at higher levels)
             Attack(piece.grid, thisPosition + ((piece.forwardDirection + Vector2I.Right) * i), possibleActions);
             Attack(piece.grid, thisPosition + ((piece.forwardDirection + Vector2I.Left) * i), possibleActions);
         }
@@ -54,7 +67,7 @@ internal partial class PawnMoveRule : ActionRuleBase
                         AttackAction newAttack = new AttackAction(attackPos, thisPiece);
                         possibleActions.Add(newAttack);
                         MoveAction newMove = new MoveAction(attackPos, attackPos);
-                        newMove.DependsOn(newAttack);
+                        newMove.AddDependency(newAttack);
                         possibleActions.Add(newMove);
                     }
                 }

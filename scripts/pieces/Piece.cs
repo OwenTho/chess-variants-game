@@ -14,11 +14,11 @@ public partial class Piece : GridItem
 
 	public Array<ActionBase> GetPossibleActions(GameController game)
 	{
-		GD.Print($"Looking through rules: {info.rules.Count}");
+		// GD.Print($"Looking through rules: {info.rules.Count}");
         Array<ActionBase> allPossibleActions = new Array<ActionBase>();
 		foreach (PieceRule pieceRule in info.rules)
         {
-            GD.Print($"Rule: {pieceRule}");
+            // GD.Print($"Rule: {pieceRule}");
             if (pieceRule.isEnabled)
 			{
                 Array<ActionBase> possibleActions = pieceRule.rule.GetPossibleActions(game, this);
@@ -30,7 +30,6 @@ public partial class Piece : GridItem
 				}
 			}
 		}
-		GD.Print(allPossibleActions);
 		return allPossibleActions;
 	}
 
@@ -41,46 +40,32 @@ public partial class Piece : GridItem
 
         foreach (ActionBase action in actions)
 		{
-			Tags invalidTags = new Tags();
-			Tags extraTags = new Tags();
+			// If it's already invalid, skip
+			if (!action.valid)
+			{
+				continue;
+			}
 			foreach (ValidationRuleBase rule in info.validationRules)
 			{
-				rule.CheckAction(game, this, action, invalidTags, extraTags);
-			}
-			// If there are no invalid tags, then it's a valid action
-			if (invalidTags.Count == 0)
-			{
-				validActions.Add(action);
-				action.valid = true;
-			} else
-			{
-				foundInvalid = true;
-				action.valid = false;
+				// GD.Print($"Checking {rule.GetType().Name} validation.");
+				rule.CheckAction(game, this, action);
             }
-		}
+        }
 
-		// Now, after going through all the actions, go through again and
-		// remove actions that rely on other actions
-		// Has to repeat until no invalid actions are found
-		while (foundInvalid)
+		// Check for invalid tags afterwards
+		foreach (ActionBase action in actions)
 		{
-			foundInvalid = false;
-			for (int i = validActions.Count - 1; i >= 0; i--)
+            // If there are no invalid tags, then it's a valid action
+            if (action.invalidTags.Count == 0)
             {
-                ActionBase action = validActions[i];
-                GD.Print($"Checking {action.GetClass().GetBaseName()}");
-				foreach (ActionBase dependentAction in action.dependsOn)
-				{
-					if (!dependentAction.valid)
-					{
-						foundInvalid = true;
-						action.valid = false;
-						validActions.RemoveAt(i);
-						break;
-					}
-				}
-			}
-		}
+                validActions.Add(action);
+            }
+            else
+            {
+                foundInvalid = true;
+                action.MakeInvalid();
+            }
+        }
 
 		return validActions;
 	}

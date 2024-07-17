@@ -7,15 +7,35 @@ public partial class GameController : Node
     Registry<PieceInfo> pieceInfoRegistry = new Registry<PieceInfo>();
     Registry<ActionRuleBase> actionRuleRegistry = new Registry<ActionRuleBase>();
     Registry<ValidationRuleBase> validationRuleRegistry = new Registry<ValidationRuleBase>();
+    List<string> initialValidationRules = new List<string>();
+
+    public void FullInit()
+    {
+        InitGrid();
+        InitValidationRules();
+        InitActionRules();
+        InitPieceInfo();
+    }
+
+    public Grid InitGrid()
+    {
+        grid = new Grid();
+        return grid;
+    }
+
     internal void InitValidationRules()
     {
-        // Make sure registry is cleared
+        // Make sure registry and initial rules are cleared
         validationRuleRegistry.Clear();
+        initialValidationRules.Clear();
 
         // Register Rules
-        MakeNewValidationRule("no_team_attack", new NoTeamAttackRule());
-        MakeNewValidationRule("no_team_overlap", new NoTeamOverlapRule());
-        MakeNewValidationRule("inside_board", new InsideBoardRule());
+        MakeNewValidationRule("no_team_attack", new NoTeamAttackRule(), true);
+        MakeNewValidationRule("no_team_overlap", new NoTeamOverlapRule(), true);
+        MakeNewValidationRule("no_enemy_overlap", new NoEnemyOverlapRule(), true);
+        MakeNewValidationRule("enemy_attack_allow_overlap", new EnemyAttackAllowOverlapRule(), true);
+        MakeNewValidationRule("line_move_stop", new LineMoveStopRule(), true);
+        MakeNewValidationRule("inside_board", new InsideBoardRule(), true);
     }
     
     internal void InitActionRules()
@@ -46,39 +66,32 @@ public partial class GameController : Node
         MakeNewPieceInfo("king", 2, "king.png").AddActionRule(actionRuleRegistry.GetValue("king_move"));
     }
 
-    private void MakeNewValidationRule(string id, ValidationRuleBase newRule)
+    private void MakeNewValidationRule(string id, ValidationRuleBase newRule, bool makeInitialRule = false)
     {
         newRule.ruleId = id;
         validationRuleRegistry.Register(id, newRule);
-        GD.Print($"Made new Rule: {id}");
+        if (makeInitialRule)
+        {
+            initialValidationRules.Add(id);
+        }
+        GD.Print($"Made new Validation Rule: {id}");
     }
 
     private void MakeNewActionRule(string id, ActionRuleBase newRule)
     {
         newRule.ruleId = id;
         actionRuleRegistry.Register(id, newRule);
-        GD.Print($"Made new Rule: {id}");
+        GD.Print($"Made new Action Rule: {id}");
     }
 
     private PieceInfo MakeNewPieceInfo(string id, int initialLevel, string textureLocation = "pawn.png")
     {
-        /*List<PieceRule> rules = new List<PieceRule>();
-        foreach (string ruleId in initialRules)
-        {
-            if (ruleRegistry.TryGetValue(ruleId, out RuleBase rule))
-            {
-                rules.Add(new PieceRule(rule));
-            }
-            else
-            {
-                GD.PushWarning($"Could not find rule {ruleId} for {id}, so it has been ignored.");
-            }
-        }*/
         PieceInfo newInfo = new PieceInfo(id, initialLevel);
 
-        newInfo.AddValidationRule(validationRuleRegistry.GetValue("no_team_attack"));
-        newInfo.AddValidationRule(validationRuleRegistry.GetValue("no_team_overlap"));
-        newInfo.AddValidationRule(validationRuleRegistry.GetValue("inside_board"));
+        foreach (string ruleId in initialValidationRules)
+        {
+            newInfo.AddValidationRule(validationRuleRegistry.GetValue(ruleId));
+        }
 
         newInfo.textureLoc = textureLocation;
         pieceInfoRegistry.Register(id, newInfo);

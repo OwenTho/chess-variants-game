@@ -1,6 +1,6 @@
 ﻿internal partial class NoTeamOverlapRule : ValidationRuleBase
 {
-    public override void CheckAction(GameController game, Piece piece, ActionBase action, Tags invalidTags, Tags extraTags)
+    public override void CheckAction(GameController game, Piece piece, ActionBase action)
     {
         // Only continue if action is a move action
         if (action is not MoveAction)
@@ -17,7 +17,7 @@
                 Piece otherPiece = (Piece)item;
                 if (otherPiece.teamId == piece.teamId)
                 {
-                    invalidTags.Add("team_move");
+                    action.InvalidTag("team_overlap");
                 }
             }
             // If nothing there, ignore

@@ -18,7 +18,7 @@ public abstract partial class ActionRuleBase : RuleBase
 
     public enum AttackType
     {
-        None, // No move
+        NoMove, // No move
         AndMove, // Move if attack
         AlsoMove // Move
     }
@@ -27,23 +27,25 @@ public abstract partial class ActionRuleBase : RuleBase
     internal Array<ActionBase> Attack(Grid grid, Vector2I attackLocation, Array<ActionBase> possibleActions, AttackType moveType = AttackType.AndMove, ActionBase dependentRule = null)
     {
         Array<ActionBase> newRules = new Array<ActionBase>();
+        AttackAction newAttack = null;
         if (grid.TryGetCellAt(attackLocation.X, attackLocation.Y, out GridCell cell))
         {
             foreach (GridItem item in cell.items)
             {
                 if (item is Piece)
                 {
-                    AttackAction newAttack = new AttackAction(attackLocation, (Piece)item);
+                    newAttack = new AttackAction(attackLocation, (Piece)item);
                     if (dependentRule != null)
                     {
-                        newAttack.DependsOn(newAttack);
+                        newAttack.AddDependency(dependentRule);
                     }
                     possibleActions.Add(newAttack);
                     newRules.Add(newAttack);
                     if (moveType == AttackType.AndMove)
                     {
                         MoveAction newMove = new MoveAction(attackLocation, attackLocation);
-                        newMove.DependsOn(newAttack);
+                        newAttack.moveAction = newMove;
+                        newMove.AddDependency(newAttack);
                         possibleActions.Add(newMove);
                         newRules.Add(newMove);
                     }
@@ -53,9 +55,13 @@ public abstract partial class ActionRuleBase : RuleBase
         if (moveType == AttackType.AlsoMove)
         {
             MoveAction newMove = new MoveAction(attackLocation, attackLocation);
+            if (newAttack != null)
+            {
+                newAttack.moveAction = newMove;
+            }
             if (dependentRule != null)
             {
-                newMove.DependsOn(dependentRule);
+                newMove.AddDependency(dependentRule);
             }
             possibleActions.Add(newMove);
             newRules.Add(newMove);
