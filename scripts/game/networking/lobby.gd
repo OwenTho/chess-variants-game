@@ -48,7 +48,11 @@ func create_game(online: bool = true):
 			return error
 	else:
 		peer = OfflineMultiplayerPeer.new()
+	# Initialise both player_nums to -1
+	for i in range(player_nums.size()):
+		player_nums[i] = -1
 	multiplayer.multiplayer_peer = peer
+	
 	
 	players_loaded = 0
 	

@@ -19,7 +19,6 @@ func _ready() -> void:
 func _on_init():
 	cursor.board = GameManager.board
 	
-	
 	Debug.stats.add_property(GameManager.game_controller, "currentPlayerNum")
 
 func _process(delta) -> void:

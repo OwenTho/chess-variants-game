@@ -39,7 +39,7 @@ func set_sprite(new_sprite: Texture2D):
 func update_sprite() -> void:
 	var image_loc: String = "assets/texture/piece/" + piece_data.info.textureLoc
 	var piece_sprite: Texture
-	if FileAccess.file_exists("res://" + image_loc):
+	if ResourceLoader.exists("res://" + image_loc):
 		piece_sprite = load("res://" + image_loc)
 	else:
 		push_warning("Could not find sprite at path '%s', so defalt is being used." % [image_loc])
