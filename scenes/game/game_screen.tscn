@@ -7,7 +7,7 @@
 [ext_resource type="Script" path="res://scripts/game/visual/Board2D.gd" id="4_03kst"]
 [ext_resource type="PackedScene" uid="uid://dkoglthgg2tyq" path="res://scenes/game/cursor_highlight.tscn" id="5_w7pci"]
 
-[node name="GameScreen" type="Node2D" node_paths=PackedStringArray("board", "cursor", "action_highlights")]
+[node name="GameScreen" type="Node2D" node_paths=PackedStringArray("board", "cursor", "action_highlights") groups=["game_screen"]]
 script = ExtResource("1_871tu")
 board = NodePath("BoardHolder/Board2D")
 cursor = NodePath("BoardHolder/Board2D/CursorHighlight")

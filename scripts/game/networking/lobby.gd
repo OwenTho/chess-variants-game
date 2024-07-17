@@ -180,10 +180,48 @@ func set_player(id: int, player_num: int):
 	
 	_update_player_num.rpc(id, player_num)
 
+signal init_done()
+
 func start_game():
 	if not is_multiplayer_authority():
 		return
 	
+	players_loaded = 0
+	
+	# Tell all clients to Init GameManager
+	init_game.rpc()
+	
+	# Once game is init, init the board
+	GameManager.init_board()
+	
+	await init_done
+	# Once game init is done, send the board contents to the players
+	players_loaded = 1 # 1, as server is already loaded
+	
+	init_board.rpc(GameManager.board_to_array())
+	
+	await init_done
+	
+	# Once init is completely done, start the game
+
+@rpc("any_peer", "call_local", "reliable")
+func done_init():
+	if is_multiplayer_authority():
+		players_loaded += 1
+		if players_loaded >= players.size():
+			init_done.emit()
+
+@rpc("authority", "call_local", "reliable")
+func init_game():
+	GameManager.init()
+	# Done with init. Tell the server.
+	done_init.rpc()
+
+@rpc("authority", "call_remote", "reliable")
+func init_board(board_content: Array):
+	print(board_content)
+	GameManager.load_board(board_content)
+	done_init.rpc()
 
 ### Game Initialisation RPCs
 

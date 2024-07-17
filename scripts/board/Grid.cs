@@ -1,14 +1,14 @@
 using Godot;
-using System.Collections.Generic;
+using Godot.Collections;
 
 public partial class Grid : GodotObject
 {
-    internal List<GridCell> gridCells = new List<GridCell>();
+    public Array<GridCell> cells = new Array<GridCell>();
 
     // Get a cell at a specific location
     public GridCell GetCellAt(int x, int y)
     {
-        foreach (GridCell cell in gridCells)
+        foreach (GridCell cell in cells)
         {
             if (cell.x == x && cell.y == y)
             {
@@ -32,7 +32,7 @@ public partial class Grid : GodotObject
             return null;
         }
 
-        foreach (GridCell cell in gridCells)
+        foreach (GridCell cell in cells)
         {
             if (cell.HasItem(item))
             {
@@ -51,7 +51,7 @@ public partial class Grid : GodotObject
             return false;
         }
 
-        return gridCells.Contains(cell);
+        return cells.Contains(cell);
     }
 
     // Check if the grid has a cell at a certain position
@@ -68,7 +68,7 @@ public partial class Grid : GodotObject
             return false;
         }
         cell.RemoveFromGrid();
-        return gridCells.Remove(cell);
+        return cells.Remove(cell);
     }
 
     public bool RemoveCellAt(int x, int y)
@@ -83,7 +83,7 @@ public partial class Grid : GodotObject
 
     public int CellCount()
     {
-        return gridCells.Count;
+        return cells.Count;
     }
 
     public bool HasItem(GridItem item)
@@ -94,7 +94,7 @@ public partial class Grid : GodotObject
             return false;
         }
         
-        foreach (GridCell cell in gridCells)
+        foreach (GridCell cell in cells)
         {
             if (cell.HasItem(item))
             {
@@ -112,7 +112,7 @@ public partial class Grid : GodotObject
             return false;
         }
 
-        foreach(GridCell cell in gridCells)
+        foreach(GridCell cell in cells)
         {
             if (cell.HasItem(item))
             {
@@ -128,7 +128,7 @@ public partial class Grid : GodotObject
         GridCell newCell = new GridCell();
         newCell.SetPos(x, y);
         newCell.grid = this;
-        gridCells.Add(newCell);
+        cells.Add(newCell);
         return newCell;
     }
 

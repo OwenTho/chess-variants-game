@@ -10,8 +10,10 @@ var selected_piece: Piece2D
 var possible_actions: Array
 
 func _ready() -> void:
-	GameManager.start(board)
-	cursor.board = board
+	GameManager.has_init.connect(_on_init)
+
+func _on_init():
+	cursor.board = GameManager.board
 
 func _process(delta) -> void:
 	if Input.is_action_pressed("mouse_right"):

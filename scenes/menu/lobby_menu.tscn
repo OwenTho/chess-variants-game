@@ -69,6 +69,7 @@ layout_mode = 2
 one_shot = true
 
 [connection signal="pressed" from="BtnLeave" to="." method="_on_btn_leave_pressed"]
+[connection signal="pressed" from="BtnPlay" to="." method="_on_btn_play_pressed"]
 [connection signal="focus_exited" from="VSplitContainer/HSplitContainer/NameEdit" to="." method="_on_name_edit_focus_exited"]
 [connection signal="text_changed" from="VSplitContainer/HSplitContainer/NameEdit" to="." method="_on_name_edit_text_changed"]
 [connection signal="timeout" from="NameChangeTimer" to="." method="_on_name_change_timer_timeout"]

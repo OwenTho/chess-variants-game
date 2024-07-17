@@ -3,11 +3,48 @@ extends Node
 var game_controller_script: CSharpScript = preload("res://scripts/game/GameController.cs")
 var game_controller: Object
 
-var game_screen: PackedScene = preload("res://scenes/game/game_screen.tscn")
+var game_scene: PackedScene = preload("res://scenes/game/game_screen.tscn")
 var piece_scene: PackedScene = preload("res://scenes/game/piece.tscn")
 
+var game: Node2D
 var grid
 var board: Board2D
+
+signal has_init()
+
+func _ready():
+	Lobby.server_disconnected.connect(_on_server_disconnect)
+
+func _on_server_disconnect():
+	reset_game()
+	get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
+
+func reset_game():
+	board = null
+	game = null
+	# game.queue_free()
+	grid = null
+
+func init() -> void:
+	if game != null:
+		game.queue_free()
+	
+	var cur_scene = get_tree().current_scene
+	game = game_scene.instantiate()
+	get_tree().root.add_child(game)
+	get_tree().current_scene = game
+	cur_scene.queue_free()
+	
+	board = game.board
+	
+	# Initialise the game controller
+	game_controller = game_controller_script.new()
+	
+	# Initialise the game
+	game_controller.FullInit()
+	grid = game_controller.grid
+	
+	has_init.emit()
 
 func start(new_board: Board2D) -> void:
 	board = new_board
@@ -40,6 +77,32 @@ func init_board() -> void:
 	place_matching("bishop", 13, 5, 0)
 	place_matching("knight", 14, 6, 0)
 	place_matching("rook", 15, 7, 0)
+
+func board_to_array() -> Array:
+	var ret_array: Array = []
+	for cell in grid.cells:
+		var cell_pos: Vector2i = cell.pos
+		for item in cell.items:
+			var this_item: Array = []
+			# TODO: Update GridItem to have its own ID, which
+			# id is saved to instead of pieceId for Pieces. This would be
+			# for custom spaces.
+			# This works for now, however, as there are only pieces.
+			# Add the ID first
+			this_item.append(item.info.pieceId)
+			# Then add the link ID
+			this_item.append(item.linkId)
+			# Finally, the team
+			this_item.append(item.teamId)
+			# The position of the item
+			this_item.append(cell_pos)
+			
+			ret_array.append(this_item)
+	return ret_array
+
+func load_board(board_data: Array):
+	for item in board_data:
+		place_piece(item[0], item[1], item[2], item[3].x, item[3].y)
 
 func place_piece(piece_id: String, id: int, team: int, x: int, y: int) -> bool:
 	# Request the game controller to make the piece

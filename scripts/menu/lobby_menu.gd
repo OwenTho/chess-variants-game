@@ -26,6 +26,9 @@ func _ready():
 	for i in range(Lobby.player_nums.size()):
 		_on_player_nums_changed(Lobby.player_nums[i], i)
 	
+	if not is_multiplayer_authority():
+		$BtnPlay.disabled = true
+	
 	# Set NameEdit to this player's name
 	name_edit.text = Lobby.players[multiplayer.get_unique_id()]["name"]
 
@@ -104,3 +107,9 @@ func _on_name_change_timer_timeout():
 func _on_name_edit_focus_exited():
 	name_timer.stop()
 	Lobby.change_name.rpc(name_edit.text)
+
+
+func _on_btn_play_pressed():
+	if not is_multiplayer_authority():
+		return
+	Lobby.start_game()
