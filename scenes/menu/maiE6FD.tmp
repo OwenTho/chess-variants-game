@@ -10,10 +10,10 @@ ip_entry = NodePath("ServerControls/VBoxContainer/IPEntry")
 
 [node name="ServerControls" type="VBoxContainer" parent="."]
 layout_mode = 0
-offset_left = 878.0
-offset_top = 447.0
-offset_right = 1128.0
-offset_bottom = 683.0
+offset_left = 882.0
+offset_top = 418.0
+offset_right = 1132.0
+offset_bottom = 628.0
 
 [node name="BtnServer" type="Button" parent="ServerControls"]
 custom_minimum_size = Vector2(0, 55)
@@ -43,6 +43,12 @@ scroll_active = false
 layout_mode = 2
 placeholder_text = "IP Address"
 alignment = 1
+
+[node name="PortEntry" type="LineEdit" parent="ServerControls/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "Port"
+alignment = 1
+max_length = 5
 
 [node name="BtnJoin" type="Button" parent="ServerControls/VBoxContainer"]
 layout_mode = 2

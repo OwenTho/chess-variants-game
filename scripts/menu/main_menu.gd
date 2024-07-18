@@ -33,7 +33,8 @@ func _on_btn_join_pressed():
 		add_child(new_dialog)
 		new_dialog.popup_centered()
 		return
-	var error = Lobby.join_game()
+	
+	var error = Lobby.join_game(join_ip)
 	if error:
 		print(error)
 		var new_dialog = AcceptDialog.new()

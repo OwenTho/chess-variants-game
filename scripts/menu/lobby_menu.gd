@@ -13,8 +13,6 @@ func _ready():
 	Lobby.player_connected.connect(_on_player_connected)
 	Lobby.player_disconnected.connect(_on_player_disconnected)
 	Lobby.player_data_received.connect(_on_data_received)
-	Lobby.server_disconnected.connect(_on_server_disconnected)
-	Lobby.connection_failed.connect(_on_server_disconnected)
 	Lobby.player_num_updated.connect(_on_player_nums_changed)
 	
 	name_edit.max_length = Lobby.NAME_LENGTH_LIMIT
@@ -73,25 +71,11 @@ func _on_player_nums_changed(id: int, player_num: int):
 
 func close_lobby():
 	get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
-	pass
-
-func _on_server_disconnected():
-	# close_lobby()
-	pass
 
 func _on_name_edit_text_changed(text: String):
 	if text.is_empty():
 		return
 	name_timer.start()
-	#var cursor_col = name_edit.get_caret_column()
-	#var cursor_line = name_edit.get_caret_line()
-	
-#	if text.length() > Lobby.NAME_LENGTH_LIMIT:
-#		text = text.substr(0,Lobby.NAME_LENGTH_LIMIT)
-#		name_edit.text = text
-#		name_edit.set_caret_column(cursor_col)
-#		name_edit.set_caret_line(cursor_line)
-	
 
 
 func _on_btn_leave_pressed():

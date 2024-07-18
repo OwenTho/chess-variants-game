@@ -1,7 +1,7 @@
 extends Node
 
 const DEFAULT_SERVER_IP: String = "127.0.0.1"
-const PORT: int = 9813
+const DEFAULT_PORT: int = 9813
 const MAX_CONNECTIONS: int = 5
 
 const NAME_LENGTH_LIMIT: int = 13
@@ -13,6 +13,8 @@ var player_nums: Array[int] = [-1,-1]
 var player_info: Dictionary = {"name":"Name"}
 
 var players_loaded: int = 0
+
+var is_player: bool = false
 
 signal connection_successful()
 signal connection_failed()
@@ -29,21 +31,28 @@ func _ready():
 	multiplayer.connection_failed.connect(_on_connected_fail)
 	multiplayer.server_disconnected.connect(_on_server_disconnected)
 
-
-func join_game(address: String = ""):
+func join_game(address: String = "", port: int = DEFAULT_PORT):
+	# If server, ignore
+	if OS.has_feature("dedicated_server"):
+		return FAILED
 	if address.is_empty():
 		address = DEFAULT_SERVER_IP
+	if port <= 1024 or port >= 49152:
+		port = DEFAULT_PORT
 	var peer = ENetMultiplayerPeer.new()
-	var error = peer.create_client(address, PORT)
+	var error = peer.create_client(address, port)
 	if error:
 		return error
 	multiplayer.multiplayer_peer = peer
+	
 
-func create_game(online: bool = true):
+func create_game(online: bool = true, port: int = DEFAULT_PORT):
+	if port <= 1024 or port >= 49152:
+		port = DEFAULT_PORT
 	var peer
 	if online:
 		peer = ENetMultiplayerPeer.new()
-		var error = peer.create_server(PORT, MAX_CONNECTIONS)
+		var error = peer.create_server(port, MAX_CONNECTIONS)
 		if error:
 			return error
 	else:
@@ -53,12 +62,15 @@ func create_game(online: bool = true):
 		player_nums[i] = -1
 	multiplayer.multiplayer_peer = peer
 	
-	
 	players_loaded = 0
 	
-	players[multiplayer.get_unique_id()] = player_info
-	set_player(multiplayer.get_unique_id(), 0)
-	player_connected.emit(multiplayer.get_unique_id(), player_info)
+	if not OS.has_feature("dedicated_server"):
+		is_player = true
+		players[multiplayer.get_unique_id()] = player_info
+		set_player(multiplayer.get_unique_id(), 0)
+		player_connected.emit(multiplayer.get_unique_id(), player_info)
+	else:
+		is_player = false
 	connection_successful.emit()
 
 func leave_game():
@@ -73,7 +85,10 @@ func remove_multiplayer_peer():
 	multiplayer.multiplayer_peer = null
 
 func _on_player_connected(id: int):
-	_register_player.rpc_id(id, player_info)
+	if is_player:
+		_register_player.rpc_id(id, player_info)
+	
+	print("PLAYER CONNECT: " + str(id))
 	
 	if is_multiplayer_authority():
 		# Check the player nums. If there is a valid one,
@@ -96,6 +111,11 @@ func _register_player(new_player_info: Dictionary):
 func _update_player(id: int, new_player_info: Dictionary):
 	players[id] = new_player_info
 	player_data_received.emit(new_player_info)
+
+func get_player_info(id: int):
+	if players.has(id):
+		return players[id]
+	return null
 
 func _on_player_disconnected(id):
 	players.erase(id)
