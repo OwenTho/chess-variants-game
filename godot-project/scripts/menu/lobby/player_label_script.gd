@@ -10,8 +10,8 @@ var player_id: int = -1
 
 func _ready():
 	if not is_multiplayer_authority():
-		$HBoxContainer/HSplitContainer/HBoxContainer/BtnPlayer1.disabled = true
-		$HBoxContainer/HSplitContainer/HBoxContainer/BtnPlayer2.disabled = true
+		$HBoxContainer/HSplitContainer/HBoxContainer/BtnPlayer1.disabled = not Lobby.player_info.is_admin
+		$HBoxContainer/HSplitContainer/HBoxContainer/BtnPlayer2.disabled = not Lobby.player_info.is_admin
 
 func set_text(name: String):
 	$PlayerNameLabel.text = name

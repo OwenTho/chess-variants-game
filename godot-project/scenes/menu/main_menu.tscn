@@ -2,23 +2,68 @@
 
 [ext_resource type="Script" path="res://scripts/menu/main_menu.gd" id="1_3st2t"]
 
-[node name="MainMenu" type="Control" node_paths=PackedStringArray("ip_entry")]
+[node name="MainMenu" type="Control" node_paths=PackedStringArray("ip_entry", "server_port_entry", "code_entry")]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_3st2t")
-ip_entry = NodePath("ServerControls/VBoxContainer/IPEntry")
+ip_entry = NodePath("ServerControls/AdvancedSettings/IPEntry")
+server_port_entry = NodePath("ServerControls/AdvancedSettings/ServerPort")
+code_entry = NodePath("ServerControls/VBoxContainer/CodeEntry")
+
+[node name="AdvancedLabel" type="RichTextLabel" parent="."]
+layout_mode = 2
+offset_left = 730.0
+offset_top = 613.0
+offset_right = 870.0
+offset_bottom = 630.0
+theme_override_font_sizes/italics_font_size = 11
+bbcode_enabled = true
+text = "[i][url=toggle_advanced]Advanced Settings[/url][/i]"
+text_direction = 2
 
 [node name="ServerControls" type="VBoxContainer" parent="."]
 layout_mode = 0
-offset_left = 878.0
-offset_top = 447.0
-offset_right = 1128.0
-offset_bottom = 683.0
+offset_left = 880.0
+offset_top = 188.0
+offset_right = 1130.0
+offset_bottom = 636.0
+alignment = 2
 
 [node name="BtnServer" type="Button" parent="ServerControls"]
 custom_minimum_size = Vector2(0, 55)
 layout_mode = 2
 text = "Create Server"
+
+[node name="AdvancedSettings" type="VBoxContainer" parent="ServerControls"]
+visible = false
+layout_mode = 2
+
+[node name="MarginContainer2" type="MarginContainer" parent="ServerControls/AdvancedSettings"]
+layout_mode = 2
+theme_override_constants/margin_top = 9
+theme_override_constants/margin_bottom = 9
+
+[node name="HSeparator" type="HSeparator" parent="ServerControls/AdvancedSettings/MarginContainer2"]
+layout_mode = 2
+
+[node name="IPLabel" type="RichTextLabel" parent="ServerControls/AdvancedSettings"]
+layout_mode = 2
+theme_override_font_sizes/italics_font_size = 14
+bbcode_enabled = true
+text = "[i]Leave blank for default values[/i]"
+fit_content = true
+scroll_active = false
+
+[node name="IPEntry" type="LineEdit" parent="ServerControls/AdvancedSettings"]
+layout_mode = 2
+placeholder_text = "Server IP"
+alignment = 1
+
+[node name="ServerPort" type="LineEdit" parent="ServerControls/AdvancedSettings"]
+layout_mode = 2
+placeholder_text = "Server Port"
+alignment = 1
+max_length = 5
 
 [node name="MarginContainer" type="MarginContainer" parent="ServerControls"]
 layout_mode = 2
@@ -31,17 +76,9 @@ layout_mode = 2
 [node name="VBoxContainer" type="VBoxContainer" parent="ServerControls"]
 layout_mode = 2
 
-[node name="Label" type="RichTextLabel" parent="ServerControls/VBoxContainer"]
+[node name="CodeEntry" type="LineEdit" parent="ServerControls/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/italics_font_size = 14
-bbcode_enabled = true
-text = "[i]Leave blank for localhost[/i]"
-fit_content = true
-scroll_active = false
-
-[node name="IPEntry" type="LineEdit" parent="ServerControls/VBoxContainer"]
-layout_mode = 2
-placeholder_text = "IP Address"
+placeholder_text = "Lobby Code"
 alignment = 1
 
 [node name="BtnJoin" type="Button" parent="ServerControls/VBoxContainer"]
@@ -64,6 +101,7 @@ offset_right = 666.0
 offset_bottom = 491.0
 text = "Quit Game"
 
+[connection signal="meta_clicked" from="AdvancedLabel" to="." method="_on_advanced_label_meta_clicked"]
 [connection signal="pressed" from="ServerControls/BtnServer" to="." method="_on_btn_server_pressed"]
 [connection signal="pressed" from="ServerControls/VBoxContainer/BtnJoin" to="." method="_on_btn_join_pressed"]
 [connection signal="pressed" from="BtnPlay" to="." method="_on_btn_play_pressed"]

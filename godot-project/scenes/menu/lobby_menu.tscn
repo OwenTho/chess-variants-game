@@ -8,7 +8,7 @@ font_size = 21
 outline_size = 5
 outline_color = Color(0, 0, 0, 1)
 
-[node name="LobbyMenu" type="Control" node_paths=PackedStringArray("name_container", "name_edit", "name_timer")]
+[node name="LobbyMenu" type="Control" node_paths=PackedStringArray("name_container", "name_edit", "name_timer", "message_holder", "message_entry", "scroll_container")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,6 +20,9 @@ player_name_scene = ExtResource("2_8rvbx")
 name_container = NodePath("VSplitContainer/NameContainer")
 name_edit = NodePath("VSplitContainer/HSplitContainer/NameEdit")
 name_timer = NodePath("NameChangeTimer")
+message_holder = NodePath("Control/VSplitContainer/MessagesMargin/ScrollContainer/Messages")
+message_entry = NodePath("Control/VSplitContainer/InputMargin/PanelContainer/VBoxContainer/TextEdit")
+scroll_container = NodePath("Control/VSplitContainer/MessagesMargin/ScrollContainer")
 
 [node name="BtnLeave" type="Button" parent="."]
 layout_mode = 0
@@ -69,8 +72,66 @@ layout_mode = 2
 [node name="NameChangeTimer" type="Timer" parent="."]
 one_shot = true
 
+[node name="Control" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 32.0
+offset_right = 368.0
+offset_bottom = 634.0
+
+[node name="VSplitContainer" type="VSplitContainer" parent="Control"]
+layout_mode = 2
+split_offset = 445
+
+[node name="MessagesMargin" type="MarginContainer" parent="Control/VSplitContainer"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Control/VSplitContainer/MessagesMargin"]
+custom_minimum_size = Vector2(0, 230)
+layout_mode = 2
+follow_focus = true
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 2
+
+[node name="Messages" type="VBoxContainer" parent="Control/VSplitContainer/MessagesMargin/ScrollContainer"]
+custom_minimum_size = Vector2(355, 230)
+layout_mode = 2
+
+[node name="InputMargin" type="MarginContainer" parent="Control/VSplitContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="PanelContainer" type="PanelContainer" parent="Control/VSplitContainer/InputMargin"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/VSplitContainer/InputMargin/PanelContainer"]
+layout_mode = 2
+
+[node name="TextEdit" type="TextEdit" parent="Control/VSplitContainer/InputMargin/PanelContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+size_flags_vertical = 3
+placeholder_text = "Enter Message..."
+wrap_mode = 1
+caret_multiple = false
+
+[node name="BtnSend" type="Button" parent="Control/VSplitContainer/InputMargin/PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Send Message"
+
+[node name="BtnClear" type="Button" parent="Control/VSplitContainer/InputMargin/PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Clear Messages"
+
 [connection signal="pressed" from="BtnLeave" to="." method="_on_btn_leave_pressed"]
 [connection signal="pressed" from="BtnPlay" to="." method="_on_btn_play_pressed"]
 [connection signal="focus_exited" from="VSplitContainer/HSplitContainer/NameEdit" to="." method="_on_name_edit_focus_exited"]
 [connection signal="text_changed" from="VSplitContainer/HSplitContainer/NameEdit" to="." method="_on_name_edit_text_changed"]
 [connection signal="timeout" from="NameChangeTimer" to="." method="_on_name_change_timer_timeout"]
+[connection signal="caret_changed" from="Control/VSplitContainer/InputMargin/PanelContainer/VBoxContainer/TextEdit" to="." method="_on_text_edit_caret_changed"]
+[connection signal="text_changed" from="Control/VSplitContainer/InputMargin/PanelContainer/VBoxContainer/TextEdit" to="." method="_on_text_edit_text_changed"]
+[connection signal="pressed" from="Control/VSplitContainer/InputMargin/PanelContainer/VBoxContainer/BtnSend" to="." method="_on_btn_send_pressed"]
+[connection signal="pressed" from="Control/VSplitContainer/InputMargin/PanelContainer/VBoxContainer/BtnClear" to="." method="_on_btn_clear_pressed"]
