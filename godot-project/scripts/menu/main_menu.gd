@@ -29,7 +29,7 @@ func _on_btn_play_pressed() -> void:
 	for i in range(Lobby.player_nums.size()):
 		Lobby.player_nums[i] = 1
 	# Start the game
-	Lobby.start_game()
+	Lobby.setup_game()
 
 
 func _on_btn_quit_pressed() -> void:

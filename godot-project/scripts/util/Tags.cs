@@ -30,4 +30,19 @@ public partial class Tags : GodotObject
     {
         tags.Clear();
     }
+
+    public override string ToString()
+    {
+        string text = "{ ";
+
+        int toGet = tags.Count;
+        int cur = 0;
+        foreach (string tag in tags)
+        {
+            text += $"{tag}, ";
+        }
+
+        text += " }";
+        return text;
+    }
 }

@@ -1,5 +1,7 @@
 extends Node2D
 
+class_name Game
+
 @export var board: Board2D
 @export var cursor: BoardItem2D
 
@@ -57,13 +59,11 @@ func select_cell(cell_pos: Vector2i):
 	# Remove existing selection before moving on	
 	remove_selection()
 	
-	# If cell doesn't exist, ignore
-	if cell == null:
-		return
-	
 	# Get the first piece
-	var item = cell.GetItem(0)
-	var item_node = item.get_parent()
+	var piece = GameManager.game_controller.GetFirstPieceAt(cell_pos.x, cell_pos.y)
+	if piece == null:
+		return
+	var item_node = piece.get_parent()
 	
 	select_item(item_node)
 
@@ -71,9 +71,14 @@ func select_item(piece: Piece2D) -> void:
 	selected_piece = piece
 	if piece.piece_data == null or piece.piece_data.info == null:
 		return
-	possible_actions = piece.piece_data.GetPossibleActions(GameManager.game_controller)
+	possible_actions = piece.piece_data.currentPossibleActions
+	if possible_actions == null:
+		return
 	
 	for action in possible_actions:
+		# Skip if invalid
+		if not action.valid:
+			continue
 		var new_highlight: Node2D = highlight_scene.instantiate()
 		
 		new_highlight.board = board
@@ -88,6 +93,9 @@ func next_turn(new_player_num: int) -> void:
 func _on_next_turn(new_player_num: int):
 	remove_selection()
 	next_turn.rpc(new_player_num)
+
+func _on_end_turn() -> void:
+	remove_selection()
 
 @rpc("authority", "call_remote", "reliable")
 func take_action_at(piece_id: int, action_location: Vector2i):
@@ -124,18 +132,9 @@ func request_action(piece_id: int, action_location: Vector2i) -> void:
 	var actions: Array = piece.GetPossibleActions(GameManager.game_controller)
 	
 	# If there are no actions, ignore
-	if actions.size() == 0:
 		return
 	
-	# If any actions aren't valid, ignore
-	for action in actions:
-		if not GameManager.game_controller.IsActionValid(action, piece):
-			return
-	
 	# Take the actions
-	for action in actions:
-		if action.actionLocation == action_location:
-			GameManager.game_controller.TakeAction(action, piece)
 	# Tell everyone to take the action
 	take_action_at.rpc(piece_id, action_location)
 	
@@ -144,6 +143,8 @@ func request_action(piece_id: int, action_location: Vector2i) -> void:
 
 func _on_requested_action(piece_id: int, action_location: Vector2i) -> void:
 	request_action.rpc(piece_id, action_location)
+func _on_requested_action(action_location: Vector2i, piece) -> void:
+	request_action.rpc(piece.id, action_location)
 
 func close_game():
 	

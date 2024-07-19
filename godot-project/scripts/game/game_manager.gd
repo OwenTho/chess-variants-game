@@ -6,7 +6,7 @@ var game_controller: Object
 var game_scene: PackedScene = preload("res://scenes/game/game_screen.tscn")
 var piece_scene: PackedScene = preload("res://scenes/game/piece.tscn")
 
-var game: Node2D
+var game: Game
 var grid
 var board: Board2D
 
@@ -52,9 +52,10 @@ func init() -> void:
 
 func setup_signals():
 	game_controller.NewTurn.connect(game._on_next_turn)
+	game_controller.EndTurn.connect(game._on_end_turn)
 	game_controller.RequestedActionAt.connect(game._on_requested_action)
 
-func start(new_board: Board2D) -> void:
+func setup_game(new_board: Board2D) -> void:
 	board = new_board
 	
 	# First, make a new GameController
@@ -66,6 +67,10 @@ func start(new_board: Board2D) -> void:
 	
 	# Load the game scene
 	init_board()
+	
+
+func start_game():
+	game_controller.StartGame()
 
 func init_board() -> void:
 	# Add all of the pieces

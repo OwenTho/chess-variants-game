@@ -1,4 +1,6 @@
-﻿internal partial class NoTeamOverlapRule : ValidationRuleBase
+﻿using Godot.Collections;
+
+internal partial class NoTeamOverlapRule : ValidationRuleBase
 {
     public override void CheckAction(GameController game, Piece piece, ActionBase action)
     {
@@ -8,19 +10,13 @@
             return;
         }
         MoveAction moveAction = (MoveAction)action;
-        if (piece.grid.TryGetCellAt(moveAction.moveLocation.X, moveAction.moveLocation.Y, out GridCell cell))
+        // Check if there is at least ONE team piece. If there is, add the enemy_overlap tag.
+        if (game.TryGetPiecesAt(moveAction.moveLocation.X, moveAction.moveLocation.Y, out Array<Piece> pieces))
         {
-            // If there is a cell, and the piece is a teammate, then make invalid
-            GridItem item = cell.GetItem(0);
-            if (item is Piece)
+            if (HasTeamPieces(pieces, piece.teamId, true))
             {
-                Piece otherPiece = (Piece)item;
-                if (otherPiece.teamId == piece.teamId)
-                {
-                    action.InvalidTag("team_overlap");
-                }
+                action.InvalidTag("team_overlap");
             }
-            // If nothing there, ignore
         }
     }
 }

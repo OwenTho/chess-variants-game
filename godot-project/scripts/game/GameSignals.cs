@@ -10,5 +10,8 @@ public partial class GameController : Node
     public delegate void PieceRemovedEventHandler(Piece removedPiece);
 
     [Signal]
-    public delegate void RequestedActionAtEventHandler(Vector2I actionLocation, int pieceId);
+    public delegate void RequestedActionAtEventHandler(Vector2I actionLocation, Piece piece);
+
+    [Signal]
+    public delegate void EndTurnEventHandler();
 }

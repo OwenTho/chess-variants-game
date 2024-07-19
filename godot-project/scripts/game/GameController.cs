@@ -110,6 +110,17 @@ public partial class GameController : Node
         return Vector2I.Zero;
     }
 
+    public Array<string> GetPieceKeys()
+    {
+        string[] keys = pieceInfoRegistry.GetKeys();
+        Array<string> pieceKeys = new Array<string>();
+        foreach (string key in keys)
+        {
+            pieceKeys.Add(key);
+        }
+        return pieceKeys;
+    }
+
     public PieceInfo GetPieceInfo(string key)
     {
         return pieceInfoRegistry.GetValue(key);
@@ -188,6 +199,11 @@ public partial class GameController : Node
 
         // Tell networking "I want to act this piece on this location"
         EmitSignal(SignalName.RequestedActionAt, piece.id, actionLocation);
+    public void StartGame()
+    {
+        // Tell all pieces to update their possible moves
+        PiecesNewTurn();
+    }
     }
 
     public void NextTurn(int newPlayerNum)
@@ -197,11 +213,22 @@ public partial class GameController : Node
         {
             return;
         }
+        // First, end turn
+        EmitSignal(SignalName.EndTurn);
+        // Tell all pieces that it's the next turn
+        foreach (Piece piece in allPieces)
+        {
+            // Remove all actions from the Grid
+            piece.EndTurn(this);
+        }
+
+        // Move to the next player
         if (newPlayerNum <= -1)
         {
             newPlayerNum = currentPlayerNum + 1;
         }
         SetPlayerNum(newPlayerNum);
+
         // Tell all pieces that it's the next turn
         foreach (Piece piece in allPieces)
         {

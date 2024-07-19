@@ -336,9 +336,9 @@ func request_start_game():
 		return
 	
 	# If player is an admin, start game
-	start_game()
+	setup_game()
 
-func start_game():
+func setup_game():
 	# Only multiplayer authority can start
 	if not is_multiplayer_authority():
 		return
@@ -351,15 +351,19 @@ func start_game():
 	# Once game is init, init the board
 	GameManager.init_board()
 	
-	await init_done
+	if players.size() > players_loaded:
+		await init_done
 	# Once game init is done, send the board contents to the players
 	players_loaded = 1 # 1, as server is already loaded
 	
 	init_board.rpc(GameManager.board_to_array())
 	
-	await init_done
+	if players.size() > players_loaded:
+		await init_done
 	
 	# Once init is completely done, start the game
+	start_game.rpc()
+	
 
 @rpc("any_peer", "call_local", "reliable")
 func done_init():
@@ -379,6 +383,10 @@ func init_board(board_content: Array):
 	print(board_content)
 	GameManager.load_board(board_content)
 	done_init.rpc()
+
+@rpc("authority", "call_local", "reliable")
+func start_game():
+	GameManager.start_game()
 
 ### Game Initialisation RPCs
 

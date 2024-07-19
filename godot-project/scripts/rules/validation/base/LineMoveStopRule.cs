@@ -10,13 +10,25 @@ internal partial class LineMoveStopRule : ValidationRuleBase
 {
     public override void CheckAction(GameController game, Piece piece, ActionBase action)
     {
-        // First check if the piece contains something
-        if (game.grid.TryGetCellAt(action.actionLocation.X, action.actionLocation.Y, out GridCell cell))
+        // If it's not a move action, ignore
+        if (action is not MoveAction)
+        {
+            return;
+        }
+        // If it's not a line move, ignore
+        if (!action.tags.Contains("line_move"))
+        {
+            return;
+        }
+        MoveAction moveAction = (MoveAction)action;
+        if (game.HasPieceAt(moveAction.moveLocation.X, moveAction.moveLocation.Y))
         {
             // If it does, cancel movement of dependent actions if it's a line movement
-            if (action.tags.Contains("line_move"))
+            moveAction.InvalidTagDependents("line_stop");
+            if (moveAction.attackAction != null)
             {
-                action.InvalidTagDependents("line_stop");
+                // Remove the tag from the attack action, as it is a dependent
+                moveAction.attackAction.RemoveInvalidTag("line_stop");
             }
         }
     }

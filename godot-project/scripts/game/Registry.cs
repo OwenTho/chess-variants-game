@@ -1,5 +1,6 @@
 ﻿using Godot;
 using System.Collections.Generic;
+using System.Linq;
 
 internal partial class Registry<T> : GodotObject
 {
@@ -62,5 +63,10 @@ internal partial class Registry<T> : GodotObject
     public void Clear()
     {
         register.Clear();
+    }
+
+    public string[] GetKeys()
+    {
+        return register.Keys.ToArray();
     }
 }

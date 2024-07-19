@@ -76,15 +76,19 @@ one_shot = true
 layout_mode = 0
 offset_left = 13.0
 offset_top = 32.0
-offset_right = 368.0
+offset_right = 396.0
 offset_bottom = 634.0
 
 [node name="VSplitContainer" type="VSplitContainer" parent="Control"]
 layout_mode = 2
-split_offset = 445
+split_offset = 465
 
 [node name="MessagesMargin" type="MarginContainer" parent="Control/VSplitContainer"]
 layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
 
 [node name="ScrollContainer" type="ScrollContainer" parent="Control/VSplitContainer/MessagesMargin"]
 custom_minimum_size = Vector2(0, 230)
