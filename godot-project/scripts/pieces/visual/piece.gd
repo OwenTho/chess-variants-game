@@ -6,6 +6,7 @@ var piece_data
 
 func _ready() -> void:
 	piece_data.ChangedCell.connect(_on_move)
+	piece_data.InfoChanged.connect(info_changed)
 
 func _on_move(new_cell) -> void:
 	if new_cell != null:
@@ -37,7 +38,11 @@ func set_sprite(new_sprite: Texture2D):
 	update_scale()
 
 func update_sprite() -> void:
-	var image_loc: String = "assets/texture/piece/" + piece_data.info.textureLoc
+	# If null, use the error sprite
+	var image_loc: String = "assets/texture/piece/invalid_piece.png"
+	if piece_data.info != null:
+		image_loc = "assets/texture/piece/" + piece_data.info.textureLoc
+	print("Using image %s" % [image_loc])
 	var piece_sprite: Texture
 	if ResourceLoader.exists("res://" + image_loc):
 		piece_sprite = load("res://" + image_loc)
@@ -46,3 +51,6 @@ func update_sprite() -> void:
 		piece_sprite = load("res://assets/texture/piece/default.png")
 	
 	set_sprite(piece_sprite)
+
+func info_changed(_info) -> void:
+	update_sprite()

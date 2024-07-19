@@ -69,6 +69,8 @@ func select_cell(cell_pos: Vector2i):
 
 func select_item(piece: Piece2D) -> void:
 	selected_piece = piece
+	if piece.piece_data == null or piece.piece_data.info == null:
+		return
 	possible_actions = piece.piece_data.GetPossibleActions(GameManager.game_controller)
 	
 	for action in possible_actions:

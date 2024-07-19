@@ -6,12 +6,27 @@ public partial class Piece : GridItem
 {
     public int timesMoved = 0;
     internal int teamId = 0;
-    public PieceInfo info { get; internal set; }
+
+    private PieceInfo _info;
+    public PieceInfo info {
+        get
+        {
+            return _info;
+        }
+        internal set
+        {
+            _info = value;
+            EmitSignal(SignalName.InfoChanged, value);
+        }
+    }
     public int id { get; internal set; }
     public int linkId { get; internal set; }
     public Vector2I forwardDirection = Vector2I.Down;
 
     public Tags tags = new Tags();
+
+    [Signal]
+    public delegate void InfoChangedEventHandler(PieceInfo info);
 
     public Array<ActionBase> GetPossibleActions(GameController game)
     {
@@ -73,6 +88,10 @@ public partial class Piece : GridItem
 
     public void NewTurn(GameController game)
     {
+        if (info == null)
+        {
+            return;
+        }
         foreach (PieceRule pieceRule in info.rules)
         {
             pieceRule.rule.NewTurn(game, this);
