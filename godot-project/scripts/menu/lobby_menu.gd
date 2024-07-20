@@ -123,8 +123,17 @@ func _on_btn_play_pressed():
 var caret_col: int = 0
 
 func _on_text_edit_text_changed():
+	var changed: bool = false
 	if message_entry.text.contains("\n"):
 		message_entry.text = message_entry.text.replace("\n", "")
+		changed = true
+	
+	if message_entry.text.length() > Lobby.MESSAGE_LIMIT:
+		message_entry.text = message_entry.text.substr(0, Lobby.MESSAGE_LIMIT)
+		changed = true
+	
+	
+	if changed:
 		message_entry.set_caret_column(caret_col)
 
 func _on_text_edit_caret_changed():
@@ -132,6 +141,11 @@ func _on_text_edit_caret_changed():
 		return
 	caret_col = message_entry.get_caret_column()
 
+func _input(event):
+	if message_entry.has_focus():
+		if event is InputEventKey and event.is_pressed():
+			if event.key_label == KEY_ENTER:
+				_on_btn_send_pressed()
 
 func _on_btn_send_pressed():
 	# Send request to server
