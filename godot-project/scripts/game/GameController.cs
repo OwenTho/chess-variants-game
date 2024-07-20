@@ -1,6 +1,7 @@
 using Godot;
 using Godot.Collections;
 using System;
+using System.Reflection.Metadata.Ecma335;
 using System.Reflection.PortableExecutable;
 
 public partial class GameController : Node
@@ -12,6 +13,8 @@ public partial class GameController : Node
     private int lastId = 0;
 
     public const int NUMBER_OF_PLAYERS = 2;
+
+    public const string king_id = "king";
 
     public int currentPlayerNum { get; private set; } = 0;
 
@@ -191,6 +194,31 @@ public partial class GameController : Node
         return false;
     }
 
+    public bool HasPieceIdAt(string pieceId, int x, int y)
+    {
+        if (grid.TryGetCellAt(x, y, out GridCell cell))
+        {
+            foreach (GridItem item in cell.items)
+            {
+                if (item is Piece)
+                {
+                    Piece piece = (Piece)item;
+                    // If no info, ignore
+                    if (piece.info == null)
+                    {
+                        continue;
+                    }
+                    // If piece id matches, return true
+                    if (piece.info.pieceId == pieceId)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     public Array<Piece> GetPiecesAt(int x, int y)
     {
         Array<Piece> pieces = new Array<Piece>();
@@ -288,6 +316,47 @@ public partial class GameController : Node
             {
                 // GD.Print($"\t{action.GetType().Name}({action.actionLocation.X}, {action.actionLocation.Y}) - {action.valid}");
                 grid.PlaceItemAt(action, action.actionLocation.X, action.actionLocation.Y);
+            }
+            // If it's the king, disable any attacks on it and stop it from moving into
+            // a space with check
+            if (piece.info.pieceId == king_id)
+            {
+                foreach (GridItem item in piece.cell.items)
+                {
+                    if (item is AttackAction)
+                    {
+                        AttackAction attackAction = (AttackAction)item;
+                        attackAction.MakeInvalid();
+                        if (attackAction.moveAction != null)
+                        {
+                            attackAction.moveAction.MakeInvalid();
+                        }
+                    }
+                }
+
+                foreach (ActionBase action in piece.currentPossibleActions)
+                {
+                    if (action is MoveAction)
+                    {
+                        MoveAction moveAction = (MoveAction)action;
+                        foreach (GridItem item in moveAction.cell.items)
+                        {
+                            if (item is AttackAction)
+                            {
+                                // Ignore actions that can't check
+                                AttackAction attackAction = (AttackAction)item;
+                                if (attackAction.tags.Contains("no_check"))
+                                {
+                                    continue;
+                                }
+                                if (attackAction.owner.teamId != piece.teamId)
+                                {
+                                    moveAction.MakeInvalid();
+                                }
+                            }
+                        }
+                    }
+                }
             }
             piece.NewTurn(this);
         }

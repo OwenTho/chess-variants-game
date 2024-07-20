@@ -25,10 +25,15 @@ internal partial class LineMoveStopRule : ValidationRuleBase
         {
             // If it does, cancel movement of dependent actions if it's a line movement
             moveAction.InvalidTagDependents("line_stop");
+            if (!game.HasPieceIdAt("king", moveAction.moveLocation.X, moveAction.moveLocation.Y))
+            {
+                moveAction.TagDependents("no_check");
+            }
             if (moveAction.attackAction != null)
             {
                 // Remove the tag from the attack action, as it is a dependent
                 moveAction.attackAction.RemoveInvalidTag("line_stop");
+                moveAction.attackAction.tags.Remove("no_check");
             }
         }
     }

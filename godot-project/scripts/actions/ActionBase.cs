@@ -28,6 +28,7 @@ public abstract partial class ActionBase : GridItem
     public ActionBase(Piece owner, Vector2I actionLocation)
     {
         this.actionLocation = actionLocation;
+        this.owner = owner;
     }
 
     public abstract void ActOn(GameController game, Piece piece);
@@ -132,7 +133,14 @@ public abstract partial class ActionBase : GridItem
         action.AddDependency(this);
     }
 
-    public void Tag(string tag, bool carry)
+    public enum CarryType
+    {
+        NONE,
+        DOWN,
+        UP
+    }
+
+    public void Tag(string tag, CarryType carryType = CarryType.DOWN)
     {
         // If this already has the tag, ignore to avoid
         // infinite loops.
@@ -142,25 +150,29 @@ public abstract partial class ActionBase : GridItem
         }
         tags.Add(tag);
         // If carry, also tag dependents
-        if (carry)
+        if (carryType == CarryType.DOWN)
         {
-            TagDependents(tag, carry);
+            TagDependents(tag);
+        }
+        if (carryType == CarryType.UP)
+        {
+            TagDependancies(tag);
         }
     }
 
-    public void TagDependents(string tag, bool carry = true)
+    public void TagDependents(string tag)
     {
-        foreach(ActionBase dependent in dependents)
+        foreach (ActionBase dependent in dependents)
         {
-            dependent.Tag(tag, carry);
+            dependent.Tag(tag, CarryType.DOWN);
         }
     }
 
-    public void TagDependancies(string tag, bool carry = true)
+    public void TagDependancies(string tag)
     {
         foreach (ActionBase dependency in dependencies)
         {
-            dependency.Tag(tag, carry);
+            dependency.Tag(tag, CarryType.UP);
         }
     }
 
@@ -201,55 +213,63 @@ public abstract partial class ActionBase : GridItem
         //GD.Print($"Tag {tag} lowered to {num}");
     }
 
-    public void InvalidTag(string tag, bool carry = true)
+    public void InvalidTag(string tag, CarryType carryType = CarryType.DOWN)
     {
         AddInvalidTag(tag);
         // If carry, also tag dependents
-        if (carry)
+        if (carryType == CarryType.DOWN)
         {
-            InvalidTagDependents(tag, carry);
+            InvalidTagDependents(tag);
+        }
+        if (carryType == CarryType.UP)
+        {
+            InvalidTagDependencies(tag);
         }
     }
 
-    public void InvalidTagDependents(string tag, bool carry = true)
+    public void InvalidTagDependents(string tag)
     {
         foreach (ActionBase dependent in dependents)
         {
-            dependent.InvalidTag(tag, carry);
+            dependent.InvalidTag(tag, CarryType.DOWN);
         }
     }
 
-    public void InvalidTagDependencies(string tag, bool carry = true)
+    public void InvalidTagDependencies(string tag)
     {
         foreach (ActionBase dependency in dependencies)
         {
-            dependency.InvalidTag(tag, carry);
+            dependency.InvalidTag(tag, CarryType.UP);
         }
     }
 
-    public void RemoveInvalidTag(string tag, bool carry = true)
+    public void RemoveInvalidTag(string tag, CarryType carryType = CarryType.DOWN)
     {
         RemoveInvalidTag(tag);
         // If carry, also remove the tag from dependents
-        if (carry)
+        if (carryType == CarryType.DOWN)
         {
-            RemoveInvalidTagDependents(tag, carry);
+            RemoveInvalidTagDependents(tag);
+        }
+        if (carryType == CarryType.UP)
+        {
+            RemoveInvalidTagDependencies(tag);
         }
     }
 
-    public void RemoveInvalidTagDependents(string tag, bool carry = true)
+    public void RemoveInvalidTagDependents(string tag)
     {
         foreach (ActionBase dependent in dependents)
         {
-            dependent.RemoveInvalidTag(tag, carry);
+            dependent.RemoveInvalidTag(tag, CarryType.DOWN);
         }
     }
 
-    public void RemoveInvalidTagDependencies(string tag, bool carry = true)
+    public void RemoveInvalidTagDependencies(string tag)
     {
         foreach (ActionBase dependency in dependencies)
         {
-            dependency.RemoveInvalidTag(tag, carry);
+            dependency.RemoveInvalidTag(tag, CarryType.UP);
         }
     }
 }
