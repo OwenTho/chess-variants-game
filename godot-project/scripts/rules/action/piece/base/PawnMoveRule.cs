@@ -14,7 +14,7 @@ internal partial class PawnMoveRule : ActionRuleBase
         for (int i = 1; i <= maxForward; i++)
         {
             Vector2I actionPos = thisPosition + (piece.forwardDirection * i);
-            MoveAction newMove = new MoveAction(actionPos, actionPos);
+            MoveAction newMove = new MoveAction(piece, actionPos, actionPos);
             if (lastMove != null)
             {
                 newMove.AddDependency(lastMove);
@@ -27,7 +27,7 @@ internal partial class PawnMoveRule : ActionRuleBase
         if (piece.timesMoved == 0)
         {
             Vector2I actionPos = thisPosition + (piece.forwardDirection * (maxForward + 1));
-            PawnMoveAction newMove = new PawnMoveAction(actionPos, actionPos);
+            PawnMoveAction newMove = new PawnMoveAction(piece, actionPos, actionPos);
             if (lastMove != null)
             {
                 newMove.AddDependency(lastMove);
@@ -41,35 +41,32 @@ internal partial class PawnMoveRule : ActionRuleBase
         for (int i = 1; i <= maxForward; i++)
         {
             // TODO: Does not currently add dependencies to the previous attack (so pawn can jump over pieces at higher levels)
-            Attack(piece.grid, thisPosition + ((piece.forwardDirection + Vector2I.Right) * i), possibleActions);
-            Attack(piece.grid, thisPosition + ((piece.forwardDirection + Vector2I.Left) * i), possibleActions);
+            Attack(piece.grid, piece, thisPosition + ((piece.forwardDirection + Vector2I.Right) * i), possibleActions, AttackType.MoveIf);
+            Attack(piece.grid, piece, thisPosition + ((piece.forwardDirection + Vector2I.Left) * i), possibleActions, AttackType.MoveIf);
         }
 
         // If next to a piece that moved twice, allow En passant
-        CheckEnPassant(piece, thisPosition + Vector2I.Left, possibleActions);
-        CheckEnPassant(piece, thisPosition + Vector2I.Right, possibleActions);
+        CheckEnPassant(game, piece, thisPosition + Vector2I.Left, possibleActions);
+        CheckEnPassant(game, piece, thisPosition + Vector2I.Right, possibleActions);
         return possibleActions;
     }
 
-    private void CheckEnPassant(Piece piece, Vector2I position, Array<ActionBase> possibleActions)
+    private void CheckEnPassant(GameController game, Piece piece, Vector2I position, Array<ActionBase> possibleActions)
     {
-        if (piece.cell.grid.TryGetCellAt(position.X, position.Y, out GridCell cell))
+        if (game.TryGetPiecesAt(position.X, position.Y, out Array<Piece> pieces))
         {
-            // If there is a cell, check for a piece
-            foreach (GridItem item in cell.items)
+            foreach (Piece victim in pieces)
             {
-                if (item is Piece)
+                if (victim.tags.Contains("pawn_initial"))
                 {
-                    Piece thisPiece = (Piece)item;
-                    if (thisPiece.tags.Contains("pawn_initial"))
-                    {
-                        Vector2I attackPos = cell.pos + piece.forwardDirection;
-                        AttackAction newAttack = new AttackAction(attackPos, thisPiece);
-                        possibleActions.Add(newAttack);
-                        MoveAction newMove = new MoveAction(attackPos, attackPos);
-                        newMove.AddDependency(newAttack);
-                        possibleActions.Add(newMove);
-                    }
+                    Vector2I attackPos = position + piece.forwardDirection;
+                    AttackAction newAttack = new AttackAction(piece, attackPos, attackPos);
+                    newAttack.AddVictim(victim);
+                    possibleActions.Add(newAttack);
+
+                    MoveAction newMove = new MoveAction(piece, attackPos, attackPos);
+                    newMove.AddDependency(newAttack);
+                    possibleActions.Add(newMove);
                 }
             }
         }

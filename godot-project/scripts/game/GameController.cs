@@ -1,6 +1,7 @@
 using Godot;
 using Godot.Collections;
 using System;
+using System.Reflection.PortableExecutable;
 
 public partial class GameController : Node
 {
@@ -137,6 +138,7 @@ public partial class GameController : Node
         // The piece must be of the current team
         if (piece == null || piece.teamId != currentPlayerNum)
         {
+            // GD.Print($"Invalid {action.GetType().Name} ({action.actionLocation.X}, {action.actionLocation.Y}): Piece null or wrong team.");
             return false;
         }
         // Ignore if null
@@ -145,9 +147,71 @@ public partial class GameController : Node
             GD.PushError($"Tried to Act on piece {piece.GetType().Name}, but the Action was null.");
             return false;
         }
+        // Ignore if invalid
+        if (!action.valid)
+        {
+            // GD.Print($"Invalid {action.GetType().Name} ({action.actionLocation.X}, {action.actionLocation.Y}): Action is invalid: {action.tags}");
+            return false;
+        }
         return true;
     }
 
+    public Piece GetFirstPieceAt(int x, int y)
+    {
+        if (grid.TryGetCellAt(x, y, out GridCell cell)) {
+            foreach (GridItem item in cell.items)
+            {
+                if (item is Piece)
+                {
+                    return (Piece)item;
+                }
+            }
+        }
+        return null;
+    }
+
+    public bool TryGetFirstPieceAt(int x, int y, out Piece piece)
+    {
+        piece = GetFirstPieceAt(x, y);
+        return piece != null;
+    }
+
+    public bool HasPieceAt(int x, int y)
+    {
+        if (grid.TryGetCellAt(x, y, out GridCell cell))
+        {
+            foreach (GridItem item in cell.items)
+            {
+                if (item is Piece)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public Array<Piece> GetPiecesAt(int x, int y)
+    {
+        Array<Piece> pieces = new Array<Piece>();
+        if (grid.TryGetCellAt(x, y, out GridCell cell))
+        {
+            foreach (GridItem item in cell.items)
+            {
+                if (item is Piece)
+                {
+                    pieces.Add((Piece)item);
+                }
+            }
+        }
+        return pieces;
+    }
+
+    public bool TryGetPiecesAt(int x, int y, out Array<Piece> pieces)
+    {
+        pieces = GetPiecesAt(x, y);
+        return pieces.Count > 0;
+    }
 
     public bool TakeAction(ActionBase action, Piece piece)
     {
@@ -160,10 +224,14 @@ public partial class GameController : Node
         return true;
     }
 
-    public void TakeActionAt(Vector2I actionLocation, Piece piece)
+    public bool TakeActionAt(Vector2I actionLocation, Piece piece)
     {
         // Get the possible actions for this piece
-        Array<ActionBase> possibleActions = piece.GetPossibleActions(this);
+        Array<ActionBase> possibleActions = piece.currentPossibleActions;
+        if (possibleActions.Count == 0)
+        {
+            return false;
+        }
 
         // Loop through all actions, and find the ones at x, y.
         foreach (ActionBase action in possibleActions)
@@ -173,6 +241,7 @@ public partial class GameController : Node
                 TakeAction(action, piece);
             }
         }
+        return true;
     }
 
     public void RequestAction(ActionBase action, Piece piece)
@@ -198,12 +267,30 @@ public partial class GameController : Node
         }
 
         // Tell networking "I want to act this piece on this location"
-        EmitSignal(SignalName.RequestedActionAt, piece.id, actionLocation);
+        EmitSignal(SignalName.RequestedActionAt, actionLocation, piece);
+    }
+
     public void StartGame()
     {
         // Tell all pieces to update their possible moves
         PiecesNewTurn();
     }
+
+    private void PiecesNewTurn()
+    {
+        foreach (Piece piece in allPieces)
+        {
+            // GD.Print($"Updating for piece {piece.id}");
+            // Update all the actions
+            piece.UpdateActions(this);
+            // Add all the actions to the Grid
+            foreach (ActionBase action in piece.currentPossibleActions)
+            {
+                // GD.Print($"\t{action.GetType().Name}({action.actionLocation.X}, {action.actionLocation.Y}) - {action.valid}");
+                grid.PlaceItemAt(action, action.actionLocation.X, action.actionLocation.Y);
+            }
+            piece.NewTurn(this);
+        }
     }
 
     public void NextTurn(int newPlayerNum)
@@ -219,6 +306,15 @@ public partial class GameController : Node
         foreach (Piece piece in allPieces)
         {
             // Remove all actions from the Grid
+            foreach (ActionBase action in piece.currentPossibleActions)
+            {
+                if (action.cell != null)
+                {
+                    action.cell.RemoveItem(action);
+                }
+            }
+
+            piece.ClearActions();
             piece.EndTurn(this);
         }
 
@@ -230,10 +326,7 @@ public partial class GameController : Node
         SetPlayerNum(newPlayerNum);
 
         // Tell all pieces that it's the next turn
-        foreach (Piece piece in allPieces)
-        {
-            piece.NewTurn(this);
-        }
+        PiecesNewTurn();
         EmitSignal(SignalName.NewTurn, currentPlayerNum);
     }
 

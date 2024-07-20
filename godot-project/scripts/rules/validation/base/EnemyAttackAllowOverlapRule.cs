@@ -1,4 +1,6 @@
 ﻿using Godot;
+using Godot.Collections;
+using System.Collections;
 using System.Linq;
 
 internal partial class EnemyAttackAllowOverlapRule : ValidationRuleBase
@@ -16,12 +18,23 @@ internal partial class EnemyAttackAllowOverlapRule : ValidationRuleBase
         {
             return;
         }
-        // If the victim and attacker are on different sides, remove the enemy_overlap tag
-        // In this instance, movement should depend on this so just remove the tag from
-        // dependents.
-        if (attackAction.victim != null && attackAction.victim.teamId != piece.teamId)
+        // If it has a specific target, remove enemy_overlap as it doesn't matter
+        if (attackAction.HasSpecificVictims())
         {
-            attackAction.moveAction.RemoveInvalidTag("enemy_overlap");
+            if (HasTeamPieces(attackAction.specificVictims, piece.teamId, false))
+            {
+                attackAction.moveAction.RemoveInvalidTag("enemy_overlap");
+            }
+            return;
+        }
+
+        // Check if there is at least ONE enemy. If there is, remove the enemy_overlap tag.
+        if (game.TryGetPiecesAt(attackAction.attackLocation.X, attackAction.attackLocation.Y, out Array<Piece> victims))
+        {
+            if (HasTeamPieces(victims, piece.teamId, false))
+            {
+                attackAction.moveAction.RemoveInvalidTag("enemy_overlap");
+            }
         }
     }
 }

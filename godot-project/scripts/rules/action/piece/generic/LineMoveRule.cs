@@ -16,22 +16,27 @@ internal abstract partial class LineMoveRule : ActionRuleBase
 
         foreach (Vector2I dir in GetDirs())
         {
-            Array<ActionBase> previousActions = null;
+            ActionBase prevMove = null;
             for (int i = 1; i <= maxForward; i++)
             {
-                Array<ActionBase> newActions = Attack(piece.grid, thisPosition + (dir * i), possibleActions, moveType: AttackType.AlsoMove);
-                foreach (ActionBase newAction in newActions)
+                Vector2I actionPos = thisPosition + (dir * i);
+                AttackAction newAttack = new AttackAction(piece, actionPos, actionPos);
+                possibleActions.Add(newAttack);
+
+                MoveAction newMove = new MoveAction(piece, actionPos, actionPos);
+                newMove.tags.Add("line_move");
+                possibleActions.Add(newMove);
+
+                newMove.attackAction = newAttack;
+                newAttack.moveAction = newMove;
+                newAttack.AddDependency(newMove);
+
+                if (prevMove != null)
                 {
-                    newAction.tags.Add("line_move");
-                    if (previousActions != null)
-                    {
-                        foreach (ActionBase prevAction in previousActions)
-                        {
-                            newAction.AddDependency(prevAction);
-                        }
-                    }
+                    newMove.AddDependency(prevMove);
                 }
-                previousActions = newActions;
+
+                prevMove = newMove;
             }
         }
         return possibleActions;

@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-public abstract partial class ActionBase : GodotObject
+public abstract partial class ActionBase : GridItem
 {
-    public string id { get; internal set; }
-
+    public Piece owner { get; private set; }
     public Vector2I actionLocation;
     public bool valid { get; private set; } = true;
 
@@ -26,7 +25,7 @@ public abstract partial class ActionBase : GodotObject
     // If it's positive, it's added. If it's negative, it's removed.
     internal Dictionary<string, int> invalidTagCounts = new Dictionary<string, int>();
 
-    public ActionBase(Vector2I actionLocation)
+    public ActionBase(Piece owner, Vector2I actionLocation)
     {
         this.actionLocation = actionLocation;
     }
@@ -74,6 +73,11 @@ public abstract partial class ActionBase : GodotObject
 
     public void AddDependency(ActionBase action)
     {
+        if (action == this)
+        {
+            GD.PushError("Tried to add an Action as a dependency of itself.");
+            return;
+        }
         if (action == null || dependencies.Contains(action))
         {
             return;
@@ -109,6 +113,11 @@ public abstract partial class ActionBase : GodotObject
 
     public void AddDependent(ActionBase action)
     {
+        if (action == this)
+        {
+            GD.PushError("Tried to add an Action as a dependent of itself.");
+            return;
+        }
         if (action == null || dependents.Contains(action))
         {
             return;

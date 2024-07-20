@@ -37,6 +37,7 @@ public partial class GameController : Node
         MakeNewValidationRule("enemy_attack_allow_overlap", new EnemyAttackAllowOverlapRule(), true);
         MakeNewValidationRule("line_move_stop", new LineMoveStopRule(), true);
         MakeNewValidationRule("inside_board", new InsideBoardRule(), true);
+        MakeNewValidationRule("attack_needs_target", new AttackNeedsTargetRule(), true);
     }
     
     internal void InitActionRules()
@@ -63,7 +64,7 @@ public partial class GameController : Node
         MakeNewPieceInfo("rook", 7, "rook.png").AddActionRule(actionRuleRegistry.GetValue("rook_move"));
         MakeNewPieceInfo("knight", 4, "knight.png").AddActionRule(actionRuleRegistry.GetValue("knight_move"));
         MakeNewPieceInfo("bishop", 7, "bishop.png").AddActionRule(actionRuleRegistry.GetValue("bishop_move"));
-        MakeNewPieceInfo("queen", 7, "queen.png").AddActionRule(actionRuleRegistry.GetValue("queen_move"));
+        //MakeNewPieceInfo("queen", 7, "queen.png").AddActionRule(actionRuleRegistry.GetValue("queen_move"));
         MakeNewPieceInfo("king", 2, "king.png").AddActionRule(actionRuleRegistry.GetValue("king_move"));
     }
 

@@ -25,6 +25,8 @@ public partial class Piece : GridItem
 
     public Tags tags = new Tags();
 
+    public Array<ActionBase> currentPossibleActions { get; internal set; }
+
     [Signal]
     public delegate void InfoChangedEventHandler(PieceInfo info);
 
@@ -37,11 +39,8 @@ public partial class Piece : GridItem
             {
                 Array<ActionBase> possibleActions = pieceRule.rule.GetPossibleActions(game, this);
 
-                possibleActions = ValidateActions(game, possibleActions);
-                if (possibleActions.Count > 0)
-                {
-                    allPossibleActions.AddRange(possibleActions);
-                }
+                ValidateActions(game, possibleActions);
+                allPossibleActions.AddRange(possibleActions);
             }
         }
         return allPossibleActions;
@@ -53,14 +52,8 @@ public partial class Piece : GridItem
 
         foreach (ActionBase action in actions)
         {
-            // If it's already invalid, skip
-            if (!action.valid)
-            {
-                continue;
-            }
             foreach (ValidationRuleBase rule in info.validationRules)
             {
-                // GD.Print($"Checking {rule.GetType().Name} validation.");
                 rule.CheckAction(game, this, action);
             }
         }
@@ -68,19 +61,32 @@ public partial class Piece : GridItem
         // Check for invalid tags afterwards
         foreach (ActionBase action in actions)
         {
-            // If there are no invalid tags, then it's a valid action
+            // If there are no invalid tags, and the action is valid, then it's valid.
             if (action.invalidTags.Count == 0)
             {
-                validActions.Add(action);
+                if (action.valid)
+                {
+                    validActions.Add(action);
+                }
             }
             else
             {
-                foundInvalid = true;
                 action.MakeInvalid();
             }
         }
 
         return validActions;
+    }
+
+    public Array<ActionBase> UpdateActions(GameController game)
+    {
+        currentPossibleActions = GetPossibleActions(game);
+        return currentPossibleActions;
+    }
+
+    public void ClearActions()
+    {
+        currentPossibleActions = null;
     }
 
     public void NewTurn(GameController game)

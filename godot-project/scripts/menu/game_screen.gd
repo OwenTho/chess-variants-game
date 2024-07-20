@@ -9,7 +9,6 @@ class_name Game
 @export var highlight_scene: PackedScene
 
 var selected_piece: Piece2D
-var possible_actions: Array
 
 func _ready() -> void:
 	GameManager.has_init.connect(_on_init)
@@ -29,7 +28,6 @@ func _process(delta) -> void:
 
 func _input(event) -> void:
 	if event is InputEventMouseButton and event.is_action_pressed("mouse_left"):
-		
 		# Get the piece the player is selecting
 		var cell_pos: Vector2i = cursor.last_cell
 		
@@ -37,24 +35,20 @@ func _input(event) -> void:
 
 func remove_selection() -> void:
 	selected_piece = null
-	possible_actions = []
 	for child in action_highlights.get_children():
 		child.queue_free()
 
 func select_cell(cell_pos: Vector2i):
 	# First check if the player is selecting an action
 	var actions_to_take: Array = []
-	for action in possible_actions:
-		if action.actionLocation == cell_pos:
-			actions_to_take.append(action)
-	
-	if actions_to_take.size() > 0:
-		var acted: bool = false
-		GameManager.game_controller.RequestActionsAt(cell_pos, selected_piece.piece_data)
-		return
-	
-	# If not any of the above, check if there is a cell on the Grid
-	var cell = GameManager.grid.GetCellAt(cell_pos.x, cell_pos.y)
+	if selected_piece != null:
+		# Check if there's an action being selected
+		# If there isn't, remove selection
+		for action in selected_piece.piece_data.currentPossibleActions:
+			if action.actionLocation == cell_pos and GameManager.game_controller.IsActionValid(action, selected_piece.piece_data):
+				# If there is, act on the location and stop
+				GameManager.game_controller.RequestActionsAt(cell_pos, selected_piece.piece_data)
+				return
 	
 	# Remove existing selection before moving on	
 	remove_selection()
@@ -69,9 +63,12 @@ func select_cell(cell_pos: Vector2i):
 
 func select_item(piece: Piece2D) -> void:
 	selected_piece = piece
+	# If a piece is missing data, or missing info, then it can't
+	# be played
 	if piece.piece_data == null or piece.piece_data.info == null:
 		return
-	possible_actions = piece.piece_data.currentPossibleActions
+	var possible_actions = piece.piece_data.currentPossibleActions
+	# If the piece has no actions, then ignore it
 	if possible_actions == null:
 		return
 	
@@ -129,20 +126,23 @@ func request_action(piece_id: int, action_location: Vector2i) -> void:
 	
 	# Verify actions at that location
 	var valid_actions: bool = true
-	var actions: Array = piece.GetPossibleActions(GameManager.game_controller)
+	var possible_actions: Array = piece.currentPossibleActions
 	
 	# If there are no actions, ignore
+	if possible_actions.size() == 0:
 		return
 	
 	# Take the actions
+	if not GameManager.game_controller.TakeActionAt(action_location, piece):
+		# If it failed, return
+		return
+	
 	# Tell everyone to take the action
 	take_action_at.rpc(piece_id, action_location)
 	
 	# Go to the next turn
 	GameManager.game_controller.NextTurn()
 
-func _on_requested_action(piece_id: int, action_location: Vector2i) -> void:
-	request_action.rpc(piece_id, action_location)
 func _on_requested_action(action_location: Vector2i, piece) -> void:
 	request_action.rpc(piece.id, action_location)
 
