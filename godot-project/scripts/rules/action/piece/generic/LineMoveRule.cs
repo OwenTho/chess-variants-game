@@ -20,23 +20,10 @@ internal abstract partial class LineMoveRule : ActionRuleBase
             for (int i = 1; i <= maxForward; i++)
             {
                 Vector2I actionPos = thisPosition + (dir * i);
-                AttackAction newAttack = new AttackAction(piece, actionPos, actionPos);
-                possibleActions.Add(newAttack);
+                AttackAction newAttack = Attack(game.grid, piece, actionPos, possibleActions, AttackType.IfMove, prevMove);
+                newAttack.moveAction.tags.Add("line_move");
 
-                MoveAction newMove = new MoveAction(piece, actionPos, actionPos);
-                newMove.tags.Add("line_move");
-                possibleActions.Add(newMove);
-
-                newMove.attackAction = newAttack;
-                newAttack.moveAction = newMove;
-                newAttack.AddDependency(newMove);
-
-                if (prevMove != null)
-                {
-                    newMove.AddDependency(prevMove);
-                }
-
-                prevMove = newMove;
+                prevMove = newAttack.moveAction;
             }
         }
         return possibleActions;

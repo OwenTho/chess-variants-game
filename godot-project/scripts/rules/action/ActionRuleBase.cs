@@ -25,42 +25,37 @@ public abstract partial class ActionRuleBase : RuleBase
     }
 
     // Returns the newly created rules
-    internal Array<ActionBase> Attack(Grid grid, Piece piece, Vector2I attackLocation, Array<ActionBase> possibleActions, AttackType moveType = AttackType.NoMove, ActionBase dependentRule = null)
+    internal AttackAction Attack(Grid grid, Piece piece, Vector2I attackLocation, Array<ActionBase> possibleActions, AttackType attackType = AttackType.NoMove, ActionBase dependentRule = null)
     {
-        Array<ActionBase> newRules = new Array<ActionBase>();
         AttackAction newAttack = new AttackAction(piece, attackLocation, attackLocation);
-        if (dependentRule != null)
+        if (dependentRule != null && attackType != AttackType.IfMove)
         {
             newAttack.AddDependency(dependentRule);
         }
         possibleActions.Add(newAttack);
 
         // If Move:
-        if (moveType != AttackType.NoMove)
+        if (attackType != AttackType.NoMove)
         {
             MoveAction newMove = new MoveAction(piece, attackLocation, attackLocation);
             newAttack.moveAction = newMove;
+            newMove.attackAction = newAttack;
             possibleActions.Add(newMove);
-            if (newAttack != null)
-            {
-                newAttack.moveAction = newMove;
-            }
             // If AndMove, add dependency for the attack
-            if (moveType == AttackType.MoveIf)
+            if (attackType == AttackType.MoveIf)
             {
                 newMove.AddDependency(newAttack);
             }
-            if (moveType == AttackType.IfMove)
+            if (attackType == AttackType.IfMove)
             {
                 newAttack.AddDependency(newMove);
             }
-            if (dependentRule != null)
+            if (dependentRule != null && attackType != AttackType.MoveIf)
             {
                 newMove.AddDependency(dependentRule);
             }
-            newRules.Add(newMove);
         }
-        return newRules;
+        return newAttack;
     }
     
     public virtual void NewTurn(GameController game, Piece piece)

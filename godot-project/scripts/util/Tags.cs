@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 
 // GodotObject wrapper for a string HashSet, so that it can be used in GDScript if needed.
-public partial class Tags : GodotObject
+public partial class Tags
 {
     private HashSet<string> tags = new HashSet<string>();
     public int Count { get { return tags.Count; } }
