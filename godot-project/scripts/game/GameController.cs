@@ -348,24 +348,26 @@ public partial class GameController : Node
 
             foreach (ActionBase action in piece.currentPossibleActions)
             {
-                if (action is MoveAction)
+                if (action is not MoveAction)
                 {
-                    MoveAction moveAction = (MoveAction)action;
-                    foreach (GridItem item in moveAction.cell.items)
+                    continue;
+                }
+                MoveAction moveAction = (MoveAction)action;
+                foreach (GridItem item in moveAction.cell.items)
+                {
+                    if (item is not AttackAction)
                     {
-                        if (item is AttackAction)
-                        {
-                            // Ignore actions that can't check
-                            AttackAction attackAction = (AttackAction)item;
-                            if (attackAction.tags.Contains("no_check"))
-                            {
-                                continue;
-                            }
-                            if (attackAction.owner.teamId != piece.teamId)
-                            {
-                                moveAction.MakeInvalid();
-                            }
-                        }
+                        continue;
+                    }
+                    // Ignore actions that can't check
+                    AttackAction attackAction = (AttackAction)item;
+                    if (attackAction.tags.Contains("no_check"))
+                    {
+                        continue;
+                    }
+                    if (attackAction.owner.teamId != piece.teamId)
+                    {
+                        moveAction.MakeInvalid();
                     }
                 }
             }
