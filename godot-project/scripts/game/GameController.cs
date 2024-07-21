@@ -320,48 +320,55 @@ public partial class GameController : Node
                 // GD.Print($"\t{action.GetType().Name}({action.actionLocation.X}, {action.actionLocation.Y}) - {action.valid}");
                 grid.PlaceItemAt(action, action.actionLocation.X, action.actionLocation.Y);
             }
+            piece.NewTurn(this);
+        }
+
+        // Repeat again, to disable certain check moves
+        foreach (Piece piece in allPieces)
+        {
             // If it's the king, disable any attacks on it and stop it from moving into
             // a space with check
-            if (piece.info.pieceId == king_id)
+            if (piece.info.pieceId != king_id)
             {
-                foreach (GridItem item in piece.cell.items)
+                continue;
+            }
+
+            foreach (GridItem item in piece.cell.items)
+            {
+                if (item is AttackAction)
                 {
-                    if (item is AttackAction)
+                    AttackAction attackAction = (AttackAction)item;
+                    attackAction.MakeInvalid();
+                    if (attackAction.moveAction != null)
                     {
-                        AttackAction attackAction = (AttackAction)item;
-                        attackAction.MakeInvalid();
-                        if (attackAction.moveAction != null)
-                        {
-                            attackAction.moveAction.MakeInvalid();
-                        }
+                        attackAction.moveAction.MakeInvalid();
                     }
                 }
+            }
 
-                foreach (ActionBase action in piece.currentPossibleActions)
+            foreach (ActionBase action in piece.currentPossibleActions)
+            {
+                if (action is MoveAction)
                 {
-                    if (action is MoveAction)
+                    MoveAction moveAction = (MoveAction)action;
+                    foreach (GridItem item in moveAction.cell.items)
                     {
-                        MoveAction moveAction = (MoveAction)action;
-                        foreach (GridItem item in moveAction.cell.items)
+                        if (item is AttackAction)
                         {
-                            if (item is AttackAction)
+                            // Ignore actions that can't check
+                            AttackAction attackAction = (AttackAction)item;
+                            if (attackAction.tags.Contains("no_check"))
                             {
-                                // Ignore actions that can't check
-                                AttackAction attackAction = (AttackAction)item;
-                                if (attackAction.tags.Contains("no_check"))
-                                {
-                                    continue;
-                                }
-                                if (attackAction.owner.teamId != piece.teamId)
-                                {
-                                    moveAction.MakeInvalid();
-                                }
+                                continue;
+                            }
+                            if (attackAction.owner.teamId != piece.teamId)
+                            {
+                                moveAction.MakeInvalid();
                             }
                         }
                     }
                 }
             }
-            piece.NewTurn(this);
         }
     }
 
