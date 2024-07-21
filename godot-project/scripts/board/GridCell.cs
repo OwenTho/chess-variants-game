@@ -1,24 +1,24 @@
 ﻿using Godot;
 using Godot.Collections;
 
-public partial class GridCell: GodotObject
+public partial class GridCell<[MustBeVariant] T>: Node where T : GridItem
 {
     internal int x;
     internal int y;
 
     public Vector2I pos { get { return new Vector2I(x, y); } }
 
-    private Grid _grid;
-    public Grid grid { get { return _grid; } internal set
+    private Grid<T> _grid;
+    public Grid<T> grid { get { return _grid; } internal set
         {
             _grid = value;
-            foreach (GridItem item in items)
+            foreach (T item in items)
             {
-                item.grid = value;
+                item.grid = value as Grid<GridItem>;
             }
         }
     }
-    public Array<GridItem> items { get; internal set; } = new Array<GridItem>();
+    public Array<T> items { get; internal set; } = new Array<T>();
 
     public void SetPos(int x, int y)
     {
@@ -28,13 +28,13 @@ public partial class GridCell: GodotObject
         this.x = x;
         this.y = y;
         // Update all items, as they have "moved" from one cell to another
-        foreach (GridItem item in items)
+        foreach (T item in items)
         {
-            item.cell = this;
+            item.cell = this as GridCell<GridItem>;
         }
     }
 
-    public bool HasItem(GridItem item)
+    public bool HasItem(T item)
     {
         return items.Contains(item);
     }
@@ -46,7 +46,7 @@ public partial class GridCell: GodotObject
 
 
 
-    public bool AddItem(GridItem item)
+    public bool AddItem(T item)
     {
         // If item already has a cell, and it's not this one,
         // then remove it from that cell.
@@ -59,12 +59,13 @@ public partial class GridCell: GodotObject
             return false;
         }
         items.Add(item);
-        item.cell = this;
-        item.grid = grid;
+        AddChild(item);
+        item.cell = this as GridCell<GridItem>;
+        item.grid = grid as Grid<GridItem>;
         return true;
     }
 
-    public GridItem GetItem(int index)
+    public T GetItem(int index)
     {
         return items[index];
     }
@@ -80,26 +81,27 @@ public partial class GridCell: GodotObject
         return false;
     }
 
-    internal bool RemoveItem(GridItem item, bool updateItem)
+    internal bool RemoveItem(T item, bool updateItem)
     {
         if (!items.Remove(item))
         {
             return false;
         }
+        RemoveChild(item);
         if (updateItem)
         {
             item.cell = null;
             item.grid = null;
         }
         // If this cell has no more items, remove it from the grid
-        if (ItemCount() == 0)
+        if (grid != null && ItemCount() == 0)
         {
             grid.RemoveCell(this);
         }
         return true;
     }
 
-    public bool RemoveItem(GridItem item)
+    public bool RemoveItem(T item)
     {
         return RemoveItem(item, true);
     }
@@ -107,5 +109,11 @@ public partial class GridCell: GodotObject
     internal void RemoveFromGrid()
     {
         grid = null;
+        // Remove all items, too.
+        foreach (var item in items)
+        {
+            RemoveItem(item);
+        }
     }
+    
 }

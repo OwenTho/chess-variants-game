@@ -7,7 +7,7 @@
 
 [sub_resource type="Theme" id="Theme_e6x1w"]
 default_font = SubResource("SystemFont_3h7uj")
-default_font_size = 30
+default_font_size = 13
 
 [node name="DebugOverlay" type="Control"]
 layout_mode = 3

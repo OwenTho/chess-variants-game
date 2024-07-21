@@ -1,14 +1,14 @@
 using Godot;
 using Godot.Collections;
 
-public partial class Grid : GodotObject
+public partial class Grid<[MustBeVariant] T> : Node where T : GridItem
 {
-    public Array<GridCell> cells = new Array<GridCell>();
+    public Array<GridCell<T>> cells = new Array<GridCell<T>>();
 
     // Get a cell at a specific location
-    public GridCell GetCellAt(int x, int y)
+    public GridCell<T> GetCellAt(int x, int y)
     {
-        foreach (GridCell cell in cells)
+        foreach (GridCell<T> cell in cells)
         {
             if (cell.x == x && cell.y == y)
             {
@@ -18,21 +18,21 @@ public partial class Grid : GodotObject
         return null;
     }
 
-    public bool TryGetCellAt(int x, int y, out GridCell cell)
+    public bool TryGetCellAt(int x, int y, out GridCell<T> cell)
     {
         cell = GetCellAt(x, y);
         return cell != null;
     }
 
     // Get a cell by the item held in it
-    public GridCell GetCellByItem(GridItem item)
+    public GridCell<T> GetCellByItem(T item)
     {
         if (item == null)
         {
             return null;
         }
 
-        foreach (GridCell cell in cells)
+        foreach (GridCell<T> cell in cells)
         {
             if (cell.HasItem(item))
             {
@@ -44,7 +44,7 @@ public partial class Grid : GodotObject
 
 
     // Check if this grid holds a certain cell
-    public bool HasCell(GridCell cell)
+    public bool HasCell(GridCell<T> cell)
     {
         if (cell == null)
         {
@@ -60,7 +60,7 @@ public partial class Grid : GodotObject
         return GetCellAt(x, y) != null;
     }
 
-    public bool RemoveCell(GridCell cell)
+    public bool RemoveCell(GridCell<T> cell)
     {
         // Only remove if it's on this grid
         if (cell == null || cell.grid != this)
@@ -68,12 +68,16 @@ public partial class Grid : GodotObject
             return false;
         }
         cell.RemoveFromGrid();
+        // If cell is removed, free it. This is because only
+        // the Grid should use GridCell, so if it's removed then
+        // it should be removed from memory.
+        cell.QueueFree();
         return cells.Remove(cell);
     }
 
     public bool RemoveCellAt(int x, int y)
     {
-        if (TryGetCellAt(x, y, out GridCell cell))
+        if (TryGetCellAt(x, y, out GridCell<T> cell))
         {
             RemoveCell(cell);
             return true;
@@ -86,15 +90,15 @@ public partial class Grid : GodotObject
         return cells.Count;
     }
 
-    public bool HasItem(GridItem item)
+    public bool HasItem(T item)
     {
         // Only continue if the item is on this grid
-        if (item == null || item.grid != this)
+        if (item == null || ReferenceEquals(item.grid, this))
         {
             return false;
         }
         
-        foreach (GridCell cell in cells)
+        foreach (GridCell<T> cell in cells)
         {
             if (cell.HasItem(item))
             {
@@ -104,15 +108,15 @@ public partial class Grid : GodotObject
         return false;
     }
 
-    public bool RemoveItem(GridItem item)
+    public bool RemoveItem(T item)
     {
         // Only continue if the item is on this grid
-        if (item == null || item.grid != this)
+        if (item == null || !ReferenceEquals(item.grid, this))
         {
             return false;
         }
 
-        foreach(GridCell cell in cells)
+        foreach (GridCell<T> cell in cells)
         {
             if (cell.HasItem(item))
             {
@@ -123,29 +127,30 @@ public partial class Grid : GodotObject
         return false;
     }
 
-    internal GridCell NewCellAt(int x, int y)
+    private GridCell<T> NewCellAt(int x, int y)
     {
-        GridCell newCell = new GridCell();
+        GridCell<T> newCell = new GridCell<T>();
         newCell.SetPos(x, y);
         newCell.grid = this;
         cells.Add(newCell);
+        AddChild(newCell);
         return newCell;
     }
 
-    public GridCell MakeCellAt(int x, int y)
+    public GridCell<T> MakeNewCellAt(int x, int y)
     {
         // Remove any previous cell on this spot
-        if (TryGetCellAt(x, y, out GridCell cell))
+        if (TryGetCellAt(x, y, out GridCell<T> cell))
         {
             RemoveCell(cell);
         }
         return NewCellAt(x, y);
     }
 
-    public GridCell MakeOrGetCellAt(int x, int y)
+    public GridCell<T> MakeOrGetCellAt(int x, int y)
     {
         // Return a cell if it's already there
-        if (TryGetCellAt(x, y, out GridCell cell))
+        if (TryGetCellAt(x, y, out GridCell<T> cell))
         {
             return cell;
         }
@@ -153,7 +158,7 @@ public partial class Grid : GodotObject
     }
 
     
-    public GridCell PlaceItemAt(GridItem item, int x, int y)
+    public GridCell<T> PlaceItemAt(T item, int x, int y)
     {
         // Ignore if item is null
         if (item == null)
@@ -162,16 +167,16 @@ public partial class Grid : GodotObject
         }
 
         // If a cell already exists, then...
-        if (TryGetCellAt(x, y, out GridCell cell))
+        if (TryGetCellAt(x, y, out GridCell<T> cell))
         {
             // Check if the item is already on this cell
-            if (cell == item.cell)
+            if (ReferenceEquals(cell, item.cell))
             {
                 return cell;
             }
 
             // If the item is on another grid, remove it from that grid
-            if (item.grid != this && item.grid != null)
+            if (item.grid != null && !ReferenceEquals(item.grid, this))
             {
                 item.grid.RemoveItem(item);
             }
@@ -182,30 +187,30 @@ public partial class Grid : GodotObject
 
         // If there isn't a cell there, then move the cell the item is in
         // (if it is in on) if it's already on this grid.
-        if (item.grid == this && item.cell != null)
+        if (ReferenceEquals(item.grid, this) && item.cell != null)
         {
             // However, only move if it's the only item on this GridCell
             if (item.cell.ItemCount() == 1)
             {
                 item.cell.SetPos(x, y);
-                return item.cell;
+                return item.cell as GridCell<T>;
             }
         }
 
         // If it's on another grid, remove it.
-        if (item.grid != null && item.grid != this)
+        if (item.grid != null && !ReferenceEquals(item.grid, this))
         {
             item.grid.RemoveItem(item);
         }
 
         // If none of the above puts the item onto a cell,
         // make a new cell for the item.
-        GridCell newCell = MakeCellAt(x, y);
+        GridCell<T> newCell = MakeNewCellAt(x, y);
         newCell.AddItem(item);
         return newCell;
     }
 
-    public void SwapCells(GridCell cell1, GridCell cell2)
+    public void SwapCells(GridCell<T> cell1, GridCell<T> cell2)
     {
         // If either is null, then remove both from the grid.
         // It's swapping a game with nothing.
@@ -217,7 +222,7 @@ public partial class Grid : GodotObject
         }
 
         // If either cell is on another grid, throw an error.
-        if ((cell1 != null && cell1.grid != this) || (cell2 != null && cell2.grid != this))
+        if (cell1.grid != this || cell2.grid != this)
         {
             GD.PushError("Cells should be on this grid if non-null.");
             return;
@@ -236,8 +241,8 @@ public partial class Grid : GodotObject
         {
             return;
         }
-        GridCell cell1 = GetCellAt(x1, y1);
-        GridCell cell2 = GetCellAt(x2, y2);
+        GridCell<T> cell1 = GetCellAt(x1, y1);
+        GridCell<T> cell2 = GetCellAt(x2, y2);
 
         // If both the same, ignore. This accounts for 2 nulls.
         if (cell1 == cell2)
@@ -247,4 +252,5 @@ public partial class Grid : GodotObject
 
         SwapCells(cell1, cell2);
     }
+    
 }

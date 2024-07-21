@@ -3,7 +3,6 @@ using Godot.Collections;
 
 internal partial class QueenMoveRule : LineMoveRule
 {
-
     internal override Vector2I[] GetDirs()
     {
         return new Vector2I[] {

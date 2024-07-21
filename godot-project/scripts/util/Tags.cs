@@ -36,7 +36,6 @@ public partial class Tags
         string text = "{ ";
 
         int toGet = tags.Count;
-        int cur = 0;
         foreach (string tag in tags)
         {
             text += $"{tag}, ";

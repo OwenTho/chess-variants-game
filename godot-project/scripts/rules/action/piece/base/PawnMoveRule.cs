@@ -38,11 +38,13 @@ internal partial class PawnMoveRule : ActionRuleBase
 
         /// Attacking
         // Attacking is possible at diagonals
+        MoveAction prevRight = null;
+        MoveAction prevLeft = null;
         for (int i = 1; i <= maxForward; i++)
         {
             // TODO: Does not currently add dependencies to the previous attack (so pawn can jump over pieces at higher levels)
-            Attack(piece.grid, piece, thisPosition + ((piece.forwardDirection + Vector2I.Right) * i), possibleActions, AttackType.MoveIf);
-            Attack(piece.grid, piece, thisPosition + ((piece.forwardDirection + Vector2I.Left) * i), possibleActions, AttackType.MoveIf);
+            prevRight = Attack(piece.grid, piece, thisPosition + ((piece.forwardDirection + Vector2I.Right) * i), possibleActions, AttackType.MoveIf, prevRight).moveAction;
+            prevLeft = Attack(piece.grid, piece, thisPosition + ((piece.forwardDirection + Vector2I.Left) * i), possibleActions, AttackType.MoveIf, prevLeft).moveAction;
         }
 
         // If next to a piece that moved twice, allow En passant

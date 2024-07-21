@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-internal partial class Registry<T> : GodotObject
+internal partial class Registry<T> : Node where T : Node
 {
     private List<T> allRegistered = new List<T>();
     private Dictionary<string, T> register = new Dictionary<string, T>();
@@ -17,6 +17,7 @@ internal partial class Registry<T> : GodotObject
         }
         register.Add(key, value);
         allRegistered.Add(value);
+        AddChild(value);
     }
 
     public bool TryGetValue(string key, out T value)

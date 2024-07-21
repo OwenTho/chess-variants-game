@@ -86,6 +86,16 @@ public partial class Piece : GridItem
 
     public void ClearActions()
     {
+        // If it's null, it's already cleared
+        if (currentPossibleActions == null)
+        {
+            return;
+        }
+        // Go through all actions and free them
+        foreach (var action in currentPossibleActions)
+        {
+            action.QueueFree();
+        }
         currentPossibleActions = null;
     }
 

@@ -16,11 +16,16 @@ public partial class GameController : Node
         InitValidationRules();
         InitActionRules();
         InitPieceInfo();
+
+        AddChild(pieceInfoRegistry);
+        AddChild(actionRuleRegistry);
+        AddChild(validationRuleRegistry);
     }
 
-    public Grid InitGrid()
+    public Grid<GridItem> InitGrid()
     {
-        grid = new Grid();
+        grid = new Grid<GridItem>();
+        AddChild(grid);
         return grid;
     }
 
@@ -86,7 +91,7 @@ public partial class GameController : Node
         GD.Print($"Made new Action Rule: {id}");
     }
 
-    private PieceInfo MakeNewPieceInfo(string id, int initialLevel, string textureLocation = "pawn.png")
+    private PieceInfo MakeNewPieceInfo(string id, int initialLevel, string textureLocation = "default.png")
     {
         PieceInfo newInfo = new PieceInfo(id, initialLevel);
 

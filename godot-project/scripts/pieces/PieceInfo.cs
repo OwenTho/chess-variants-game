@@ -1,7 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 
-public partial class PieceInfo : GodotObject
+public partial class PieceInfo : Node
 {
     internal List<PieceRule> rules;
     internal List<ValidationRuleBase> validationRules;

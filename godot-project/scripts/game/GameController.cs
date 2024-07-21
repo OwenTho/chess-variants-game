@@ -6,7 +6,7 @@ using System.Reflection.PortableExecutable;
 
 public partial class GameController : Node
 {
-    public Grid grid { get; private set; }
+    public Grid<GridItem> grid { get; private set; }
 
     public Vector2I gridSize = new Vector2I(8, 8);
 
@@ -51,7 +51,6 @@ public partial class GameController : Node
             newPiece.id = lastId;
             lastId += 1;
         }
-        lastId += 1;
         newPiece.linkId = linkId;
         newPiece.teamId = teamId;
 
@@ -87,6 +86,9 @@ public partial class GameController : Node
 
         // Remove from allPieces
         allPieces.Remove(piece);
+
+        // Free the piece
+        piece.QueueFree();
 
         // Emit signal
         EmitSignal(SignalName.PieceRemoved, piece);
@@ -161,7 +163,7 @@ public partial class GameController : Node
 
     public Piece GetFirstPieceAt(int x, int y)
     {
-        if (grid.TryGetCellAt(x, y, out GridCell cell)) {
+        if (grid.TryGetCellAt(x, y, out GridCell<GridItem> cell)) {
             foreach (GridItem item in cell.items)
             {
                 if (item is Piece)
@@ -181,7 +183,7 @@ public partial class GameController : Node
 
     public bool HasPieceAt(int x, int y)
     {
-        if (grid.TryGetCellAt(x, y, out GridCell cell))
+        if (grid.TryGetCellAt(x, y, out GridCell<GridItem> cell))
         {
             foreach (GridItem item in cell.items)
             {
@@ -196,7 +198,7 @@ public partial class GameController : Node
 
     public bool HasPieceIdAt(string pieceId, int x, int y)
     {
-        if (grid.TryGetCellAt(x, y, out GridCell cell))
+        if (grid.TryGetCellAt(x, y, out GridCell<GridItem> cell))
         {
             foreach (GridItem item in cell.items)
             {
@@ -222,7 +224,7 @@ public partial class GameController : Node
     public Array<Piece> GetPiecesAt(int x, int y)
     {
         Array<Piece> pieces = new Array<Piece>();
-        if (grid.TryGetCellAt(x, y, out GridCell cell))
+        if (grid.TryGetCellAt(x, y, out GridCell<GridItem> cell))
         {
             foreach (GridItem item in cell.items)
             {
@@ -247,7 +249,7 @@ public partial class GameController : Node
         {
             return false;
         }
-        
+
         action.ActOn(this, piece);
         return true;
     }
@@ -260,13 +262,14 @@ public partial class GameController : Node
         {
             return false;
         }
-
+        
+        bool didAct = false;
         // Loop through all actions, and find the ones at x, y.
         foreach (ActionBase action in possibleActions)
         {
             if (action.actionLocation == actionLocation)
             {
-                TakeAction(action, piece);
+                didAct |= TakeAction(action, piece);
             }
         }
         return true;
@@ -382,7 +385,6 @@ public partial class GameController : Node
                     action.cell.RemoveItem(action);
                 }
             }
-
             piece.ClearActions();
             piece.EndTurn(this);
         }

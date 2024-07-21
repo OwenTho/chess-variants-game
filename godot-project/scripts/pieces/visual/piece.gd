@@ -11,8 +11,6 @@ func _ready() -> void:
 func _on_move(new_cell) -> void:
 	if new_cell != null:
 		set_pos(new_cell.x, new_cell.y)
-	else:
-		queue_free()
 
 func update_pos() -> void:
 	set_pos(piece_data.cell.x, piece_data.cell.y)

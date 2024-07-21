@@ -25,7 +25,7 @@ public abstract partial class ActionRuleBase : RuleBase
     }
 
     // Returns the newly created rules
-    internal AttackAction Attack(Grid grid, Piece piece, Vector2I attackLocation, Array<ActionBase> possibleActions, AttackType attackType = AttackType.NoMove, ActionBase dependentRule = null)
+    internal AttackAction Attack(Grid<GridItem> grid, Piece piece, Vector2I attackLocation, Array<ActionBase> possibleActions, AttackType attackType = AttackType.NoMove, ActionBase dependentRule = null)
     {
         AttackAction newAttack = new AttackAction(piece, attackLocation, attackLocation);
         if (dependentRule != null && attackType != AttackType.IfMove)

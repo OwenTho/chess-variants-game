@@ -22,6 +22,7 @@ func _on_server_disconnect():
 func reset_game():
 	if game != null:
 		game.close_game()
+		game_controller.queue_free()
 	board = null
 	game = null
 	# game.queue_free()
@@ -41,6 +42,7 @@ func init() -> void:
 	
 	# Initialise the game controller
 	game_controller = game_controller_script.new()
+	add_child(game_controller)
 	
 	setup_signals()
 	
@@ -54,19 +56,7 @@ func setup_signals():
 	game_controller.NewTurn.connect(game._on_next_turn)
 	game_controller.EndTurn.connect(game._on_end_turn)
 	game_controller.RequestedActionAt.connect(game._on_requested_action)
-
-func setup_game(new_board: Board2D) -> void:
-	board = new_board
-	
-	# First, make a new GameController
-	game_controller = game_controller_script.new()
-	
-	# Initialise the game
-	game_controller.FullInit()
-	self.grid = game_controller.grid
-	
-	# Load the game scene
-	init_board()
+	game_controller.PieceRemoved.connect(game._on_piece_taken)
 	
 
 func start_game():
@@ -134,7 +124,7 @@ func place_piece(piece_id: String, link_id: int, team: int, x: int, y: int, id: 
 	new_piece.piece_data = new_piece_data
 	new_piece.board = board
 	
-	new_piece.add_child(new_piece_data)
+	# new_piece.add_child(new_piece_data)
 	
 	# Update the position and sprite
 	new_piece.update_pos()
@@ -150,6 +140,10 @@ func place_matching(piece_id: String, id: int, x: int, y: int) -> void:
 	place_piece(piece_id, id, 0, x, y)
 	place_piece(piece_id, id, 1, x, game_controller.gridSize.y - y - 1)
 
-
+func get_piece_id(id: int) -> Piece2D:
+	for piece in get_tree().get_nodes_in_group("piece"):
+		if piece.piece_data.id == id:
+			return piece
+	return null
 
 
