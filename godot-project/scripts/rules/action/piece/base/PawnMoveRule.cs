@@ -72,7 +72,7 @@ internal partial class PawnMoveRule : ActionRuleBase
         }
     }
 
-    public override void NewTurn(GameController game, Piece piece)
+    public override void EndTurn(GameController game, Piece piece)
     {
         piece.tags.Remove("pawn_initial");
         if (piece.tags.Contains("setup_pawn_initial"))
