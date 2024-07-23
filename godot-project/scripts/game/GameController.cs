@@ -90,6 +90,13 @@ public partial class GameController : Node
         // Free the piece
         piece.QueueFree();
 
+        // Remove the actions from the grid
+        foreach (ActionBase action in piece.currentPossibleActions)
+        {
+            action.QueueFree();
+            action.cell.RemoveItem(action);
+        }
+
         // Emit signal
         EmitSignal(SignalName.PieceRemoved, piece);
     }
