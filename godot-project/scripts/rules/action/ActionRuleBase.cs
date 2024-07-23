@@ -9,12 +9,7 @@ using System.Threading.Tasks;
 
 public abstract partial class ActionRuleBase : RuleBase
 {
-    public abstract Array<ActionBase> AddPossibleActions(GameController game, Piece piece, Array<ActionBase> possibleActions);
-
-    public Array<ActionBase> GetPossibleActions(GameController game, Piece piece)
-    {
-        return AddPossibleActions(game, piece, new Array<ActionBase>());
-    }
+    public abstract void AddPossibleActions(GameController game, Piece piece);
 
     public enum AttackType
     {
@@ -25,22 +20,22 @@ public abstract partial class ActionRuleBase : RuleBase
     }
 
     // Returns the newly created rules
-    internal AttackAction Attack(Grid<GridItem> grid, Piece piece, Vector2I attackLocation, Array<ActionBase> possibleActions, AttackType attackType = AttackType.NoMove, ActionBase dependentRule = null)
+    internal AttackAction Attack(Piece attacker, Vector2I attackLocation, AttackType attackType = AttackType.NoMove, ActionBase dependentRule = null)
     {
-        AttackAction newAttack = new AttackAction(piece, attackLocation, attackLocation);
+        AttackAction newAttack = new AttackAction(attacker, attackLocation, attackLocation);
         if (dependentRule != null && attackType != AttackType.IfMove)
         {
             newAttack.AddDependency(dependentRule);
         }
-        possibleActions.Add(newAttack);
+        attacker.AddAction(newAttack);
 
         // If Move:
         if (attackType != AttackType.NoMove)
         {
-            MoveAction newMove = new MoveAction(piece, attackLocation, attackLocation);
+            MoveAction newMove = new MoveAction(attacker, attackLocation, attackLocation);
             newAttack.moveAction = newMove;
             newMove.attackAction = newAttack;
-            possibleActions.Add(newMove);
+            attacker.AddAction(newMove);
             // If AndMove, add dependency for the attack
             if (attackType == AttackType.MoveIf)
             {

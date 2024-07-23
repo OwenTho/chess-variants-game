@@ -25,25 +25,71 @@ public partial class Piece : GridItem
 
     public Tags tags = new Tags();
 
-    public Array<ActionBase> currentPossibleActions { get; internal set; }
 
     [Signal]
     public delegate void InfoChangedEventHandler(PieceInfo info);
 
-    public Array<ActionBase> GetPossibleActions(GameController game)
+    private class ActionsToTake
     {
-        Array<ActionBase> allPossibleActions = new Array<ActionBase>();
+        internal Array<ActionBase> possibleActions;
+        internal ActionsToTake()
+        {
+            possibleActions = new Array<ActionBase>();
+        }
+
+        internal void Add(ActionBase action)
+        {
+            possibleActions.Add(action);
+        }
+
+        internal void Clear()
+        {
+            possibleActions.Clear();
+        }
+    }
+
+    private ActionsToTake actionsToTake = new ActionsToTake();
+
+    public Array<ActionBase> currentPossibleActions
+    {
+        get { return actionsToTake.possibleActions; }
+    }
+
+    public Array<ActionBase> UpdateActions(GameController game)
+    {
+        actionsToTake.Clear();
+        // Loop through the rules and add all of the possible actions
         foreach (PieceRule pieceRule in info.rules)
         {
             if (pieceRule.isEnabled)
             {
-                Array<ActionBase> possibleActions = pieceRule.rule.GetPossibleActions(game, this);
-
-                ValidateActions(game, possibleActions);
-                allPossibleActions.AddRange(possibleActions);
+                pieceRule.rule.AddPossibleActions(game, this);
             }
         }
-        return allPossibleActions;
+        // Validate all actions
+        VerifyMyActions(game);
+        return actionsToTake.possibleActions;
+    }
+
+    public Array<ActionBase> GetPossibleActions(GameController game)
+    {
+        // Store the current actions, and make a new list
+        Array<ActionBase> temp = actionsToTake.possibleActions;
+        actionsToTake.possibleActions = new Array<ActionBase>();
+        // Update the list and store it, returning the new values
+        Array<ActionBase> returnArray = UpdateActions(game);
+        actionsToTake.possibleActions = temp;
+        return returnArray;
+    }
+
+    public void AddAction(ActionBase action)
+    {
+        actionsToTake.Add(action);
+    }
+
+    private Array<ActionBase> VerifyMyActions(GameController game)
+    {
+        return ValidateActions(game, actionsToTake.possibleActions);
     }
 
     public Array<ActionBase> ValidateActions(GameController game, Array<ActionBase> actions)
@@ -78,12 +124,6 @@ public partial class Piece : GridItem
         return validActions;
     }
 
-    public Array<ActionBase> UpdateActions(GameController game)
-    {
-        currentPossibleActions = GetPossibleActions(game);
-        return currentPossibleActions;
-    }
-
     public void ClearActions()
     {
         // If it's null, it's already cleared
@@ -96,7 +136,8 @@ public partial class Piece : GridItem
         {
             action.QueueFree();
         }
-        currentPossibleActions = null;
+        // Clear the list
+        actionsToTake.Clear();
     }
 
     public void NewTurn(GameController game)

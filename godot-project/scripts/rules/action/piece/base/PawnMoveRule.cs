@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 internal partial class PawnMoveRule : ActionRuleBase
 {
-    public override Array<ActionBase> AddPossibleActions(GameController game, Piece piece, Array<ActionBase> possibleActions)
+    public override void AddPossibleActions(GameController game, Piece piece)
     {
         /// Movement
         // Allow moving forward a number of spaces
@@ -19,7 +19,7 @@ internal partial class PawnMoveRule : ActionRuleBase
             {
                 newMove.AddDependency(lastMove);
             }
-            possibleActions.Add(newMove);
+            piece.AddAction(newMove);
             lastMove = newMove;
         }
 
@@ -33,7 +33,7 @@ internal partial class PawnMoveRule : ActionRuleBase
                 newMove.AddDependency(lastMove);
             }
             // The action is unique, due to needing to allow En passant
-            possibleActions.Add(newMove);
+            piece.AddAction(newMove);
         }
 
         /// Attacking
@@ -42,18 +42,16 @@ internal partial class PawnMoveRule : ActionRuleBase
         MoveAction prevLeft = null;
         for (int i = 1; i <= maxForward; i++)
         {
-            // TODO: Does not currently add dependencies to the previous attack (so pawn can jump over pieces at higher levels)
-            prevRight = Attack(piece.grid, piece, thisPosition + ((piece.forwardDirection + Vector2I.Right) * i), possibleActions, AttackType.MoveIf, prevRight).moveAction;
-            prevLeft = Attack(piece.grid, piece, thisPosition + ((piece.forwardDirection + Vector2I.Left) * i), possibleActions, AttackType.MoveIf, prevLeft).moveAction;
+            prevRight = Attack(piece, thisPosition + ((piece.forwardDirection + Vector2I.Right) * i), AttackType.MoveIf, prevRight).moveAction;
+            prevLeft = Attack(piece, thisPosition + ((piece.forwardDirection + Vector2I.Left) * i), AttackType.MoveIf, prevLeft).moveAction;
         }
 
         // If next to a piece that moved twice, allow En passant
-        CheckEnPassant(game, piece, thisPosition + Vector2I.Left, possibleActions);
-        CheckEnPassant(game, piece, thisPosition + Vector2I.Right, possibleActions);
-        return possibleActions;
+        CheckEnPassant(game, piece, thisPosition + Vector2I.Left);
+        CheckEnPassant(game, piece, thisPosition + Vector2I.Right);
     }
 
-    private void CheckEnPassant(GameController game, Piece piece, Vector2I position, Array<ActionBase> possibleActions)
+    private void CheckEnPassant(GameController game, Piece piece, Vector2I position)
     {
         if (game.TryGetPiecesAt(position.X, position.Y, out Array<Piece> pieces))
         {
@@ -64,11 +62,11 @@ internal partial class PawnMoveRule : ActionRuleBase
                     Vector2I attackPos = position + piece.forwardDirection;
                     AttackAction newAttack = new AttackAction(piece, attackPos, attackPos);
                     newAttack.AddVictim(victim);
-                    possibleActions.Add(newAttack);
+                    piece.AddAction(newAttack);
 
                     MoveAction newMove = new MoveAction(piece, attackPos, attackPos);
                     newMove.AddDependency(newAttack);
-                    possibleActions.Add(newMove);
+                    piece.AddAction(newMove);
                 }
             }
         }

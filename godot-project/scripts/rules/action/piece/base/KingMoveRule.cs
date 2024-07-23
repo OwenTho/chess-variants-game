@@ -4,19 +4,18 @@ using Godot.Collections;
 
 internal partial class KingMoveRule : ActionRuleBase
 {
-    public override Array<ActionBase> AddPossibleActions(GameController game, Piece piece, Array<ActionBase> possibleActions)
+    public override void AddPossibleActions(GameController game, Piece piece)
     {
         Vector2I thisPosition = piece.cell.pos;
-        Attack(piece.grid, piece, thisPosition + Vector2I.Down + Vector2I.Left, possibleActions, AttackType.IfMove); // Up Left
-        Attack(piece.grid, piece, thisPosition + Vector2I.Down, possibleActions, AttackType.IfMove); // Up
-        Attack(piece.grid, piece, thisPosition + Vector2I.Down + Vector2I.Right, possibleActions, AttackType.IfMove); // Up Right
+        Attack(piece, thisPosition + Vector2I.Down + Vector2I.Left, AttackType.IfMove); // Up Left
+        Attack(piece, thisPosition + Vector2I.Down, AttackType.IfMove); // Up
+        Attack(piece, thisPosition + Vector2I.Down + Vector2I.Right, AttackType.IfMove); // Up Right
 
-        Attack(piece.grid, piece, thisPosition + Vector2I.Left, possibleActions, AttackType.IfMove); // Left
-        Attack(piece.grid, piece, thisPosition + Vector2I.Right, possibleActions, AttackType.IfMove); // Right
+        Attack(piece, thisPosition + Vector2I.Left, AttackType.IfMove); // Left
+        Attack(piece, thisPosition + Vector2I.Right, AttackType.IfMove); // Right
 
-        Attack(piece.grid, piece, thisPosition + Vector2I.Up + Vector2I.Left, possibleActions, AttackType.IfMove); // Down Left
-        Attack(piece.grid, piece, thisPosition + Vector2I.Up, possibleActions, AttackType.IfMove); // Down
-        Attack(piece.grid, piece, thisPosition + Vector2I.Up + Vector2I.Right, possibleActions, AttackType.IfMove); // Down Right
-        return possibleActions;
+        Attack(piece, thisPosition + Vector2I.Up + Vector2I.Left, AttackType.IfMove); // Down Left
+        Attack(piece, thisPosition + Vector2I.Up, AttackType.IfMove); // Down
+        Attack(piece, thisPosition + Vector2I.Up + Vector2I.Right, AttackType.IfMove); // Down Right
     }
 }
