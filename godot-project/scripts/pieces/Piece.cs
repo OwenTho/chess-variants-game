@@ -6,6 +6,7 @@ public partial class Piece : GridItem
 {
     public int timesMoved = 0;
     internal int teamId = 0;
+    public bool needsActionUpdate { get; private set; } = true;
 
     private PieceInfo _info;
     public PieceInfo info {
@@ -50,35 +51,69 @@ public partial class Piece : GridItem
 
     private ActionsToTake actionsToTake = new ActionsToTake();
 
-    public Array<ActionBase> currentPossibleActions
-    {
-        get { return actionsToTake.possibleActions; }
-    }
+    public Array<ActionBase> currentPossibleActions { get { return actionsToTake.possibleActions; } }
 
+    // Called to tell Piece to update actions again
+    public void EnableActionsUpdate()
+    {
+        needsActionUpdate = true;
+    }
+    
     public Array<ActionBase> UpdateActions(GameController game)
     {
-        actionsToTake.Clear();
-        // Loop through the rules and add all of the possible actions
-        foreach (PieceRule pieceRule in info.rules)
+        // If the piece isn't on a cell, ignore
+        if (cell == null)
         {
-            if (pieceRule.isEnabled)
+            return currentPossibleActions;
+        }
+        // If needing to update actions, then update them
+        if (needsActionUpdate)
+        {
+            actionsToTake.Clear();
+            // Loop through the rules and add all of the possible actions
+            foreach (PieceRule pieceRule in info.rules)
             {
-                pieceRule.rule.AddPossibleActions(game, this);
+                if (pieceRule.isEnabled)
+                {
+                    pieceRule.rule.AddPossibleActions(game, this);
+                }
             }
         }
-        // Validate all actions
+        else
+        {
+            // If an action update is unneeded, just reset the verification
+            foreach (var action in currentPossibleActions)
+            {
+                action.ResetValidity();
+            }
+        }
+        // Now that actions have been made / reset, validate them
         VerifyMyActions(game);
-        return actionsToTake.possibleActions;
+        // Now that actions have been validated, disable the need for a new
+        // update
+        needsActionUpdate = false;
+
+        return currentPossibleActions;
     }
 
     public Array<ActionBase> GetPossibleActions(GameController game)
     {
+        // Store current needsActions
+        bool temp1 = needsActionUpdate;
         // Store the current actions, and make a new list
-        Array<ActionBase> temp = actionsToTake.possibleActions;
+        Array<ActionBase> temp2 = actionsToTake.possibleActions;
+        
+        // Set the values to their defaults for making new actions
+        needsActionUpdate = true;
         actionsToTake.possibleActions = new Array<ActionBase>();
-        // Update the list and store it, returning the new values
+        
+        // Update the list and store it
         Array<ActionBase> returnArray = UpdateActions(game);
-        actionsToTake.possibleActions = temp;
+        
+        // Return the values to what they were before
+        needsActionUpdate = temp1;
+        actionsToTake.possibleActions = temp2;
+        
         return returnArray;
     }
 

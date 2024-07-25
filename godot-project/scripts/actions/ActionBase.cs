@@ -15,11 +15,11 @@ public abstract partial class ActionBase : GridItem
     // Rules that depend on this one.
     public List<ActionBase> dependents { get; private set; } = new List<ActionBase>();
 
-    // Extra tags of the Action
-    public Tags tags { get; private set; } = new Tags();
+    // Extra tags of the Action. Add to this in the Move Rules.
+    public Tags tags { get; } = new Tags();
 
-    // Tags that make this action invalid
-    public Tags invalidTags { get; private set; } = new Tags();
+    // Tags that make this action invalid. Add to this in Verification Rules.
+    public Tags invalidTags { get; } = new Tags();
 
     // Dictionary which holds the invalid tags, and the number of occurrences.
     // If it's positive, it's added. If it's negative, it's removed.
@@ -271,5 +271,14 @@ public abstract partial class ActionBase : GridItem
         {
             dependency.RemoveInvalidTag(tag, CarryType.UP);
         }
+    }
+
+    internal void ResetValidity()
+    {
+        // Set to be valid again
+        valid = true;
+        // Clear tags
+        invalidTags.Clear();
+        invalidTagCounts.Clear();
     }
 }

@@ -12,7 +12,10 @@ public partial class MoveAction : ActionBase
 
     public override void ActOn(GameController game, Piece piece)
     {
+        // Move piece
         game.grid.PlaceItemAt(piece, actionLocation.X, actionLocation.Y);
+        // Now that piece has moved, it needs to be updated
+        piece.EnableActionsUpdate();
         piece.timesMoved += 1;
     }
 }

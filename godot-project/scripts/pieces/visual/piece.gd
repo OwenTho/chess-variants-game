@@ -13,6 +13,10 @@ func _on_move(new_cell) -> void:
 		set_pos(new_cell.x, new_cell.y)
 
 func update_pos() -> void:
+	if piece_data == null:
+		return
+	if piece_data.cell == null:
+		return
 	set_pos(piece_data.cell.x, piece_data.cell.y)
 
 func _enter_tree():

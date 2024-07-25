@@ -85,10 +85,10 @@ public partial class GameController : Node
         // Remove piece from board
         grid.RemoveItem(piece);
 
-        // Remove from allPieces
+        // Move to takenPieces
         allPieces.Remove(piece);
 
-        // Free the piece
+        // Free the Godot data
         piece.QueueFree();
 
         // Remove the actions from the grid
@@ -319,14 +319,16 @@ public partial class GameController : Node
     {
         foreach (Piece piece in allPieces)
         {
-            // GD.Print($"Updating for piece {piece.id}");
+            bool addToGrid = piece.needsActionUpdate;
             // Update all the actions
             piece.UpdateActions(this);
-            // Add all the actions to the Grid
-            foreach (ActionBase action in piece.currentPossibleActions)
+            // Add all the actions to the Grid, if they need to be.
+            if (addToGrid)
             {
-                // GD.Print($"\t{action.GetType().Name}({action.actionLocation.X}, {action.actionLocation.Y}) - {action.valid}");
+                foreach (ActionBase action in piece.currentPossibleActions)
+                {
                     actionGrid.PlaceItemAt(action, action.actionLocation.X, action.actionLocation.Y);
+                }
             }
 
             piece.NewTurn(this);
@@ -398,16 +400,23 @@ public partial class GameController : Node
         // Tell all pieces that it's the next turn
         foreach (Piece piece in allPieces)
         {
-            // Remove all actions from the Grid
-            foreach (ActionBase action in piece.currentPossibleActions)
-            {
-                if (action.cell != null)
-                {
-                    action.cell.RemoveItem(action);
-                }
-            }
-            piece.ClearActions();
+            // Tell the piece it's the end of the turn. It's
+            // possible that the piece will request actions to
+            // be remade as a result.
             piece.EndTurn(this);
+            // Remove all actions from the Grid if the piece needs updating
+            if (piece.needsActionUpdate)
+            {
+                foreach (ActionBase action in piece.currentPossibleActions)
+                {
+                    if (action.cell != null)
+                    {
+                        action.cell.RemoveItem(action);
+                    }
+                }
+
+                piece.ClearActions();
+            }
         }
 
         // Move to the next player

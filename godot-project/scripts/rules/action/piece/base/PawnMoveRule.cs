@@ -72,8 +72,29 @@ internal partial class PawnMoveRule : ActionRuleBase
         }
     }
 
+    private bool CheckForPawn(GameController game, Vector2I position)
+    {
+        if (game.TryGetPiecesAt(position.X, position.Y, out Array<Piece> pieces))
+        {
+            foreach (Piece piece in pieces)
+            {
+                if (piece.info.pieceId == "pawn")
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public override void EndTurn(GameController game, Piece piece)
     {
+        // If next to a pawn, EnPassant needs another check
+        if (CheckForPawn(game, piece.cell.pos + Vector2I.Left) || CheckForPawn(game, piece.cell.pos + Vector2I.Right))
+        {
+            piece.EnableActionsUpdate();
+        }
         piece.tags.Remove("pawn_initial");
         if (piece.tags.Contains("setup_pawn_initial"))
         {
