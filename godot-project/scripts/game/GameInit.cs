@@ -13,6 +13,7 @@ public partial class GameController : Node
     {
         lastId = 0;
         InitGrid();
+        InitActionGrid();
         InitValidationRules();
         InitActionRules();
         InitPieceInfo();
@@ -22,11 +23,18 @@ public partial class GameController : Node
         AddChild(validationRuleRegistry);
     }
 
-    public Grid<GridItem> InitGrid()
+    public Grid InitGrid()
     {
-        grid = new Grid<GridItem>();
+        grid = new Grid();
         AddChild(grid);
         return grid;
+    }
+
+    public Grid InitActionGrid()
+    {
+        actionGrid = new Grid();
+        AddChild(actionGrid);
+        return actionGrid;
     }
 
     internal void InitValidationRules()

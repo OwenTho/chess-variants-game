@@ -6,7 +6,8 @@ using System.Reflection.PortableExecutable;
 
 public partial class GameController : Node
 {
-    public Grid<GridItem> grid { get; private set; }
+    public Grid grid { get; private set; }
+    public Grid actionGrid { get; private set; }
 
     public Vector2I gridSize = new Vector2I(8, 8);
 
@@ -170,8 +171,8 @@ public partial class GameController : Node
 
     public Piece GetFirstPieceAt(int x, int y)
     {
-        if (grid.TryGetCellAt(x, y, out GridCell<GridItem> cell)) {
-            foreach (GridItem item in cell.items)
+        if (grid.TryGetCellAt(x, y, out GridCell cell)) {
+            foreach (var item in cell.items)
             {
                 if (item is Piece)
                 {
@@ -190,9 +191,9 @@ public partial class GameController : Node
 
     public bool HasPieceAt(int x, int y)
     {
-        if (grid.TryGetCellAt(x, y, out GridCell<GridItem> cell))
+        if (grid.TryGetCellAt(x, y, out GridCell cell))
         {
-            foreach (GridItem item in cell.items)
+            foreach (var item in cell.items)
             {
                 if (item is Piece)
                 {
@@ -205,9 +206,9 @@ public partial class GameController : Node
 
     public bool HasPieceIdAt(string pieceId, int x, int y)
     {
-        if (grid.TryGetCellAt(x, y, out GridCell<GridItem> cell))
+        if (grid.TryGetCellAt(x, y, out GridCell cell))
         {
-            foreach (GridItem item in cell.items)
+            foreach (var item in cell.items)
             {
                 if (item is Piece)
                 {
@@ -231,9 +232,9 @@ public partial class GameController : Node
     public Array<Piece> GetPiecesAt(int x, int y)
     {
         Array<Piece> pieces = new Array<Piece>();
-        if (grid.TryGetCellAt(x, y, out GridCell<GridItem> cell))
+        if (grid.TryGetCellAt(x, y, out GridCell cell))
         {
-            foreach (GridItem item in cell.items)
+            foreach (var item in cell.items)
             {
                 if (item is Piece)
                 {
@@ -279,7 +280,7 @@ public partial class GameController : Node
                 didAct |= TakeAction(action, piece);
             }
         }
-        return true;
+        return didAct;
     }
 
     public void RequestAction(ActionBase action, Piece piece)
@@ -325,12 +326,13 @@ public partial class GameController : Node
             foreach (ActionBase action in piece.currentPossibleActions)
             {
                 // GD.Print($"\t{action.GetType().Name}({action.actionLocation.X}, {action.actionLocation.Y}) - {action.valid}");
-                grid.PlaceItemAt(action, action.actionLocation.X, action.actionLocation.Y);
+                    actionGrid.PlaceItemAt(action, action.actionLocation.X, action.actionLocation.Y);
             }
+
             piece.NewTurn(this);
         }
 
-        // Repeat again, to disable certain check moves
+        // Loop again, to disable certain check moves
         foreach (Piece piece in allPieces)
         {
             // If it's the king, disable any attacks on it and stop it from moving into
@@ -340,15 +342,18 @@ public partial class GameController : Node
                 continue;
             }
 
-            foreach (GridItem item in piece.cell.items)
+            if (actionGrid.TryGetCellAt(piece.cell.x, piece.cell.y, out GridCell cell))
             {
-                if (item is AttackAction)
+                foreach (GridItem item in cell.items)
                 {
-                    AttackAction attackAction = (AttackAction)item;
-                    attackAction.MakeInvalid();
-                    if (attackAction.moveAction != null)
+                    if (item is AttackAction)
                     {
-                        attackAction.moveAction.MakeInvalid();
+                        AttackAction attackAction = (AttackAction)item;
+                        attackAction.MakeInvalid();
+                        if (attackAction.moveAction != null)
+                        {
+                            attackAction.moveAction.MakeInvalid();
+                        }
                     }
                 }
             }
@@ -360,7 +365,7 @@ public partial class GameController : Node
                     continue;
                 }
                 MoveAction moveAction = (MoveAction)action;
-                foreach (GridItem item in moveAction.cell.items)
+                foreach (var item in moveAction.cell.items)
                 {
                     if (item is not AttackAction)
                     {

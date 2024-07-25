@@ -3,3 +3,4 @@ godot-project/.godot/
 *.translation
 godot-project/addons/
 godot-project/.vs/
+godot-project/.idea/

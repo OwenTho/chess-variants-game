@@ -2,10 +2,10 @@
 
 public partial class GridItem : Node
 {
-    public Grid<GridItem> grid { get; internal set; }
-    private GridCell<GridItem> myCell;
+    public Grid  grid { get; internal set; }
+    private GridCell myCell;
     // public Tags tag { get; private set; } = new Tags();
-    public GridCell<GridItem> cell {
+    public GridCell cell {
         get { 
             return myCell;
         }
@@ -16,6 +16,6 @@ public partial class GridItem : Node
     }
 
     [Signal]
-    public delegate void ChangedCellEventHandler(GridCell<GridItem> cell);
+    public delegate void ChangedCellEventHandler(GridCell cell);
     
 }

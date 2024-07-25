@@ -1,24 +1,24 @@
 ﻿using Godot;
 using Godot.Collections;
 
-public partial class GridCell<[MustBeVariant] T>: Node where T : GridItem
+public partial class GridCell : Node
 {
     internal int x;
     internal int y;
 
     public Vector2I pos { get { return new Vector2I(x, y); } }
 
-    private Grid<T> _grid;
-    public Grid<T> grid { get { return _grid; } internal set
+    private Grid _grid;
+    public Grid grid { get { return _grid; } internal set
         {
             _grid = value;
-            foreach (T item in items)
+            foreach (var item in items)
             {
-                item.grid = value as Grid<GridItem>;
+                item.grid = value;
             }
         }
     }
-    public Array<T> items { get; internal set; } = new Array<T>();
+    public Array<GridItem> items { get; internal set; } = new Array<GridItem>();
 
     public void SetPos(int x, int y)
     {
@@ -28,13 +28,13 @@ public partial class GridCell<[MustBeVariant] T>: Node where T : GridItem
         this.x = x;
         this.y = y;
         // Update all items, as they have "moved" from one cell to another
-        foreach (T item in items)
+        foreach (var item in items)
         {
-            item.cell = this as GridCell<GridItem>;
+            item.cell = this;
         }
     }
 
-    public bool HasItem(T item)
+    public bool HasItem(GridItem item)
     {
         return items.Contains(item);
     }
@@ -46,7 +46,7 @@ public partial class GridCell<[MustBeVariant] T>: Node where T : GridItem
 
 
 
-    public bool AddItem(T item)
+    public bool AddItem(GridItem item)
     {
         // If item already has a cell, and it's not this one,
         // then remove it from that cell.
@@ -60,12 +60,12 @@ public partial class GridCell<[MustBeVariant] T>: Node where T : GridItem
         }
         items.Add(item);
         AddChild(item);
-        item.cell = this as GridCell<GridItem>;
-        item.grid = grid as Grid<GridItem>;
+        item.cell = this;
+        item.grid = grid;
         return true;
     }
 
-    public T GetItem(int index)
+    public GridItem GetItem(int index)
     {
         return items[index];
     }
@@ -81,7 +81,7 @@ public partial class GridCell<[MustBeVariant] T>: Node where T : GridItem
         return false;
     }
 
-    internal bool RemoveItem(T item, bool updateItem)
+    internal bool RemoveItem(GridItem item, bool updateItem)
     {
         if (!items.Remove(item))
         {
@@ -101,7 +101,7 @@ public partial class GridCell<[MustBeVariant] T>: Node where T : GridItem
         return true;
     }
 
-    public bool RemoveItem(T item)
+    public bool RemoveItem(GridItem item)
     {
         return RemoveItem(item, true);
     }
