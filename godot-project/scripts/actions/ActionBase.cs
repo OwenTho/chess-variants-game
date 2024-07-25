@@ -17,6 +17,9 @@ public abstract partial class ActionBase : GridItem
 
     // Extra tags of the Action. Add to this in the Move Rules.
     public Tags tags { get; } = new Tags();
+    
+    // Tags used in validation steps. Add thos in Verification Rules.
+    public Tags verifyTags { get; } = new Tags();
 
     // Tags that make this action invalid. Add to this in Verification Rules.
     public Tags invalidTags { get; } = new Tags();
@@ -175,6 +178,44 @@ public abstract partial class ActionBase : GridItem
             dependency.Tag(tag, CarryType.UP);
         }
     }
+    
+    
+    
+    public void VerifyTag(string tag, CarryType carryType = CarryType.DOWN)
+    {
+        // If this already has the tag, ignore to avoid
+        // infinite loops.
+        if (verifyTags.Contains(tag))
+        {
+            return;
+        }
+        verifyTags.Add(tag);
+        // If carry, also tag dependents
+        if (carryType == CarryType.DOWN)
+        {
+            VerifyTagDependents(tag);
+        }
+        if (carryType == CarryType.UP)
+        {
+            VerifyTagDependancies(tag);
+        }
+    }
+
+    public void VerifyTagDependents(string tag)
+    {
+        foreach (ActionBase dependent in dependents)
+        {
+            dependent.VerifyTag(tag, CarryType.DOWN);
+        }
+    }
+
+    public void VerifyTagDependancies(string tag)
+    {
+        foreach (ActionBase dependency in dependencies)
+        {
+            dependency.VerifyTag(tag, CarryType.UP);
+        }
+    }
 
 
 
@@ -278,6 +319,7 @@ public abstract partial class ActionBase : GridItem
         // Set to be valid again
         valid = true;
         // Clear tags
+        verifyTags.Clear();
         invalidTags.Clear();
         invalidTagCounts.Clear();
     }

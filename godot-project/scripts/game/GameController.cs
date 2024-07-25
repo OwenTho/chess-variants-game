@@ -375,7 +375,7 @@ public partial class GameController : Node
                     }
                     // Ignore actions that can't check
                     AttackAction attackAction = (AttackAction)item;
-                    if (attackAction.tags.Contains("no_check"))
+                    if (attackAction.verifyTags.Contains("no_check") || !attackAction.valid)
                     {
                         continue;
                     }

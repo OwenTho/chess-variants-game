@@ -27,7 +27,7 @@ internal partial class LineMoveStopRule : ValidationRuleBase
             moveAction.InvalidTagDependents("line_stop");
             if (!game.HasPieceIdAt("king", moveAction.moveLocation.X, moveAction.moveLocation.Y))
             {
-                moveAction.TagDependents("no_check");
+                moveAction.VerifyTagDependents("no_check");
             }
             if (moveAction.attackAction != null)
             {
