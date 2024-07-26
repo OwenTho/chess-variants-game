@@ -1,8 +1,7 @@
 using Godot;
 using Godot.Collections;
-using System.Collections.Generic;
 
-public partial class Piece : GridItem
+public partial class Piece : GameItem
 {
     public int timesMoved = 0;
     internal int teamId = 0;

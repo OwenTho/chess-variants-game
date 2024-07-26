@@ -1,15 +1,15 @@
 ﻿using Godot;
 using Godot.Collections;
 
-public partial class GridCell : Node
+public partial class GridCell<T> : Node
 {
     internal int x;
     internal int y;
 
     public Vector2I pos { get { return new Vector2I(x, y); } }
 
-    private Grid _grid;
-    public Grid grid { get { return _grid; } internal set
+    private Grid<T> _grid;
+    public Grid<T> grid { get { return _grid; } internal set
         {
             _grid = value;
             foreach (var item in items)
@@ -18,7 +18,7 @@ public partial class GridCell : Node
             }
         }
     }
-    public Array<GridItem> items { get; internal set; } = new Array<GridItem>();
+    public Array<GridItem<T>> items { get; internal set; } = new();
 
     public void SetPos(int x, int y)
     {
@@ -34,7 +34,7 @@ public partial class GridCell : Node
         }
     }
 
-    public bool HasItem(GridItem item)
+    public bool HasItem(GridItem<T> item)
     {
         return items.Contains(item);
     }
@@ -46,7 +46,7 @@ public partial class GridCell : Node
 
 
 
-    public bool AddItem(GridItem item)
+    public bool AddItem(GridItem<T> item)
     {
         // If item already has a cell, and it's not this one,
         // then remove it from that cell.
@@ -65,12 +65,12 @@ public partial class GridCell : Node
         return true;
     }
 
-    public GridItem GetItem(int index)
+    public GridItem<T> GetItem(int index)
     {
         return items[index];
     }
 
-    public bool TryGet(int index, out GridItem item)
+    public bool TryGet(int index, out GridItem<T> item)
     {
         if (index >= 0 && index < items.Count)
         {
@@ -81,7 +81,7 @@ public partial class GridCell : Node
         return false;
     }
 
-    internal bool RemoveItem(GridItem item, bool updateItem)
+    internal bool RemoveItem(GridItem<T> item, bool updateItem)
     {
         if (!items.Remove(item))
         {
@@ -101,7 +101,7 @@ public partial class GridCell : Node
         return true;
     }
 
-    public bool RemoveItem(GridItem item)
+    public bool RemoveItem(GridItem<T> item)
     {
         return RemoveItem(item, true);
     }

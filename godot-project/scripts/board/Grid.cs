@@ -1,14 +1,14 @@
 using Godot;
 using Godot.Collections;
 
-public partial class Grid : Node
+public partial class Grid<T> : Node
 {
-    public Array<GridCell> cells = new Array<GridCell>();
+    public Array<GridCell<T>> cells = new();
 
     // Get a cell at a specific location
-    public GridCell GetCellAt(int x, int y)
+    public GridCell<T> GetCellAt(int x, int y)
     {
-        foreach (GridCell cell in cells)
+        foreach (GridCell<T> cell in cells)
         {
             if (cell.x == x && cell.y == y)
             {
@@ -18,21 +18,21 @@ public partial class Grid : Node
         return null;
     }
 
-    public bool TryGetCellAt(int x, int y, out GridCell cell)
+    public bool TryGetCellAt(int x, int y, out GridCell<T> cell)
     {
         cell = GetCellAt(x, y);
         return cell != null;
     }
 
     // Get a cell by the item held in it
-    public GridCell GetCellByItem(GridItem item)
+    public GridCell<T> GetCellByItem(GridItem<T> item)
     {
         if (item == null)
         {
             return null;
         }
 
-        foreach (GridCell cell in cells)
+        foreach (GridCell<T> cell in cells)
         {
             if (cell.HasItem(item))
             {
@@ -44,7 +44,7 @@ public partial class Grid : Node
 
 
     // Check if this grid holds a certain cell
-    public bool HasCell(GridCell cell)
+    public bool HasCell(GridCell<T> cell)
     {
         if (cell == null)
         {
@@ -60,7 +60,7 @@ public partial class Grid : Node
         return GetCellAt(x, y) != null;
     }
 
-    public bool RemoveCell(GridCell cell)
+    public bool RemoveCell(GridCell<T> cell)
     {
         // Only remove if it's on this grid
         if (cell == null || cell.grid != this)
@@ -77,7 +77,7 @@ public partial class Grid : Node
 
     public bool RemoveCellAt(int x, int y)
     {
-        if (TryGetCellAt(x, y, out GridCell cell))
+        if (TryGetCellAt(x, y, out GridCell<T> cell))
         {
             RemoveCell(cell);
             return true;
@@ -90,7 +90,7 @@ public partial class Grid : Node
         return cells.Count;
     }
 
-    public bool HasItem(GridItem item)
+    public bool HasItem(GridItem<T> item)
     {
         // Only continue if the item is on this grid
         if (item == null || ReferenceEquals(item.grid, this))
@@ -98,7 +98,7 @@ public partial class Grid : Node
             return false;
         }
         
-        foreach (GridCell cell in cells)
+        foreach (var cell in cells)
         {
             if (cell.HasItem(item))
             {
@@ -108,7 +108,7 @@ public partial class Grid : Node
         return false;
     }
 
-    public bool RemoveItem(GridItem item)
+    public bool RemoveItem(GridItem<T> item)
     {
         // Only continue if the item is on this grid
         if (item == null || !ReferenceEquals(item.grid, this))
@@ -116,7 +116,7 @@ public partial class Grid : Node
             return false;
         }
 
-        foreach (GridCell cell in cells)
+        foreach (var cell in cells)
         {
             if (cell.HasItem(item))
             {
@@ -127,9 +127,9 @@ public partial class Grid : Node
         return false;
     }
 
-    private GridCell NewCellAt(int x, int y)
+    private GridCell<T> NewCellAt(int x, int y)
     {
-        GridCell newCell = new GridCell();
+        GridCell<T> newCell = new();
         newCell.SetPos(x, y);
         newCell.grid = this;
         cells.Add(newCell);
@@ -137,20 +137,20 @@ public partial class Grid : Node
         return newCell;
     }
 
-    public GridCell MakeNewCellAt(int x, int y)
+    public GridCell<T> MakeNewCellAt(int x, int y)
     {
         // Remove any previous cell on this spot
-        if (TryGetCellAt(x, y, out GridCell cell))
+        if (TryGetCellAt(x, y, out GridCell<T> cell))
         {
             RemoveCell(cell);
         }
         return NewCellAt(x, y);
     }
 
-    public GridCell MakeOrGetCellAt(int x, int y)
+    public GridCell<T> MakeOrGetCellAt(int x, int y)
     {
         // Return a cell if it's already there
-        if (TryGetCellAt(x, y, out GridCell cell))
+        if (TryGetCellAt(x, y, out GridCell<T> cell))
         {
             return cell;
         }
@@ -158,7 +158,7 @@ public partial class Grid : Node
     }
 
     
-    public GridCell PlaceItemAt(GridItem item, int x, int y)
+    public GridCell<T> PlaceItemAt(GridItem<T> item, int x, int y)
     {
         // Ignore if item is null
         if (item == null)
@@ -167,7 +167,7 @@ public partial class Grid : Node
         }
 
         // If a cell already exists, then...
-        if (TryGetCellAt(x, y, out GridCell cell))
+        if (TryGetCellAt(x, y, out GridCell<T> cell))
         {
             // Check if the item is already on this cell
             if (ReferenceEquals(cell, item.cell))
@@ -205,12 +205,12 @@ public partial class Grid : Node
 
         // If none of the above puts the item onto a cell,
         // make a new cell for the item.
-        GridCell newCell = MakeNewCellAt(x, y);
+        GridCell<T> newCell = MakeNewCellAt(x, y);
         newCell.AddItem(item);
         return newCell;
     }
 
-    public void SwapCells(GridCell cell1, GridCell cell2)
+    public void SwapCells(GridCell<T> cell1, GridCell<T> cell2)
     {
         // If either is null, then remove both from the grid.
         // It's swapping a game with nothing.
@@ -241,8 +241,8 @@ public partial class Grid : Node
         {
             return;
         }
-        GridCell cell1 = GetCellAt(x1, y1);
-        GridCell cell2 = GetCellAt(x2, y2);
+        GridCell<T> cell1 = GetCellAt(x1, y1);
+        GridCell<T> cell2 = GetCellAt(x2, y2);
 
         // If both the same, ignore. This accounts for 2 nulls.
         if (cell1 == cell2)

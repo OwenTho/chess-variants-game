@@ -1,7 +1,6 @@
 ﻿using Godot;
 using System.Collections.Generic;
 
-
 public partial class GameController : Node
 {
     Registry<PieceInfo> pieceInfoRegistry = new Registry<PieceInfo>();
@@ -23,16 +22,16 @@ public partial class GameController : Node
         AddChild(validationRuleRegistry);
     }
 
-    public Grid InitGrid()
+    public Grid<GameItem> InitGrid()
     {
-        grid = new Grid();
+        grid = new Grid<GameItem>();
         AddChild(grid);
         return grid;
     }
 
-    public Grid InitActionGrid()
+    public Grid<ActionBase> InitActionGrid()
     {
-        actionGrid = new Grid();
+        actionGrid = new Grid<ActionBase>();
         AddChild(actionGrid);
         return actionGrid;
     }

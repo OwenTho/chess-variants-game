@@ -1,6 +1,5 @@
 ﻿using Godot;
 
-
 public partial class GameController : Node
 {
     [Signal]

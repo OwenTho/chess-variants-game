@@ -1,13 +1,10 @@
 using Godot;
 using Godot.Collections;
-using System;
-using System.Reflection.Metadata.Ecma335;
-using System.Reflection.PortableExecutable;
 
 public partial class GameController : Node
 {
-    public Grid grid { get; private set; }
-    public Grid actionGrid { get; private set; }
+    public Grid<GameItem> grid { get; private set; }
+    public Grid<ActionBase> actionGrid { get; private set; }
 
     public Vector2I gridSize = new Vector2I(8, 8);
 
@@ -171,7 +168,7 @@ public partial class GameController : Node
 
     public Piece GetFirstPieceAt(int x, int y)
     {
-        if (grid.TryGetCellAt(x, y, out GridCell cell)) {
+        if (grid.TryGetCellAt(x, y, out GridCell<GameItem> cell)) {
             foreach (var item in cell.items)
             {
                 if (item is Piece)
@@ -191,7 +188,7 @@ public partial class GameController : Node
 
     public bool HasPieceAt(int x, int y)
     {
-        if (grid.TryGetCellAt(x, y, out GridCell cell))
+        if (grid.TryGetCellAt(x, y, out GridCell<GameItem> cell))
         {
             foreach (var item in cell.items)
             {
@@ -206,7 +203,7 @@ public partial class GameController : Node
 
     public bool HasPieceIdAt(string pieceId, int x, int y)
     {
-        if (grid.TryGetCellAt(x, y, out GridCell cell))
+        if (grid.TryGetCellAt(x, y, out GridCell<GameItem> cell))
         {
             foreach (var item in cell.items)
             {
@@ -232,7 +229,7 @@ public partial class GameController : Node
     public Array<Piece> GetPiecesAt(int x, int y)
     {
         Array<Piece> pieces = new Array<Piece>();
-        if (grid.TryGetCellAt(x, y, out GridCell cell))
+        if (grid.TryGetCellAt(x, y, out GridCell<GameItem> cell))
         {
             foreach (var item in cell.items)
             {
@@ -344,9 +341,9 @@ public partial class GameController : Node
                 continue;
             }
 
-            if (actionGrid.TryGetCellAt(piece.cell.x, piece.cell.y, out GridCell cell))
+            if (actionGrid.TryGetCellAt(piece.cell.x, piece.cell.y, out GridCell<ActionBase> cell))
             {
-                foreach (GridItem item in cell.items)
+                foreach (GridItem<ActionBase> item in cell.items)
                 {
                     if (item is AttackAction)
                     {
@@ -373,7 +370,7 @@ public partial class GameController : Node
                     {
                         continue;
                     }
-                    // Ignore actions that can't check
+                    // Ignore actions that can't check or are invalid
                     AttackAction attackAction = (AttackAction)item;
                     if (attackAction.verifyTags.Contains("no_check") || !attackAction.valid)
                     {

@@ -1,11 +1,11 @@
 ﻿using Godot;
 
-public partial class GridItem : Node
+public abstract partial class GridItem<T> : Node
 {
-    public Grid  grid { get; internal set; }
-    private GridCell myCell;
+    public Grid<T> grid { get; internal set; }
+    private GridCell<T> myCell;
     // public Tags tag { get; private set; } = new Tags();
-    public GridCell cell {
+    public GridCell<T> cell {
         get { 
             return myCell;
         }
@@ -16,6 +16,6 @@ public partial class GridItem : Node
     }
 
     [Signal]
-    public delegate void ChangedCellEventHandler(GridCell cell);
+    public delegate void ChangedCellEventHandler(GridCell<T> cell);
     
 }

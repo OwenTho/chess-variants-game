@@ -1,8 +1,7 @@
 ﻿using Godot;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
-public abstract partial class ActionBase : GridItem
+public abstract partial class ActionBase : GridItem<ActionBase>
 {
     public Piece owner { get; private set; }
     public Vector2I actionLocation;
