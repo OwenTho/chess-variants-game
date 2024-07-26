@@ -28,12 +28,15 @@ internal partial class LineMoveStopRule : ValidationRuleBase
             if (!game.HasPieceIdAt("king", moveAction.moveLocation.X, moveAction.moveLocation.Y))
             {
                 moveAction.VerifyTagDependents("no_check");
+                if (moveAction.attackAction != null)
+                {
+                    moveAction.attackAction.verifyTags.Remove("no_check");
+                }
             }
             if (moveAction.attackAction != null)
             {
                 // Remove the tag from the attack action, as it is a dependent
-                moveAction.attackAction.RemoveInvalidTag("line_stop");
-                moveAction.attackAction.tags.Remove("no_check");
+                moveAction.attackAction.RemoveInvalidTag("line_stop", ActionBase.CarryType.NONE);
             }
         }
     }

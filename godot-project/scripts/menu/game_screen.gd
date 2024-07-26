@@ -93,21 +93,27 @@ func _on_next_turn(new_player_num: int):
 func _on_end_turn() -> void:
 	remove_selection()
 
+@rpc("authority", "call_local", "reliable")
+func failed_action() -> void:
+	remove_selection()
+
 @rpc("any_peer", "call_local", "reliable")
 func request_action(piece_id: int, action_location: Vector2i) -> void:
 	# Ignore if not authority
 	if not is_multiplayer_authority():
 		return
 	
+	var sender_id: int = multiplayer.get_remote_sender_id()
+	
 	# Get the player number of this player
-	var player_num: int = Lobby.get_player_num(multiplayer.get_remote_sender_id())
+	var player_num: int = Lobby.get_player_num(sender_id)
 	# If it's -1, ignore
 	if (player_num == -1):
 		return
 	
 	# If it's the wrong player number, ignore
 	var cur_player_num = GameManager.game_state.currentPlayerNum
-	if Lobby.player_nums[cur_player_num] != multiplayer.get_remote_sender_id():
+	if Lobby.player_nums[cur_player_num] != sender_id:
 		return
 	
 	# Get piece
@@ -127,6 +133,7 @@ func request_action(piece_id: int, action_location: Vector2i) -> void:
 	
 	# Take the actions
 	if not GameManager.game_state.TakeActionAt(action_location, piece):
+		failed_action.rpc_id(sender_id)
 		# If it failed, return
 		return
 	

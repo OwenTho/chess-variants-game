@@ -2,7 +2,7 @@ using System;
 using Godot;
 using Godot.Collections;
 
-public partial class Piece : GameItem, ICloneable
+public partial class Piece : GameItem
 {
     public int timesMoved = 0;
     internal int teamId = 0;
@@ -33,6 +33,7 @@ public partial class Piece : GameItem, ICloneable
     private class ActionsToTake
     {
         internal Array<ActionBase> possibleActions;
+        internal int curActionId;
         internal ActionsToTake()
         {
             possibleActions = new Array<ActionBase>();
@@ -41,16 +42,19 @@ public partial class Piece : GameItem, ICloneable
         internal void Add(ActionBase action)
         {
             possibleActions.Add(action);
+            action.actionId = curActionId++;
         }
 
         internal void Remove(ActionBase action)
         {
             possibleActions.Remove(action);
+            // Don't change id, as it may be out of order
         }
 
         internal void Clear()
         {
             possibleActions.Clear();
+            curActionId = 0;
         }
     }
 
@@ -211,7 +215,22 @@ public partial class Piece : GameItem, ICloneable
 
     public object Clone()
     {
-        Piece newPiece = new();
+        Piece newPiece = new Piece();
+        // Copy variables
+        newPiece._info = info;
+        newPiece.id = id;
+        newPiece.linkId = linkId;
+        newPiece.teamId = teamId;
+        
+        newPiece.forwardDirection = forwardDirection;
+        
+        newPiece.timesMoved = timesMoved;
+        newPiece.needsActionUpdate = needsActionUpdate;
+
+        foreach (var tag in tags)
+        {
+            newPiece.tags.Add(tag);
+        }
 
         return newPiece;
     }

@@ -1,4 +1,5 @@
-﻿using Godot;
+﻿using System.Collections.Generic;
+using Godot;
 
 public partial class MoveAction : ActionBase
 {
@@ -23,5 +24,27 @@ public partial class MoveAction : ActionBase
         MoveAction newMove = new MoveAction(null, actionLocation, moveLocation);
         CloneTo(newMove);
         return newMove;
+    }
+
+    public override Dictionary<string, int> GetExtraCopyLinks()
+    {
+        Dictionary<string, int> newDictionary = new Dictionary<string, int>();
+        if (attackAction != null)
+        {
+            newDictionary.Add("attackAction", attackAction.actionId);
+        }
+
+        return newDictionary;
+    }
+
+    public override void SetExtraCopyLinks(GameState game, Dictionary<string, int> extraLinks, Dictionary<int, ActionBase> links)
+    {
+        if (extraLinks.TryGetValue("attackAction", out int attackActionId))
+        {
+            if (links.TryGetValue(attackActionId, out ActionBase attackAction))
+            {
+                this.attackAction = (AttackAction)attackAction;
+            }
+        }
     }
 }

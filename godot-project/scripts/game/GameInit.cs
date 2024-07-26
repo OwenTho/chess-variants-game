@@ -22,9 +22,16 @@ public partial class GameController : Node
 
     public GameState InitGameState()
     {
+        // Create the GameState
         currentGameState = new GameState(this);
         currentGameState.Init();
         AddChild(currentGameState);
+        
+        // Connect the signals
+        currentGameState.NewTurn += (newPlayerNum) => EmitSignal(SignalName.NewTurn, newPlayerNum);
+        currentGameState.PieceRemoved += (removedPiece) => EmitSignal(SignalName.PieceRemoved, removedPiece);
+        currentGameState.EndTurn += () => EmitSignal(SignalName.EndTurn);
+        
         return currentGameState;
     }
 

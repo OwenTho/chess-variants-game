@@ -20,12 +20,12 @@ public abstract partial class ActionRuleBase : RuleBase
     }
 
     // Returns the newly created rules
-    internal AttackAction Attack(Piece attacker, Vector2I attackLocation, AttackType attackType = AttackType.NoMove, ActionBase dependentRule = null)
+    internal AttackAction Attack(Piece attacker, Vector2I attackLocation, AttackType attackType = AttackType.NoMove, ActionBase dependency = null)
     {
         AttackAction newAttack = new AttackAction(attacker, attackLocation, attackLocation);
-        if (dependentRule != null && attackType != AttackType.IfMove)
+        if (dependency != null && attackType != AttackType.IfMove)
         {
-            newAttack.AddDependency(dependentRule);
+            newAttack.AddDependency(dependency);
         }
         attacker.AddAction(newAttack);
 
@@ -45,9 +45,9 @@ public abstract partial class ActionRuleBase : RuleBase
             {
                 newAttack.AddDependency(newMove);
             }
-            if (dependentRule != null && attackType != AttackType.MoveIf)
+            if (dependency != null && attackType != AttackType.MoveIf)
             {
-                newMove.AddDependency(dependentRule);
+                newMove.AddDependency(dependency);
             }
         }
         return newAttack;

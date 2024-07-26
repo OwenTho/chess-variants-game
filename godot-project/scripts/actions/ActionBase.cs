@@ -2,18 +2,19 @@
 using Godot;
 using System.Collections.Generic;
 
-public abstract partial class ActionBase : GridItem<ActionBase>, ICloneable
+public abstract partial class ActionBase : GridItem<ActionBase>
 {
+    public int actionId = -1;
     public Piece owner { get; private set; }
     public Vector2I actionLocation;
     public bool valid { get; private set; } = true;
 
     // Rules that this rule depends on. If these are invalid, this one should
     // also be invalid.
-    public List<ActionBase> dependencies { get; private set; } = new List<ActionBase>();
+    public List<ActionBase> dependencies { get; private set; }
 
     // Rules that depend on this one.
-    public List<ActionBase> dependents { get; private set; } = new List<ActionBase>();
+    public List<ActionBase> dependents { get; private set; }
 
     // Extra tags of the Action. Add to this in the Move Rules.
     public Tags tags { get; } = new Tags();
@@ -26,12 +27,16 @@ public abstract partial class ActionBase : GridItem<ActionBase>, ICloneable
 
     // Dictionary which holds the invalid tags, and the number of occurrences.
     // If it's positive, it's added. If it's negative, it's removed.
-    internal Dictionary<string, int> invalidTagCounts = new Dictionary<string, int>();
+    internal Dictionary<string, int> invalidTagCounts;
 
     public ActionBase(Piece owner, Vector2I actionLocation)
     {
         this.actionLocation = actionLocation;
         this.owner = owner;
+
+        dependencies = new List<ActionBase>();
+        dependents = new List<ActionBase>();
+        invalidTagCounts = new Dictionary<string, int>();
     }
 
     public abstract void ActOn(GameState game, Piece piece);
@@ -89,7 +94,7 @@ public abstract partial class ActionBase : GridItem<ActionBase>, ICloneable
         // Make sure it's not a dependent
         if (HasDependent(action))
         {
-            GD.PushError($"Tried to make {this} a dependent of {action}, when it is already a dependency.");
+            GD.PushError($"Tried to make {this} a dependent of {action}, when it is a dependency.");
             return;
         }
         dependencies.Add(action);
@@ -127,9 +132,9 @@ public abstract partial class ActionBase : GridItem<ActionBase>, ICloneable
             return;
         }
         // Make sure it's not a dependency
-        if (HasDependent(action))
+        if (HasDependency(action))
         {
-            GD.PushError($"Tried to make {this} a dependency of {action}, when it is already a dependent.");
+            GD.PushError($"Tried to make {this} a dependency of {action}, when it is a dependent.");
             return;
         }
         dependents.Add(action);
@@ -324,6 +329,44 @@ public abstract partial class ActionBase : GridItem<ActionBase>, ICloneable
         invalidTagCounts.Clear();
     }
 
+    public void SetOwner(Piece newOwner, CarryType carryType = CarryType.DOWN)
+    {
+        
+        // If owner is the same, ignore
+        if (owner == newOwner)
+        {
+            return;
+        }
+        
+        // If old owner is not null, remove this from the owner
+        if (owner != null)
+        {
+            owner.RemoveAction(this);
+        }
+        
+        owner = newOwner;
+
+        if (carryType == CarryType.DOWN)
+        {
+            foreach (var dependent in dependents)
+            {
+                dependent.SetOwner(newOwner);
+            }
+        }
+
+        if (carryType == CarryType.UP)
+        {
+            foreach (var dependency in dependencies)
+            {
+                dependency.SetOwner(newOwner, CarryType.UP);
+            }
+        }
+        
+        // Assume the owner already has the action
+    }
+    
+    
+
     public abstract object Clone();
 
     protected void CloneTo(ActionBase action)
@@ -356,34 +399,19 @@ public abstract partial class ActionBase : GridItem<ActionBase>, ICloneable
         }
         
         // Copy over the other variables
-        // Don't copy owner, as it would have the copy owner
+        // Don't copy owner, as it would have the copy owner too
+        action.actionId = actionId;
         action.valid = valid;
+        action.actionLocation = actionLocation;
     }
 
-    public void SetOwner(Piece newOwner)
+    public virtual Dictionary<string, int> GetExtraCopyLinks()
+    {
+        return null;
+    }
+
+    public virtual void SetExtraCopyLinks(GameState game, Dictionary<string, int> extraLinks, Dictionary<int, ActionBase> links)
     {
         
-        // If owner is the same, ignore
-        if (owner == newOwner)
-        {
-            return;
-        }
-        
-        // If old owner is not null, remove this from the owner
-        if (owner != null)
-        {
-            owner.RemoveAction(this);
-        }
-        
-        owner = newOwner;
-        
-        // If new owner is null, stop here
-        if (newOwner == null)
-        {
-            return;
-        }
-        
-        // Add this as an action to the owner
-        newOwner.AddAction(this);
     }
 }

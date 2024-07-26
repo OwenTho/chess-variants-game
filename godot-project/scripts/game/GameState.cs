@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using Godot;
 using Godot.Collections;
 
-public partial class GameState : Node, ICloneable
+public partial class GameState : Node
 {
     private GameController gameController;
     
@@ -18,6 +19,15 @@ public partial class GameState : Node, ICloneable
 
     private Array<Piece> allPieces;
 
+    public enum CheckType
+    {
+        NONE,
+        IN_CHECK,
+        POSSIBLE_CHECKMATE
+    }
+
+    public CheckType[] playerCheck;
+
     public GameState(GameController gameController)
     {
         this.gameController = gameController;
@@ -32,6 +42,12 @@ public partial class GameState : Node, ICloneable
         AddChild(actionGrid);
         allPieces = new Array<Piece>();
         gridSize = new Vector2I(8, 8);
+
+        playerCheck = new CheckType[GameController.NUMBER_OF_PLAYERS];
+        for (int i = 0; i < playerCheck.Length; i++)
+        {
+            playerCheck[i] = CheckType.NONE;
+        }
     }
 
     public void SetPlayerNum(int newPlayerNum)
@@ -92,8 +108,9 @@ public partial class GameState : Node, ICloneable
             action.QueueFree();
             action.cell.RemoveItem(action);
         }
+        
         // Emit signal
-        gameController.EmitSignal(GameController.SignalName.PieceRemoved, piece);
+        EmitSignal(SignalName.PieceRemoved, piece);
     }
     
     public Piece TakePiece(int pieceId)
@@ -104,29 +121,6 @@ public partial class GameState : Node, ICloneable
             return piece;
         }
         return null;
-    }
-    
-    public bool IsActionValid(ActionBase action, Piece piece)
-    {
-        // The piece must be of the current team
-        if (piece == null || piece.teamId != currentPlayerNum)
-        {
-            // GD.Print($"Invalid {action.GetType().Name} ({action.actionLocation.X}, {action.actionLocation.Y}): Piece null or wrong team.");
-            return false;
-        }
-        // Ignore if null
-        if (action == null)
-        {
-            GD.PushError($"Tried to Act on piece {piece.GetType().Name}, but the Action was null.");
-            return false;
-        }
-        // Ignore if invalid
-        if (!action.valid)
-        {
-            // GD.Print($"Invalid {action.GetType().Name} ({action.actionLocation.X}, {action.actionLocation.Y}): Action is invalid: {action.tags}");
-            return false;
-        }
-        return true;
     }
 
     public Piece GetFirstPieceAt(int x, int y)
@@ -228,6 +222,48 @@ public partial class GameState : Node, ICloneable
         pieces = GetPiecesAt(x, y);
         return pieces.Count > 0;
     }
+
+    public bool IsTargeted(Piece piece)
+    {
+        if (actionGrid.TryGetCellAt(piece.cell.x, piece.cell.y, out GridCell<ActionBase> cell))
+        {
+            foreach (var item in cell.items)
+            {
+                if (item is AttackAction attackAction)
+                {
+                    // If the attack is from another team, and valid, then return true
+                    if (piece.teamId != attackAction.owner.teamId)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    
+    public bool IsActionValid(ActionBase action, Piece piece)
+    {
+        // The piece must be of the current team
+        if (piece == null || piece.teamId != currentPlayerNum)
+        {
+            // GD.Print($"Invalid {action.GetType().Name} ({action.actionLocation.X}, {action.actionLocation.Y}): Piece null or wrong team.");
+            return false;
+        }
+        // Ignore if null
+        if (action == null)
+        {
+            GD.PushError($"Tried to Act on piece {piece.GetType().Name}, but the Action was null.");
+            return false;
+        }
+        // Ignore if invalid
+        if (!action.valid)
+        {
+            // GD.Print($"Invalid {action.GetType().Name} ({action.actionLocation.X}, {action.actionLocation.Y}): Action is invalid: {action.tags}");
+            return false;
+        }
+        return true;
+    }
     
     public bool TakeAction(ActionBase action, Piece piece)
     {
@@ -240,18 +276,37 @@ public partial class GameState : Node, ICloneable
         return true;
     }
 
-    public bool TakeActionAt(Vector2I actionLocation, Piece piece)
+    public bool DoesActionCheck(Vector2I actionLocation, Piece piece)
     {
-        // Get the possible actions for this piece
-        Array<ActionBase> possibleActions = piece.currentPossibleActions;
-        if (possibleActions.Count == 0)
+        // Simulate the movement, and check if the player is still in check
+        GameState newState = (GameState)Clone();
+        
+        // Do the actions, and go to the next turn
+        bool actionWorked = newState.DoActionsAt(actionLocation, newState.GetPiece(piece.id));
+        // If actions didn't work, then return true
+        if (!actionWorked)
+        {
+            newState.QueueFree();
+            return true;
+        }
+        newState.NextTurn();
+        
+        // Check if the player is still in check
+        GD.Print(newState.playerCheck[piece.teamId].ToString());
+        newState.QueueFree();
+        if (newState.playerCheck[piece.teamId] == CheckType.NONE)
         {
             return false;
         }
-        
+
+        return true;
+    }
+
+    private bool DoActionsAt(Vector2I actionLocation, Piece piece)
+    {
         bool didAct = false;
         // Loop through all actions, and find the ones at x, y.
-        foreach (ActionBase action in possibleActions)
+        foreach (ActionBase action in piece.currentPossibleActions)
         {
             if (action.actionLocation == actionLocation)
             {
@@ -259,6 +314,23 @@ public partial class GameState : Node, ICloneable
             }
         }
         return didAct;
+    }
+
+    public bool TakeActionAt(Vector2I actionLocation, Piece piece)
+    {
+        // Get the possible actions for this piece
+        if (piece.currentPossibleActions.Count == 0)
+        {
+            return false;
+        }
+        
+        // If the player is in check, make sure the actions are valid
+        if (DoesActionCheck(actionLocation, piece))
+        {
+            return false;
+        }
+
+        return DoActionsAt(actionLocation, piece);
     }
     
     
@@ -287,6 +359,12 @@ public partial class GameState : Node, ICloneable
 
             piece.NewTurn(this);
         }
+        
+        // Reset player check
+        for (int i = 0; i < playerCheck.Length; i++)
+        {
+            playerCheck[i] = CheckType.NONE;
+        }
 
         // Loop again, to disable certain check moves
         foreach (Piece piece in allPieces)
@@ -305,6 +383,18 @@ public partial class GameState : Node, ICloneable
                     if (item is AttackAction)
                     {
                         AttackAction attackAction = (AttackAction)item;
+                        // If attack is valid, and is able to check, then mark it down for the player
+                        if (playerCheck[piece.teamId] == CheckType.NONE)
+                        {
+                            if (attackAction.owner.teamId != piece.teamId)
+                            {
+                                if (!attackAction.verifyTags.Contains("no_check"))
+                                {
+                                    playerCheck[piece.teamId] = CheckType.IN_CHECK;
+                                }
+                            }
+                        }
+                        
                         attackAction.MakeInvalid();
                         if (attackAction.moveAction != null)
                         {
@@ -320,7 +410,6 @@ public partial class GameState : Node, ICloneable
                 {
                     continue;
                 }
-
                 foreach (var item in moveAction.cell.items)
                 {
                     if (item is not AttackAction attackAction)
@@ -340,6 +429,27 @@ public partial class GameState : Node, ICloneable
                     }
                 }
             }
+
+            // Check for a single valid move action. If there is none, and the piece is in
+            // check, then it's a possible checkmate
+
+            bool canMove = false;
+            foreach (ActionBase action in piece.currentPossibleActions)
+            {
+                if (action is MoveAction moveAction)
+                {
+                    if (moveAction.valid)
+                    {
+                        canMove = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!canMove && playerCheck[piece.teamId] == CheckType.IN_CHECK)
+            {
+                playerCheck[piece.teamId] = CheckType.POSSIBLE_CHECKMATE;
+            }
         }
     }
 
@@ -351,7 +461,7 @@ public partial class GameState : Node, ICloneable
             return;
         }
         // First, end turn
-        gameController.EmitSignal(GameController.SignalName.EndTurn);
+        EmitSignal(SignalName.EndTurn);
         // Tell all pieces that it's the next turn
         foreach (Piece piece in allPieces)
         {
@@ -383,21 +493,20 @@ public partial class GameState : Node, ICloneable
 
         // Tell all pieces that it's the next turn
         PiecesNewTurn();
-        gameController.EmitSignal(GameController.SignalName.NewTurn, currentPlayerNum);
+        EmitSignal(SignalName.NewTurn, currentPlayerNum);
     }
 
     public void NextTurn()
     {
         NextTurn(-1);
     }
-    
-    
+
     
 
     public object Clone()
     {
         // Initialise the new state
-        GameState newState = new(gameController);
+        GameState newState = new GameState(gameController);
         newState.Init();
 
         // Copy over the pieces and their actions
@@ -406,17 +515,72 @@ public partial class GameState : Node, ICloneable
             Piece newPiece = (Piece)piece.Clone();
             newState.allPieces.Add(newPiece);
             newState.grid.PlaceItemAt(newPiece, piece.cell.x, piece.cell.y);
+            System.Collections.Generic.Dictionary<int, ActionBase> actions = new System.Collections.Generic.Dictionary<int, ActionBase>();
+            System.Collections.Generic.Dictionary<int, List<int>> actionDependents = new System.Collections.Generic.Dictionary<int, List<int>>();
+            System.Collections.Generic.Dictionary<int, System.Collections.Generic.Dictionary<string, int>> extraLinks = new System.Collections.Generic.Dictionary<int, System.Collections.Generic.Dictionary<string, int>>();
             foreach (var action in piece.currentPossibleActions)
             {
                 ActionBase newAction = (ActionBase)action.Clone();
                 newPiece.AddAction(newAction);
-                newState.actionGrid.PlaceItemAt(newAction, action.cell.x, action.cell.y);
+                newAction.SetOwner(newPiece);
+                newState.actionGrid.PlaceItemAt(newAction, newAction.actionLocation.X, newAction.actionLocation.Y);
+                actions.Add(newAction.actionId, newAction);
+                // Get all the dependencies and get their ids.
+                List<int> dependents = new List<int>();
+                foreach (var dependent in action.dependents)
+                {
+                    dependents.Add(dependent.actionId);
+                }
+                actionDependents.Add(newAction.actionId, dependents);
+                
+                System.Collections.Generic.Dictionary<string, int> links = action.GetExtraCopyLinks();
+                /*if (links != null)
+                {
+                    string text = "{ ";
+                    foreach (var keyValue in links)
+                    {
+                        text += $"({keyValue.Key} :: {keyValue.Value}), ";
+                    }
+
+                    GD.Print($"{text} }}");
+                }*/
+
+                if (links != null && links.Count > 0)
+                {
+                    extraLinks.Add(newAction.actionId, links);
+                }
+            }
+            
+            // After actions are copied, create dependent links
+            foreach (var action in newPiece.currentPossibleActions)
+            {
+                if (actionDependents.TryGetValue(action.actionId, out List<int> dependents))
+                {
+                    foreach (var dependentId in dependents)
+                    {
+                        if (actions.TryGetValue(dependentId, out ActionBase dependent))
+                        {
+                            action.AddDependent(dependent);
+                        }
+                        else
+                        {
+                            GD.Print($"Missing dependent: {dependentId}");
+                        }
+                    }
+                }
+                
+                // Also give it the information for extra links
+                if (extraLinks.TryGetValue(action.actionId, out System.Collections.Generic.Dictionary<string, int> actionLinks))
+                {
+                    action.SetExtraCopyLinks(newState, actionLinks, actions);
+                }
             }
         }
         
         // Copy over variables
         newState.currentPlayerNum = currentPlayerNum;
         newState.gridSize = gridSize;
+        newState.lastId = lastId;
 
         return newState;
     }

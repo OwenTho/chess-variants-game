@@ -97,8 +97,7 @@ public partial class GameController : Node
 
     public bool TryGetFirstPieceAt(int x, int y, out Piece piece)
     {
-        piece = currentGameState.GetFirstPieceAt(x, y);
-        return piece != null;
+        return currentGameState.TryGetFirstPieceAt(x, y, out piece);
     }
 
     public bool HasPieceAt(int x, int y)
@@ -118,8 +117,7 @@ public partial class GameController : Node
 
     public bool TryGetPiecesAt(int x, int y, out Array<Piece> pieces)
     {
-        pieces = currentGameState.GetPiecesAt(x, y);
-        return pieces.Count > 0;
+        return currentGameState.TryGetPiecesAt(x, y, out pieces);
     }
 
     public bool TakeAction(ActionBase action, Piece piece)

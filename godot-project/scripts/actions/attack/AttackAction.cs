@@ -77,8 +77,48 @@ public partial class AttackAction : ActionBase
 
     public override object Clone()
     {
-        AttackAction newMove = new AttackAction(null, actionLocation, attackLocation, moveAction);
-        CloneTo(newMove);
-        return newMove;
+        AttackAction newAttack = new AttackAction(null, actionLocation, attackLocation, moveAction);
+        CloneTo(newAttack);
+        return newAttack;
+    }
+
+    public override System.Collections.Generic.Dictionary<string, int> GetExtraCopyLinks()
+    {
+        System.Collections.Generic.Dictionary<string, int> newDictionary = new();
+        if (moveAction != null)
+        {
+            newDictionary.Add("moveAction", moveAction.actionId);
+        }
+
+        if (specificVictims != null)
+        {
+            for (int i = 0; i < specificVictims.Count; i++)
+            {
+                newDictionary.Add($"victim_{i}", specificVictims[i].id);
+            }
+        }
+
+        return newDictionary;
+    }
+
+    public override void SetExtraCopyLinks(GameState game, System.Collections.Generic.Dictionary<string, int> extraLinks, System.Collections.Generic.Dictionary<int, ActionBase> links)
+    {
+        if (extraLinks.TryGetValue("attackAction", out int attackActionId))
+        {
+            if (links.TryGetValue(attackActionId, out ActionBase moveAction))
+            {
+                this.moveAction = (MoveAction)moveAction;
+            }
+        }
+
+        int i = 0;
+        while (extraLinks.TryGetValue($"victim_{i}", out int id))
+        {
+            if (game.TryGetPiece(id, out Piece piece))
+            {
+                specificVictims.Add(piece);
+            }
+            i++;
+        }
     }
 }
