@@ -341,6 +341,31 @@ public partial class GameController : Node
                 continue;
             }
 
+            foreach (ActionBase action in piece.currentPossibleActions)
+            {
+                if (action is not MoveAction moveAction)
+                {
+                    continue;
+                }
+
+                foreach (var item in moveAction.cell.items)
+                {
+                    if (item is not AttackAction attackAction)
+                    {
+                        continue;
+                    }
+                    // Ignore actions that can't check
+                    if (attackAction.verifyTags.Contains("no_check"))
+                    {
+                        continue;
+                    }
+                    if (attackAction.owner.teamId != piece.teamId)
+                    {
+                        moveAction.MakeInvalid();
+                    }
+                }
+            }
+            
             if (actionGrid.TryGetCellAt(piece.cell.x, piece.cell.y, out GridCell<ActionBase> cell))
             {
                 foreach (GridItem<ActionBase> item in cell.items)
@@ -353,32 +378,6 @@ public partial class GameController : Node
                         {
                             attackAction.moveAction.MakeInvalid();
                         }
-                    }
-                }
-            }
-
-            foreach (ActionBase action in piece.currentPossibleActions)
-            {
-                if (action is not MoveAction)
-                {
-                    continue;
-                }
-                MoveAction moveAction = (MoveAction)action;
-                foreach (var item in moveAction.cell.items)
-                {
-                    if (item is not AttackAction)
-                    {
-                        continue;
-                    }
-                    // Ignore actions that can't check or are invalid
-                    AttackAction attackAction = (AttackAction)item;
-                    if (attackAction.verifyTags.Contains("no_check") || !attackAction.valid)
-                    {
-                        continue;
-                    }
-                    if (attackAction.owner.teamId != piece.teamId)
-                    {
-                        moveAction.MakeInvalid();
                     }
                 }
             }

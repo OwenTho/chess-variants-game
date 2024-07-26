@@ -13,4 +13,3 @@ texture = ExtResource("2_5orig")
 [node name="RemoteTransform2D" type="RemoteTransform2D" parent="."]
 remote_path = NodePath("../SprPiece")
 update_rotation = false
-update_scale = false
