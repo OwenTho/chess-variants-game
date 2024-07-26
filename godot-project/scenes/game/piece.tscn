@@ -1,10 +1,10 @@
 [gd_scene load_steps=3 format=3 uid="uid://de3wktgc8oh51"]
 
-[ext_resource type="Script" path="res://scripts/pieces/visual/piece.gd" id="1_y4q1a"]
+[ext_resource type="Script" path="res://scripts/piece/visual/piece.gd" id="1_uexo4"]
 [ext_resource type="Texture2D" uid="uid://doewls0xy2qhi" path="res://assets/texture/piece/default.png" id="2_5orig"]
 
 [node name="Piece" type="Node2D" groups=["piece"]]
-script = ExtResource("1_y4q1a")
+script = ExtResource("1_uexo4")
 
 [node name="SprPiece" type="Sprite2D" parent="."]
 top_level = true

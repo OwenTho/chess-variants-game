@@ -1,5 +1,5 @@
 ﻿
-public abstract class GameItem : GridItem<GameItem>
+public abstract partial class GameItem : GridItem<GameItem>
 {
     
 }
