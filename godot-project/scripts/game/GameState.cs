@@ -18,6 +18,8 @@ public partial class GameState : Node
     public Vector2I gridSize;
 
     private Array<Piece> allPieces;
+    
+    bool needToCheckCheckmate = true;
 
     public enum CheckType
     {
@@ -280,25 +282,26 @@ public partial class GameState : Node
     {
         // Simulate the movement, and check if the player is still in check
         GameState newState = (GameState)Clone();
+        newState.needToCheckCheckmate = false;
         
         // Do the actions, and go to the next turn
         bool actionWorked = newState.DoActionsAt(actionLocation, newState.GetPiece(piece.id));
         // If actions didn't work, then return true
         if (!actionWorked)
         {
-            newState.QueueFree();
+            newState.Free();
             return true;
         }
         newState.NextTurn();
         
         // Check if the player is still in check
         GD.Print(newState.playerCheck[piece.teamId].ToString());
-        newState.QueueFree();
-        if (newState.playerCheck[piece.teamId] == CheckType.NONE)
+        CheckType result = newState.playerCheck[piece.teamId];
+        newState.Free();
+        if (result == CheckType.NONE)
         {
             return false;
         }
-
         return true;
     }
 
@@ -432,7 +435,6 @@ public partial class GameState : Node
 
             // Check for a single valid move action. If there is none, and the piece is in
             // check, then it's a possible checkmate
-
             bool canMove = false;
             foreach (ActionBase action in piece.currentPossibleActions)
             {
@@ -449,6 +451,80 @@ public partial class GameState : Node
             if (!canMove && playerCheck[piece.teamId] == CheckType.IN_CHECK)
             {
                 playerCheck[piece.teamId] = CheckType.POSSIBLE_CHECKMATE;
+            }
+        }
+
+        if (!needToCheckCheckmate)
+        {
+            return;
+        }
+        
+        // Check if each player is in check
+        for (int teamNum = 0; teamNum < GameController.NUMBER_OF_PLAYERS; teamNum++)
+        {
+            // Ignore if not in check
+            if (playerCheck[teamNum] == CheckType.NONE)
+            {
+                continue;
+            }
+            
+            // If the team is not playing, then they've lost (given they can't move out of check)
+            if (teamNum != currentPlayerNum)
+            {
+                // TODO: End Game / remove player from game
+                continue;
+            }
+            
+            // If they are playing, then check if they're in check or checkmate
+            if (playerCheck[teamNum] == CheckType.IN_CHECK)
+            {
+                // Check can be ignored, as it means the King, at least, can move out of Check
+                continue;
+            }
+            
+            // If the King is possibly in Checkmate, each possible action needs to be checked.
+            bool foundNoCheck = false;
+            foreach (var piece in allPieces)
+            {
+                // Only check for the current team being checked
+                if (piece.teamId != teamNum)
+                {
+                    continue;
+                }
+                // For each piece, we need to check if the piece can make any action that results
+                // in no check. If there is a SINGLE action, then we can stop checking. Otherwise, we continue.
+                // In the instance that the player is in checkmate, they are out of the game.
+                HashSet<Vector2I> checkedLocations = new HashSet<Vector2I>();
+                foreach (var action in piece.currentPossibleActions)
+                {
+                    // If action is invalid, then ignore it
+                    if (!action.valid)
+                    {
+                        continue;
+                    }
+                    // If action location is already done, ignore
+                    if (checkedLocations.Contains(action.actionLocation))
+                    {
+                        continue;
+                    }
+                    checkedLocations.Add(action.actionLocation);
+                    if (!DoesActionCheck(action.actionLocation, piece))
+                    {
+                        foundNoCheck = true;
+                        break;
+                    }
+                }
+
+                if (foundNoCheck)
+                {
+                    break;
+                }
+            }
+
+            // If no check was found, then the player has lost.
+            if (!foundNoCheck)
+            {
+                GD.Print("Checkmate!");
             }
         }
     }
