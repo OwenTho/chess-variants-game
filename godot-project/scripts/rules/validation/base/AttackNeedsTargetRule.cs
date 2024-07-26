@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 internal partial class AttackNeedsTargetRule : ValidationRuleBase
 {
-    public override void CheckAction(GameController game, Piece piece, ActionBase action)
+    public override void CheckAction(GameState game, Piece piece, ActionBase action)
     {
         // Ignore if not attack
         if (action is not AttackAction)

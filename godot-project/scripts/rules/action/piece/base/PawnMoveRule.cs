@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 internal partial class PawnMoveRule : ActionRuleBase
 {
-    public override void AddPossibleActions(GameController game, Piece piece)
+    public override void AddPossibleActions(GameState game, Piece piece)
     {
         /// Movement
         // Allow moving forward a number of spaces
@@ -51,7 +51,7 @@ internal partial class PawnMoveRule : ActionRuleBase
         CheckEnPassant(game, piece, thisPosition + Vector2I.Right);
     }
 
-    private void CheckEnPassant(GameController game, Piece piece, Vector2I position)
+    private void CheckEnPassant(GameState game, Piece piece, Vector2I position)
     {
         if (game.TryGetPiecesAt(position.X, position.Y, out Array<Piece> pieces))
         {
@@ -72,7 +72,7 @@ internal partial class PawnMoveRule : ActionRuleBase
         }
     }
 
-    private bool CheckForPawn(GameController game, Vector2I position)
+    private bool CheckForPawn(GameState game, Vector2I position)
     {
         if (game.TryGetPiecesAt(position.X, position.Y, out Array<Piece> pieces))
         {
@@ -88,7 +88,7 @@ internal partial class PawnMoveRule : ActionRuleBase
         return false;
     }
 
-    public override void EndTurn(GameController game, Piece piece)
+    public override void EndTurn(GameState game, Piece piece)
     {
         // If next to a pawn, EnPassant needs another check
         if (CheckForPawn(game, piece.cell.pos + Vector2I.Left) || CheckForPawn(game, piece.cell.pos + Vector2I.Right))

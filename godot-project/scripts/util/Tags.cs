@@ -1,5 +1,6 @@
 ﻿using Godot;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 
 // GodotObject wrapper for a string HashSet, so that it can be used in GDScript if needed.
-public partial class Tags
+public partial class Tags : IEnumerable<string>
 {
     private HashSet<string> tags = new HashSet<string>();
     public int Count { get { return tags.Count; } }
@@ -31,6 +32,11 @@ public partial class Tags
         tags.Clear();
     }
 
+    public IEnumerator<string> GetEnumerator()
+    {
+        return tags.GetEnumerator();
+    }
+
     public override string ToString()
     {
         string text = "{ ";
@@ -43,5 +49,10 @@ public partial class Tags
 
         text += " }";
         return text;
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }

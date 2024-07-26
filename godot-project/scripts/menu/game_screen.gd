@@ -20,7 +20,7 @@ func _ready() -> void:
 func _on_init():
 	cursor.board = GameManager.board
 	
-	Debug.stats.add_property(GameManager.game_controller, "currentPlayerNum")
+	Debug.stats.add_property(GameManager.game_state, "currentPlayerNum")
 
 func _process(delta) -> void:
 	if Input.is_action_pressed("mouse_right"):
@@ -106,12 +106,12 @@ func request_action(piece_id: int, action_location: Vector2i) -> void:
 		return
 	
 	# If it's the wrong player number, ignore
-	var cur_player_num = GameManager.game_controller.currentPlayerNum
+	var cur_player_num = GameManager.game_state.currentPlayerNum
 	if Lobby.player_nums[cur_player_num] != multiplayer.get_remote_sender_id():
 		return
 	
 	# Get piece
-	var piece = GameManager.game_controller.GetPiece(piece_id)
+	var piece = GameManager.game_state.GetPiece(piece_id)
 	
 	# If piece id is invalid, ignore
 	if piece == null:
@@ -126,7 +126,7 @@ func request_action(piece_id: int, action_location: Vector2i) -> void:
 		return
 	
 	# Take the actions
-	if not GameManager.game_controller.TakeActionAt(action_location, piece):
+	if not GameManager.game_state.TakeActionAt(action_location, piece):
 		# If it failed, return
 		return
 	
@@ -134,18 +134,18 @@ func request_action(piece_id: int, action_location: Vector2i) -> void:
 	take_action_at.rpc(piece_id, action_location)
 	
 	# Go to the next turn
-	GameManager.game_controller.NextTurn()
+	GameManager.game_state.NextTurn()
 
 @rpc("authority", "call_remote", "reliable")
 func take_action_at(piece_id: int, action_location: Vector2i):
-	var piece = GameManager.game_controller.GetPiece(piece_id)
+	var piece = GameManager.game_state.GetPiece(piece_id)
 	if piece != null:
-		GameManager.game_controller.TakeActionAt(action_location, piece)
+		GameManager.game_state.TakeActionAt(action_location, piece)
 
 @rpc("authority", "call_remote", "reliable")
 func next_turn(new_player_num: int) -> void:
 	remove_selection()
-	GameManager.game_controller.NextTurn(new_player_num)
+	GameManager.game_state.NextTurn(new_player_num)
 
 func _on_requested_action(action_location: Vector2i, piece) -> void:
 	request_action.rpc(piece.id, action_location)

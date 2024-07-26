@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 internal abstract partial class LineMoveRule : ActionRuleBase
 {
 
-    public override void AddPossibleActions(GameController game, Piece piece)
+    public override void AddPossibleActions(GameState game, Piece piece)
     {
         int maxForward = piece.info.level;
         Vector2I thisPosition = new Vector2I(piece.cell.x, piece.cell.y);

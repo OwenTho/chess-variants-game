@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 internal partial class InsideBoardRule : ValidationRuleBase
 {
-    public override void CheckAction(GameController game, Piece piece, ActionBase action)
+    public override void CheckAction(GameState game, Piece piece, ActionBase action)
     {
         if (action.actionLocation.X < 0 || action.actionLocation.X >= game.gridSize.X)
         {

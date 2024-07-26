@@ -3,16 +3,14 @@ using System.Collections.Generic;
 
 public partial class GameController : Node
 {
-    Registry<PieceInfo> pieceInfoRegistry = new Registry<PieceInfo>();
-    Registry<ActionRuleBase> actionRuleRegistry = new Registry<ActionRuleBase>();
-    Registry<ValidationRuleBase> validationRuleRegistry = new Registry<ValidationRuleBase>();
+    internal Registry<PieceInfo> pieceInfoRegistry = new Registry<PieceInfo>();
+    internal Registry<ActionRuleBase> actionRuleRegistry = new Registry<ActionRuleBase>();
+    internal Registry<ValidationRuleBase> validationRuleRegistry = new Registry<ValidationRuleBase>();
     List<string> initialValidationRules = new List<string>();
 
     public void FullInit()
     {
-        lastId = 0;
-        InitGrid();
-        InitActionGrid();
+        InitGameState();
         InitValidationRules();
         InitActionRules();
         InitPieceInfo();
@@ -22,18 +20,12 @@ public partial class GameController : Node
         AddChild(validationRuleRegistry);
     }
 
-    public Grid<GameItem> InitGrid()
+    public GameState InitGameState()
     {
-        grid = new Grid<GameItem>();
-        AddChild(grid);
-        return grid;
-    }
-
-    public Grid<ActionBase> InitActionGrid()
-    {
-        actionGrid = new Grid<ActionBase>();
-        AddChild(actionGrid);
-        return actionGrid;
+        currentGameState = new GameState(this);
+        currentGameState.Init();
+        AddChild(currentGameState);
+        return currentGameState;
     }
 
     internal void InitValidationRules()

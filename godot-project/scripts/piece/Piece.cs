@@ -1,7 +1,8 @@
+using System;
 using Godot;
 using Godot.Collections;
 
-public partial class Piece : GameItem
+public partial class Piece : GameItem, ICloneable
 {
     public int timesMoved = 0;
     internal int teamId = 0;
@@ -42,6 +43,11 @@ public partial class Piece : GameItem
             possibleActions.Add(action);
         }
 
+        internal void Remove(ActionBase action)
+        {
+            possibleActions.Remove(action);
+        }
+
         internal void Clear()
         {
             possibleActions.Clear();
@@ -58,7 +64,7 @@ public partial class Piece : GameItem
         needsActionUpdate = true;
     }
     
-    public Array<ActionBase> UpdateActions(GameController game)
+    public Array<ActionBase> UpdateActions(GameState game)
     {
         // If the piece isn't on a cell, ignore
         if (cell == null)
@@ -95,7 +101,7 @@ public partial class Piece : GameItem
         return currentPossibleActions;
     }
 
-    public Array<ActionBase> GetPossibleActions(GameController game)
+    public Array<ActionBase> GetPossibleActions(GameState game)
     {
         // Store current needsActions
         bool temp1 = needsActionUpdate;
@@ -121,12 +127,17 @@ public partial class Piece : GameItem
         actionsToTake.Add(action);
     }
 
-    private Array<ActionBase> VerifyMyActions(GameController game)
+    public void RemoveAction(ActionBase action)
+    {
+        actionsToTake.Remove(action);
+    }
+
+    private Array<ActionBase> VerifyMyActions(GameState game)
     {
         return ValidateActions(game, actionsToTake.possibleActions);
     }
 
-    public Array<ActionBase> ValidateActions(GameController game, Array<ActionBase> actions)
+    public Array<ActionBase> ValidateActions(GameState game, Array<ActionBase> actions)
     {
         Array<ActionBase> validActions = new Array<ActionBase>();
 
@@ -174,7 +185,7 @@ public partial class Piece : GameItem
         actionsToTake.Clear();
     }
 
-    public void NewTurn(GameController game)
+    public void NewTurn(GameState game)
     {
         if (info == null)
         {
@@ -186,7 +197,7 @@ public partial class Piece : GameItem
         }
     }
 
-    public void EndTurn(GameController game)
+    public void EndTurn(GameState game)
     {
         if (info == null)
         {
@@ -196,5 +207,12 @@ public partial class Piece : GameItem
         {
             pieceRule.rule.EndTurn(game, this);
         }
+    }
+
+    public object Clone()
+    {
+        Piece newPiece = new();
+
+        return newPiece;
     }
 }

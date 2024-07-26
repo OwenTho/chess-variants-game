@@ -9,12 +9,19 @@ public partial class MoveAction : ActionBase
         this.moveLocation = moveLocation;
     }
 
-    public override void ActOn(GameController game, Piece piece)
+    public override void ActOn(GameState game, Piece piece)
     {
         // Move piece
         game.grid.PlaceItemAt(piece, actionLocation.X, actionLocation.Y);
         // Now that piece has moved, it needs to be updated
         piece.EnableActionsUpdate();
         piece.timesMoved += 1;
+    }
+
+    public override object Clone()
+    {
+        MoveAction newMove = new MoveAction(null, actionLocation, moveLocation);
+        CloneTo(newMove);
+        return newMove;
     }
 }

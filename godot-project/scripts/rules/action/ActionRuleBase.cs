@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 public abstract partial class ActionRuleBase : RuleBase
 {
-    public abstract void AddPossibleActions(GameController game, Piece piece);
+    public abstract void AddPossibleActions(GameState game, Piece piece);
 
     public enum AttackType
     {
@@ -53,12 +53,12 @@ public abstract partial class ActionRuleBase : RuleBase
         return newAttack;
     }
     
-    public virtual void NewTurn(GameController game, Piece piece)
+    public virtual void NewTurn(GameState game, Piece piece)
     {
 
     }
 
-    public virtual void EndTurn(GameController game, Piece piece)
+    public virtual void EndTurn(GameState game, Piece piece)
     {
 
     }

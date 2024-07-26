@@ -2,6 +2,7 @@ extends Node
 
 var game_controller_script: CSharpScript = preload("res://scripts/game/GameController.cs")
 var game_controller: Object
+var game_state: Object
 
 var game_scene: PackedScene = preload("res://scenes/game/game_screen.tscn")
 var piece_scene: PackedScene = preload("res://scenes/game/piece.tscn")
@@ -48,7 +49,8 @@ func init() -> void:
 	
 	# Initialise the game
 	game_controller.FullInit()
-	grid = game_controller.grid
+	game_state = game_controller.currentGameState
+	grid = game_state.grid
 	
 	has_init.emit()
 
@@ -60,7 +62,7 @@ func setup_signals():
 	
 
 func start_game():
-	game_controller.StartGame()
+	game_state.StartGame()
 
 func init_board() -> void:
 	# Add all of the pieces
@@ -138,7 +140,7 @@ func place_piece(piece_id: String, link_id: int, team: int, x: int, y: int, id: 
 
 func place_matching(piece_id: String, id: int, x: int, y: int) -> void:
 	place_piece(piece_id, id, 0, x, y)
-	place_piece(piece_id, id, 1, x, game_controller.gridSize.y - y - 1)
+	place_piece(piece_id, id, 1, x, game_state.gridSize.y - y - 1)
 
 func get_piece_id(id: int) -> Piece2D:
 	for piece in get_tree().get_nodes_in_group("piece"):

@@ -2,7 +2,7 @@
 
 internal partial class NoEnemyOverlapRule : ValidationRuleBase
 {
-    public override void CheckAction(GameController game, Piece piece, ActionBase action)
+    public override void CheckAction(GameState game, Piece piece, ActionBase action)
     {
         // Only continue if action is a move action
         if (action is not MoveAction)

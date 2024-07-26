@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public abstract partial class ValidationRuleBase : RuleBase
 {
-    public abstract void CheckAction(GameController game, Piece piece, ActionBase action);
+    public abstract void CheckAction(GameState game, Piece piece, ActionBase action);
 
     public Array<Piece> GetTeamPieces(Array<Piece> pieces, int teamId, bool sameTeam = true)
     {

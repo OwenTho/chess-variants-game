@@ -3,110 +3,23 @@ using Godot.Collections;
 
 public partial class GameController : Node
 {
-    public Grid<GameItem> grid { get; private set; }
-    public Grid<ActionBase> actionGrid { get; private set; }
-
-    public Vector2I gridSize = new Vector2I(8, 8);
-
-    private int lastId = 0;
+    public GameState currentGameState { get; private set; }
 
     public const int NUMBER_OF_PLAYERS = 2;
 
-    public const string king_id = "king";
-
-    public int currentPlayerNum { get; private set; } = 0;
-
-    public Array<Piece> allPieces = new Array<Piece>();
-
-    public void SetPlayerNum(int newPlayerNum)
-    {
-        currentPlayerNum = newPlayerNum;
-        currentPlayerNum %= NUMBER_OF_PLAYERS;
-        if (currentPlayerNum < 0)
-        {
-            currentPlayerNum = 0;
-        }
-    }
-
     public Piece PlacePiece(string pieceId, int linkId, int teamId, int x, int y, int id = -1)
     {
-        PieceInfo info = pieceInfoRegistry.GetValue(pieceId);
-        if (info == null)
-        {
-            GD.PushWarning("Tried to place a piece with {pieceId}, even though it hasn't been registered!");
-            return null;
-        }
-
-        
-        Piece newPiece = new Piece();
-        allPieces.Add(newPiece);
-        newPiece.info = info;
-        if (id != -1)
-        {
-            newPiece.id = id;
-        } else
-        {
-            newPiece.id = lastId;
-            lastId += 1;
-        }
-        newPiece.linkId = linkId;
-        newPiece.teamId = teamId;
-
-        newPiece.forwardDirection = GetTeamDirection(teamId);
-
-        grid.PlaceItemAt(newPiece, x, y);
-
-        return newPiece;
+        return currentGameState.PlacePiece(pieceId, linkId, teamId, x, y, id);
     }
 
     public Piece GetPiece(int pieceId)
     {
-        foreach (Piece piece in allPieces)
-        {
-            if (piece.id == pieceId)
-            {
-                return piece;
-            }
-        }
-        return null;
+        return currentGameState.GetPiece(pieceId);
     }
 
     public bool TryGetPiece(int pieceId, out Piece piece)
     {
-        piece = GetPiece(pieceId);
-        return piece != null;
-    }
-
-    public void TakePiece(Piece piece)
-    {
-        // Remove piece from board
-        grid.RemoveItem(piece);
-
-        // Move to takenPieces
-        allPieces.Remove(piece);
-
-        // Free the Godot data
-        piece.QueueFree();
-
-        // Remove the actions from the grid
-        foreach (ActionBase action in piece.currentPossibleActions)
-        {
-            action.QueueFree();
-            action.cell.RemoveItem(action);
-        }
-
-        // Emit signal
-        EmitSignal(SignalName.PieceRemoved, piece);
-    }
-
-    public Piece TakePiece(int pieceId)
-    {
-        if (TryGetPiece(pieceId, out Piece piece))
-        {
-            TakePiece(piece);
-            return piece;
-        }
-        return null;
+        return currentGameState.TryGetPiece(pieceId, out piece);
     }
 
     public Vector2I GetTeamDirection(int teamId)
@@ -142,144 +55,6 @@ public partial class GameController : Node
         return actionRuleRegistry.GetValue(key);
     }
 
-
-    public bool IsActionValid(ActionBase action, Piece piece)
-    {
-        // The piece must be of the current team
-        if (piece == null || piece.teamId != currentPlayerNum)
-        {
-            // GD.Print($"Invalid {action.GetType().Name} ({action.actionLocation.X}, {action.actionLocation.Y}): Piece null or wrong team.");
-            return false;
-        }
-        // Ignore if null
-        if (action == null)
-        {
-            GD.PushError($"Tried to Act on piece {piece.GetType().Name}, but the Action was null.");
-            return false;
-        }
-        // Ignore if invalid
-        if (!action.valid)
-        {
-            // GD.Print($"Invalid {action.GetType().Name} ({action.actionLocation.X}, {action.actionLocation.Y}): Action is invalid: {action.tags}");
-            return false;
-        }
-        return true;
-    }
-
-    public Piece GetFirstPieceAt(int x, int y)
-    {
-        if (grid.TryGetCellAt(x, y, out GridCell<GameItem> cell)) {
-            foreach (var item in cell.items)
-            {
-                if (item is Piece)
-                {
-                    return (Piece)item;
-                }
-            }
-        }
-        return null;
-    }
-
-    public bool TryGetFirstPieceAt(int x, int y, out Piece piece)
-    {
-        piece = GetFirstPieceAt(x, y);
-        return piece != null;
-    }
-
-    public bool HasPieceAt(int x, int y)
-    {
-        if (grid.TryGetCellAt(x, y, out GridCell<GameItem> cell))
-        {
-            foreach (var item in cell.items)
-            {
-                if (item is Piece)
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    public bool HasPieceIdAt(string pieceId, int x, int y)
-    {
-        if (grid.TryGetCellAt(x, y, out GridCell<GameItem> cell))
-        {
-            foreach (var item in cell.items)
-            {
-                if (item is Piece)
-                {
-                    Piece piece = (Piece)item;
-                    // If no info, ignore
-                    if (piece.info == null)
-                    {
-                        continue;
-                    }
-                    // If piece id matches, return true
-                    if (piece.info.pieceId == pieceId)
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    public Array<Piece> GetPiecesAt(int x, int y)
-    {
-        Array<Piece> pieces = new Array<Piece>();
-        if (grid.TryGetCellAt(x, y, out GridCell<GameItem> cell))
-        {
-            foreach (var item in cell.items)
-            {
-                if (item is Piece)
-                {
-                    pieces.Add((Piece)item);
-                }
-            }
-        }
-        return pieces;
-    }
-
-    public bool TryGetPiecesAt(int x, int y, out Array<Piece> pieces)
-    {
-        pieces = GetPiecesAt(x, y);
-        return pieces.Count > 0;
-    }
-
-    public bool TakeAction(ActionBase action, Piece piece)
-    {
-        if (!IsActionValid(action, piece))
-        {
-            return false;
-        }
-
-        action.ActOn(this, piece);
-        return true;
-    }
-
-    public bool TakeActionAt(Vector2I actionLocation, Piece piece)
-    {
-        // Get the possible actions for this piece
-        Array<ActionBase> possibleActions = piece.currentPossibleActions;
-        if (possibleActions.Count == 0)
-        {
-            return false;
-        }
-        
-        bool didAct = false;
-        // Loop through all actions, and find the ones at x, y.
-        foreach (ActionBase action in possibleActions)
-        {
-            if (action.actionLocation == actionLocation)
-            {
-                didAct |= TakeAction(action, piece);
-            }
-        }
-        return didAct;
-    }
-
     public void RequestAction(ActionBase action, Piece piece)
     {
         // Ignore if null
@@ -291,13 +66,12 @@ public partial class GameController : Node
 
         // Request at the location
         RequestActionsAt(action.actionLocation, piece);
-        return;
     }
 
     public void RequestActionsAt(Vector2I actionLocation, Piece piece)
     {
         // The piece must be of the current team
-        if (piece.teamId != currentPlayerNum)
+        if (piece.teamId != currentGameState.currentPlayerNum)
         {
             return;
         }
@@ -305,130 +79,56 @@ public partial class GameController : Node
         // Tell networking "I want to act this piece on this location"
         EmitSignal(SignalName.RequestedActionAt, actionLocation, piece);
     }
-
-    public void StartGame()
+    
+    
+    
+    
+    // Function calls to the currentGameState for easier access
+    
+    public bool IsActionValid(ActionBase action, Piece piece)
     {
-        // Tell all pieces to update their possible moves
-        PiecesNewTurn();
+        return currentGameState.IsActionValid(action, piece);
     }
 
-    private void PiecesNewTurn()
+    public Piece GetFirstPieceAt(int x, int y)
     {
-        foreach (Piece piece in allPieces)
-        {
-            bool addToGrid = piece.needsActionUpdate;
-            // Update all the actions
-            piece.UpdateActions(this);
-            // Add all the actions to the Grid, if they need to be.
-            if (addToGrid)
-            {
-                foreach (ActionBase action in piece.currentPossibleActions)
-                {
-                    actionGrid.PlaceItemAt(action, action.actionLocation.X, action.actionLocation.Y);
-                }
-            }
-
-            piece.NewTurn(this);
-        }
-
-        // Loop again, to disable certain check moves
-        foreach (Piece piece in allPieces)
-        {
-            // If it's the king, disable any attacks on it and stop it from moving into
-            // a space with check
-            if (piece.info.pieceId != king_id)
-            {
-                continue;
-            }
-
-            foreach (ActionBase action in piece.currentPossibleActions)
-            {
-                if (action is not MoveAction moveAction)
-                {
-                    continue;
-                }
-
-                foreach (var item in moveAction.cell.items)
-                {
-                    if (item is not AttackAction attackAction)
-                    {
-                        continue;
-                    }
-                    // Ignore actions that can't check
-                    if (attackAction.verifyTags.Contains("no_check"))
-                    {
-                        continue;
-                    }
-                    if (attackAction.owner.teamId != piece.teamId)
-                    {
-                        moveAction.MakeInvalid();
-                    }
-                }
-            }
-            
-            if (actionGrid.TryGetCellAt(piece.cell.x, piece.cell.y, out GridCell<ActionBase> cell))
-            {
-                foreach (GridItem<ActionBase> item in cell.items)
-                {
-                    if (item is AttackAction)
-                    {
-                        AttackAction attackAction = (AttackAction)item;
-                        attackAction.MakeInvalid();
-                        if (attackAction.moveAction != null)
-                        {
-                            attackAction.moveAction.MakeInvalid();
-                        }
-                    }
-                }
-            }
-        }
+        return currentGameState.GetFirstPieceAt(x, y);
     }
 
-    public void NextTurn(int newPlayerNum)
+    public bool TryGetFirstPieceAt(int x, int y, out Piece piece)
     {
-        // If it's already this player's turn, ignore
-        if (newPlayerNum == currentPlayerNum)
-        {
-            return;
-        }
-        // First, end turn
-        EmitSignal(SignalName.EndTurn);
-        // Tell all pieces that it's the next turn
-        foreach (Piece piece in allPieces)
-        {
-            // Tell the piece it's the end of the turn. It's
-            // possible that the piece will request actions to
-            // be remade as a result.
-            piece.EndTurn(this);
-            // Remove all actions from the Grid if the piece needs updating
-            if (piece.needsActionUpdate)
-            {
-                foreach (ActionBase action in piece.currentPossibleActions)
-                {
-                    if (action.cell != null)
-                    {
-                        action.cell.RemoveItem(action);
-                    }
-                }
-
-                piece.ClearActions();
-            }
-        }
-
-        // Move to the next player
-        if (newPlayerNum <= -1)
-        {
-            newPlayerNum = currentPlayerNum + 1;
-        }
-        SetPlayerNum(newPlayerNum);
-
-        // Tell all pieces that it's the next turn
-        PiecesNewTurn();
-        EmitSignal(SignalName.NewTurn, currentPlayerNum);
+        piece = currentGameState.GetFirstPieceAt(x, y);
+        return piece != null;
     }
 
-    public void NextTurn()
+    public bool HasPieceAt(int x, int y)
     {
-        NextTurn(-1);
+        return currentGameState.HasPieceAt(x, y);
+    }
+
+    public bool HasPieceIdAt(string pieceId, int x, int y)
+    {
+        return currentGameState.HasPieceIdAt(pieceId, x, y);
+    }
+
+    public Array<Piece> GetPiecesAt(int x, int y)
+    {
+        return currentGameState.GetPiecesAt(x, y);
+    }
+
+    public bool TryGetPiecesAt(int x, int y, out Array<Piece> pieces)
+    {
+        pieces = currentGameState.GetPiecesAt(x, y);
+        return pieces.Count > 0;
+    }
+
+    public bool TakeAction(ActionBase action, Piece piece)
+    {
+        return currentGameState.TakeAction(action, piece);
+    }
+
+    public bool TakeActionAt(Vector2I actionLocation, Piece piece)
+    {
+        return currentGameState.TakeActionAt(actionLocation, piece);
     }
 }

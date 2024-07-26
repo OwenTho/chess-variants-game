@@ -1,7 +1,8 @@
-﻿using Godot;
+﻿using System;
+using Godot;
 using System.Collections.Generic;
 
-public abstract partial class ActionBase : GridItem<ActionBase>
+public abstract partial class ActionBase : GridItem<ActionBase>, ICloneable
 {
     public Piece owner { get; private set; }
     public Vector2I actionLocation;
@@ -33,7 +34,7 @@ public abstract partial class ActionBase : GridItem<ActionBase>
         this.owner = owner;
     }
 
-    public abstract void ActOn(GameController game, Piece piece);
+    public abstract void ActOn(GameState game, Piece piece);
 
     public void MakeDependentsInvalid()
     {
@@ -321,5 +322,68 @@ public abstract partial class ActionBase : GridItem<ActionBase>
         verifyTags.Clear();
         invalidTags.Clear();
         invalidTagCounts.Clear();
+    }
+
+    public abstract object Clone();
+
+    protected void CloneTo(ActionBase action)
+    {
+        // First clear the action
+        action.verifyTags.Clear();
+        action.invalidTags.Clear();
+        action.tags.Clear();
+        action.invalidTagCounts.Clear();
+        
+        // Then copy over the tags
+        foreach (var tag in tags)
+        {
+            action.tags.Add(tag);
+        }
+        
+        foreach (var tag in verifyTags)
+        {
+            action.verifyTags.Add(tag);
+        }
+
+        foreach (var tag in invalidTags)
+        {
+            action.invalidTags.Add(tag);
+        }
+
+        foreach (var keyValue in invalidTagCounts)
+        {
+            action.invalidTagCounts.Add(keyValue.Key, keyValue.Value);
+        }
+        
+        // Copy over the other variables
+        // Don't copy owner, as it would have the copy owner
+        action.valid = valid;
+    }
+
+    public void SetOwner(Piece newOwner)
+    {
+        
+        // If owner is the same, ignore
+        if (owner == newOwner)
+        {
+            return;
+        }
+        
+        // If old owner is not null, remove this from the owner
+        if (owner != null)
+        {
+            owner.RemoveAction(this);
+        }
+        
+        owner = newOwner;
+        
+        // If new owner is null, stop here
+        if (newOwner == null)
+        {
+            return;
+        }
+        
+        // Add this as an action to the owner
+        newOwner.AddAction(this);
     }
 }

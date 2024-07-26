@@ -44,7 +44,7 @@ public partial class AttackAction : ActionBase
         return specificVictims.Count > 0;
     }
 
-    public override void ActOn(GameController game, Piece piece)
+    public override void ActOn(GameState game, Piece piece)
     {
         // If there are special victims, only take those
         if (HasSpecificVictims())
@@ -65,13 +65,20 @@ public partial class AttackAction : ActionBase
         }
     }
 
-    public Array<Piece> GetTargetedPieces(GameController game)
+    public Array<Piece> GetTargetedPieces(GameState game)
     {
         return game.GetPiecesAt(attackLocation.X, attackLocation.Y);
     }
 
-    public bool HasTargetedPieces(GameController game)
+    public bool HasTargetedPieces(GameState game)
     {
         return game.HasPieceAt(attackLocation.X, attackLocation.Y);
+    }
+
+    public override object Clone()
+    {
+        AttackAction newMove = new AttackAction(null, actionLocation, attackLocation, moveAction);
+        CloneTo(newMove);
+        return newMove;
     }
 }
