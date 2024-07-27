@@ -31,6 +31,7 @@ public partial class GameController : Node
         currentGameState.NewTurn += (newPlayerNum) => EmitSignal(SignalName.NewTurn, newPlayerNum);
         currentGameState.PieceRemoved += (removedPiece) => EmitSignal(SignalName.PieceRemoved, removedPiece);
         currentGameState.EndTurn += () => EmitSignal(SignalName.EndTurn);
+        currentGameState.SendNotice += (playerTarget, text) => EmitSignal(SignalName.SendNotice, playerTarget, text);
         
         return currentGameState;
     }

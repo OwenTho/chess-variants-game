@@ -8,6 +8,8 @@ class_name Game
 @export var action_highlights: Node2D
 @export var highlight_scene: PackedScene
 
+@export var notices: VBoxContainer
+
 var selected_piece: Piece2D
 
 func _ready() -> void:
@@ -132,7 +134,7 @@ func request_action(piece_id: int, action_location: Vector2i) -> void:
 		return
 	
 	# Take the actions
-	if not GameManager.game_state.TakeActionAt(action_location, piece):
+	if not GameManager.game_controller.TakeActionAt(action_location, piece):
 		failed_action.rpc_id(sender_id)
 		# If it failed, return
 		return
@@ -141,13 +143,13 @@ func request_action(piece_id: int, action_location: Vector2i) -> void:
 	take_action_at.rpc(piece_id, action_location)
 	
 	# Go to the next turn
-	GameManager.game_state.NextTurn()
+	GameManager.game_controller.NextTurn()
 
 @rpc("authority", "call_remote", "reliable")
 func take_action_at(piece_id: int, action_location: Vector2i):
 	var piece = GameManager.game_state.GetPiece(piece_id)
 	if piece != null:
-		GameManager.game_state.TakeActionAt(action_location, piece)
+		GameManager.game_controller.TakeActionAt(action_location, piece)
 
 @rpc("authority", "call_remote", "reliable")
 func next_turn(new_player_num: int) -> void:
@@ -163,6 +165,23 @@ func _on_piece_taken(piece):
 		return
 	
 	remove_piece.queue_free()
+
+
+@rpc("authority", "call_local", "reliable", 2)
+func receive_notice(text: String) -> void:
+	notices.add_notice(text)
+
+func send_notice(player_target: int, text: String) -> void:
+	if not is_multiplayer_authority():
+		return
+	# If it's -1, rpc to all
+	if player_target == -1:
+		receive_notice.rpc(text)
+		return
+	# Otherwise, get the id of the player
+	var player_id: int = Lobby.player_nums[player_target]
+	receive_notice.rpc_id(player_id, text)
+
 
 
 

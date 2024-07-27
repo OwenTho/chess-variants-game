@@ -19,7 +19,7 @@ public partial class GameState : Node
 
     private Array<Piece> allPieces;
     
-    bool needToCheckCheckmate = true;
+    bool tempState = true;
 
     public enum CheckType
     {
@@ -282,7 +282,7 @@ public partial class GameState : Node
     {
         // Simulate the movement, and check if the player is still in check
         GameState newState = (GameState)Clone();
-        newState.needToCheckCheckmate = false;
+        newState.tempState = false;
         
         // Do the actions, and go to the next turn
         bool actionWorked = newState.DoActionsAt(actionLocation, newState.GetPiece(piece.id));
@@ -324,12 +324,14 @@ public partial class GameState : Node
         // Get the possible actions for this piece
         if (piece.currentPossibleActions.Count == 0)
         {
+            EmitSignal(SignalName.SendNotice, currentPlayerNum, "No actions available at selected location.");
             return false;
         }
         
         // If the player is in check, make sure the actions are valid
         if (DoesActionCheck(actionLocation, piece))
         {
+            EmitSignal(SignalName.SendNotice, currentPlayerNum, "Action leads to Check.");
             return false;
         }
 
@@ -454,7 +456,7 @@ public partial class GameState : Node
             }
         }
 
-        if (!needToCheckCheckmate)
+        if (!tempState)
         {
             return;
         }
@@ -481,6 +483,8 @@ public partial class GameState : Node
                 // Check can be ignored, as it means the King, at least, can move out of Check
                 continue;
             }
+            
+            EmitSignal(SignalName.SendNotice, -1, "Checking for Checkmate.");
             
             // If the King is possibly in Checkmate, each possible action needs to be checked.
             bool foundNoCheck = false;

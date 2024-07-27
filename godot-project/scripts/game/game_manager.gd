@@ -59,6 +59,7 @@ func setup_signals():
 	game_controller.EndTurn.connect(game._on_end_turn)
 	game_controller.RequestedActionAt.connect(game._on_requested_action)
 	game_controller.PieceRemoved.connect(game._on_piece_taken)
+	game_controller.SendNotice.connect(game.send_notice)
 	
 
 func start_game():

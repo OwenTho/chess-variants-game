@@ -1,3 +1,5 @@
+using System.Threading;
+using System.Threading.Tasks;
 using Godot;
 using Godot.Collections;
 
@@ -128,5 +130,10 @@ public partial class GameController : Node
     public bool TakeActionAt(Vector2I actionLocation, Piece piece)
     {
         return currentGameState.TakeActionAt(actionLocation, piece);
+    }
+
+    public void NextTurn()
+    {
+        currentGameState.NextTurn();
     }
 }

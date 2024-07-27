@@ -10,4 +10,7 @@ public partial class GameState : Node
 
     [Signal]
     public delegate void EndTurnEventHandler();
+
+    [Signal]
+    public delegate void SendNoticeEventHandler(int playerTarget, string text);
 }
