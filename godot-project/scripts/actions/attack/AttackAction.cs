@@ -4,7 +4,7 @@ using Godot.Collections;
 
 public partial class AttackAction : ActionBase
 {
-    public List<Piece> specificVictims; // Leave null unless needed
+    public Piece specificVictim; // Leave null unless needed
     public Vector2I attackLocation;
     public MoveAction moveAction;
     public AttackAction(Piece owner, Vector2I actionLocation, Vector2I attackLocation, MoveAction moveAction = null) : base(owner, actionLocation)
@@ -13,36 +13,19 @@ public partial class AttackAction : ActionBase
         this.moveAction = moveAction;
     }
 
-    public bool AddVictim(Piece piece)
+    public void AddVictim(Piece piece)
     {
-        if (specificVictims == null)
-        {
-            specificVictims = new List<Piece>();
-        }
-        else if (specificVictims.Contains(piece))
-        {
-            return false;
-        }
-        specificVictims.Add(piece);
-        return true;
-    }
-
-    public bool RemoveVictim(Piece piece)
-    {
-        if (specificVictims == null)
-        {
-            return false;
-        }
-        return specificVictims.Remove(piece);
+        specificVictim = piece;
     }
 
     public bool HasSpecificVictims()
     {
-        if (specificVictims == null)
+        if (specificVictim == null)
         {
             return false;
         }
-        return specificVictims.Count > 0;
+
+        return true;
     }
 
     public override void ActOn(GameState game, Piece piece)
@@ -50,10 +33,7 @@ public partial class AttackAction : ActionBase
         // If there are special victims, only take those
         if (HasSpecificVictims())
         {
-            foreach (Piece victim in specificVictims)
-            {
-                game.TakePiece(victim);
-            }
+            game.TakePiece(specificVictim);
             return;
         }
         // Otherwise, if there are no victims, just take whatever isn't on this
@@ -91,12 +71,9 @@ public partial class AttackAction : ActionBase
             newDictionary.Add("moveAction", moveAction.actionId);
         }
 
-        if (specificVictims != null)
+        if (specificVictim != null)
         {
-            for (int i = 0; i < specificVictims.Count; i++)
-            {
-                newDictionary.Add($"victim_{i}", specificVictims[i].id);
-            }
+            newDictionary.Add("victim", specificVictim.id);
         }
 
         return newDictionary;
@@ -112,14 +89,12 @@ public partial class AttackAction : ActionBase
             }
         }
 
-        int i = 0;
-        while (extraLinks.TryGetValue($"victim_{i}", out int id))
+        if (extraLinks.TryGetValue("victim", out int id))
         {
             if (game.TryGetPiece(id, out Piece piece))
             {
-                specificVictims.Add(piece);
+                specificVictim = piece;
             }
-            i++;
         }
     }
 }

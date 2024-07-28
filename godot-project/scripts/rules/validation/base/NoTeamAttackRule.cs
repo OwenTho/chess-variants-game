@@ -10,15 +10,13 @@ internal partial class NoTeamAttackRule : ValidationRuleBase
             return;
         }
         AttackAction attackAction = (AttackAction)action;
-        // If specific targets, exclude teammates
+        // If specific targets, it's invalid if it's a teammate
         if (attackAction.HasSpecificVictims())
         {
-            foreach (Piece victim in attackAction.specificVictims)
+            if (attackAction.specificVictim.teamId == piece.teamId)
             {
-                if (victim.teamId == piece.teamId)
-                {
-                    attackAction.RemoveVictim(victim);
-                }
+                action.InvalidTag("team_attack");
+                return;
             }
         }
         // If the victim and attacker are on the same side, make the attack invalid
