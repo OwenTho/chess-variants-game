@@ -106,9 +106,9 @@ public partial class AttackAction : ActionBase
     {
         if (extraLinks.TryGetValue("attackAction", out int attackActionId))
         {
-            if (links.TryGetValue(attackActionId, out ActionBase moveAction))
+            if (links.TryGetValue(attackActionId, out ActionBase linkedMoveAction))
             {
-                this.moveAction = (MoveAction)moveAction;
+                moveAction = (MoveAction)linkedMoveAction;
             }
         }
 

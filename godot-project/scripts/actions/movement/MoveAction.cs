@@ -13,7 +13,7 @@ public partial class MoveAction : ActionBase
     public override void ActOn(GameState game, Piece piece)
     {
         // Move piece
-        game.grid.PlaceItemAt(piece, actionLocation.X, actionLocation.Y);
+        game.grid.PlaceItemAt(piece, moveLocation.X, moveLocation.Y);
         // Now that piece has moved, it needs to be updated
         piece.EnableActionsUpdate();
         piece.timesMoved += 1;
@@ -41,9 +41,9 @@ public partial class MoveAction : ActionBase
     {
         if (extraLinks.TryGetValue("attackAction", out int attackActionId))
         {
-            if (links.TryGetValue(attackActionId, out ActionBase attackAction))
+            if (links.TryGetValue(attackActionId, out ActionBase linkedAttackAction))
             {
-                this.attackAction = (AttackAction)attackAction;
+                attackAction = (AttackAction)linkedAttackAction;
             }
         }
     }
