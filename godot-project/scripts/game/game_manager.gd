@@ -17,17 +17,18 @@ func _ready():
 	Lobby.server_disconnected.connect(_on_server_disconnect)
 
 func _on_server_disconnect():
+	if game != null:
+		game.to_menu()
 	reset_game()
 	#get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
 
 func reset_game():
 	if game != null:
-		game.close_game()
 		game_controller.queue_free()
 	board = null
 	game = null
-	# game.queue_free()
 	grid = null
+	game_state = null
 
 func init() -> void:
 	if game != null:
@@ -59,6 +60,9 @@ func setup_signals():
 	game_controller.NewTurn.connect(game._on_next_turn)
 	game_controller.ActionProcessed.connect(game._on_action_processed)
 	game_controller.EndTurn.connect(game._on_end_turn)
+	
+	game_controller.PlayerLost.connect(game._on_player_lost)
+	
 	game_controller.PieceRemoved.connect(game._on_piece_taken)
 	game_controller.SendNotice.connect(game.send_notice)
 	

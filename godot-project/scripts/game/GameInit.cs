@@ -30,8 +30,11 @@ public partial class GameController
         // Connect the signals
         currentGameState.NewTurn += (newPlayerNum) => EmitSignal(SignalName.NewTurn, newPlayerNum);
         currentGameState.ActionProcessed += (success, actionLocation, piece) => EmitSignal(SignalName.ActionProcessed, success, actionLocation, piece);
-        currentGameState.PieceRemoved += (removedPiece) => EmitSignal(SignalName.PieceRemoved, removedPiece);
         currentGameState.EndTurn += () => EmitSignal(SignalName.EndTurn);
+        currentGameState.PlayerLost += (playerNum) => EmitSignal(SignalName.PlayerLost, playerNum);
+        
+        currentGameState.PieceRemoved += (removedPiece) => EmitSignal(SignalName.PieceRemoved, removedPiece);
+        
         currentGameState.SendNotice += (playerTarget, text) => EmitSignal(SignalName.SendNotice, playerTarget, text);
         
         return currentGameState;

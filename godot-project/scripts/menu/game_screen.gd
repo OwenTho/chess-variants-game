@@ -195,7 +195,34 @@ func send_notice(player_target: int, text: String) -> void:
 
 
 
-func close_game():
+func _on_player_lost(player_num: int):
+	if not is_multiplayer_authority():
+		return
+	
+	player_won.rpc(2 - player_num)
+
+@rpc("authority", "call_local", "reliable")
+func player_won(winner: int):
+	var pop_up: AcceptDialog = AcceptDialog.new()
+	pop_up.dialog_text = "Player %s has won." % [winner]
+	pop_up.title = "Checkmate!"
+	pop_up.dialog_hide_on_ok = false
+	add_child(pop_up)
+	pop_up.close_requested.connect(to_lobby)
+	pop_up.close_requested.connect(pop_up.queue_free)
+	pop_up.confirmed.connect(to_lobby)
+	pop_up.confirmed.connect(pop_up.queue_free)
+	
+	pop_up.popup_centered()
+
+func to_lobby():
+	GameManager.reset_game()
+	if multiplayer.multiplayer_peer is OfflineMultiplayerPeer:
+		get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
+	else:
+		get_tree().change_scene_to_file("res://scenes/menu/lobby_menu.tscn")
+
+func to_menu():
 	get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
 
 func _on_btn_quit_pressed():

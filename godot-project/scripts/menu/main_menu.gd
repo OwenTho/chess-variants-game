@@ -48,6 +48,7 @@ func error_dialog(title: String, text: String) -> void:
 	new_dialog.title = title
 	new_dialog.dialog_text = text
 	new_dialog.close_requested.connect(new_dialog.queue_free)
+	new_dialog.confirmed.connect(new_dialog.queue_free)
 	add_child(new_dialog)
 	new_dialog.popup_centered()
 

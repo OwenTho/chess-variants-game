@@ -467,6 +467,7 @@ public partial class GameState : Node
         }
         
         // Check if each player is in check
+        int checkmatePlayer = -1;
         for (int teamNum = 0; teamNum < GameController.NUMBER_OF_PLAYERS; teamNum++)
         {
             // Ignore if not in check
@@ -475,10 +476,9 @@ public partial class GameState : Node
                 continue;
             }
             
-            // If the team is not playing, then they've lost (given they can't move out of check)
+            // If the team is not the one playing, it means they won't be able to move anyway
             if (teamNum != currentPlayerNum)
             {
-                // TODO: End Game / remove player from game
                 continue;
             }
             
@@ -526,6 +526,7 @@ public partial class GameState : Node
 
                 if (foundNoCheck)
                 {
+                    checkmatePlayer = teamNum;
                     break;
                 }
             }
@@ -533,7 +534,12 @@ public partial class GameState : Node
             // If no check was found, then the player has lost.
             if (!foundNoCheck)
             {
-                GD.Print("Checkmate!");
+                CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, -1, "Checkmate!");
+                CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.PlayerLost, checkmatePlayer);
+            }
+            else
+            {
+                CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, -1, "Not Checkmate.");
             }
         }
     }

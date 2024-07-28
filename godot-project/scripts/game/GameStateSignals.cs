@@ -12,6 +12,9 @@ public partial class GameState
     public delegate void EndTurnEventHandler();
 
     [Signal]
+    public delegate void PlayerLostEventHandler(int playerNum);
+
+    [Signal]
     public delegate void PieceRemovedEventHandler(Piece removedPiece);
 
     [Signal]
