@@ -64,6 +64,7 @@ public partial class GameController : Node
         MakeNewActionRule("bishop_move", new BishopMoveRule());
         MakeNewActionRule("queen_move", new QueenMoveRule());
         MakeNewActionRule("king_move", new KingMoveRule());
+        MakeNewActionRule("castle", new CastleRule());
     }
 
     internal void InitPieceInfo()
@@ -77,7 +78,7 @@ public partial class GameController : Node
         MakeNewPieceInfo("knight", 4, "knight.png").AddActionRule(actionRuleRegistry.GetValue("knight_move"));
         MakeNewPieceInfo("bishop", 7, "bishop.png").AddActionRule(actionRuleRegistry.GetValue("bishop_move"));
         MakeNewPieceInfo("queen", 7, "queen.png").AddActionRule(actionRuleRegistry.GetValue("queen_move"));
-        MakeNewPieceInfo("king", 2, "king.png").AddActionRule(actionRuleRegistry.GetValue("king_move"));
+        MakeNewPieceInfo("king", 2, "king.png").AddActionRule(actionRuleRegistry.GetValue("king_move")).AddActionRule(actionRuleRegistry.GetValue("castle"));
     }
 
     private void MakeNewValidationRule(string id, ValidationRuleBase newRule, bool makeInitialRule = false)

@@ -213,6 +213,19 @@ public partial class Piece : GameItem
         }
     }
 
+
+
+    public bool IsPiece(string id)
+    {
+        if (info == null)
+        {
+            return false;
+        }
+
+        return info.pieceId == id;
+    }
+    
+
     public object Clone()
     {
         Piece newPiece = new Piece();

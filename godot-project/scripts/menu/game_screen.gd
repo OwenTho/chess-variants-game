@@ -76,10 +76,15 @@ func select_item(piece: Piece2D) -> void:
 	if possible_actions == null:
 		return
 	
+	var checked_locations: Array[Vector2i] = []
 	for action in possible_actions:
-		# Skip if invalid
-		if not action.valid:
+		# Skip if invalid or not an acting action
+		if not action.valid or not action.acting:
 			continue
+		# Ignore if position already checked
+		if checked_locations.has(action.actionLocation):
+			continue
+		checked_locations.append(action.actionLocation)
 		var new_highlight: Node2D = highlight_scene.instantiate()
 		
 		new_highlight.board = board

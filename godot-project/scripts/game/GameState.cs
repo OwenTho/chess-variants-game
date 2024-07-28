@@ -258,6 +258,11 @@ public partial class GameState : Node
             GD.PushError($"Tried to Act on piece {piece.GetType().Name}, but the Action was null.");
             return false;
         }
+        // Ignore if not acting
+        if (!action.acting)
+        {
+            return false;
+        }
         // Ignore if invalid
         if (!action.valid)
         {
@@ -595,6 +600,12 @@ public partial class GameState : Node
             Piece newPiece = (Piece)piece.Clone();
             newState.allPieces.Add(newPiece);
             newState.grid.PlaceItemAt(newPiece, piece.cell.x, piece.cell.y);
+        }
+        
+        // With all the new pieces, Clone the actions
+        foreach (var newPiece in newState.allPieces)
+        {
+            Piece piece = GetPiece(newPiece.id);
             System.Collections.Generic.Dictionary<int, ActionBase> actions = new System.Collections.Generic.Dictionary<int, ActionBase>();
             System.Collections.Generic.Dictionary<int, List<int>> actionDependents = new System.Collections.Generic.Dictionary<int, List<int>>();
             System.Collections.Generic.Dictionary<int, System.Collections.Generic.Dictionary<string, int>> extraLinks = new System.Collections.Generic.Dictionary<int, System.Collections.Generic.Dictionary<string, int>>();

@@ -7,6 +7,11 @@ public abstract partial class ActionBase : GridItem<ActionBase>
     public int actionId = -1;
     public Piece owner { get; private set; }
     public Vector2I actionLocation;
+    
+    // If the action does something or not. Actions for checking validating (e.g: Sliding) set this to false.
+    public bool acting { get; protected set; } = true;
+
+    // If the action is valid and can be done
     public bool valid { get; private set; } = true;
 
     // Rules that this rule depends on. If these are invalid, this one should
