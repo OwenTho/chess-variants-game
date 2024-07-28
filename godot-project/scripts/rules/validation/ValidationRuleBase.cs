@@ -25,7 +25,7 @@ public abstract partial class ValidationRuleBase : RuleBase
         return teamPieces.Count > 0;
     }
 
-    public bool HasTeamPieces(Array<Piece> pieces, int teamId, bool sameTeam = true)
+    public bool HasTeamPieces(IList<Piece> pieces, int teamId, bool sameTeam = true)
     {
         if (pieces == null || pieces.Count == 0)
         {

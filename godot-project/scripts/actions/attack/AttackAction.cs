@@ -1,9 +1,10 @@
 ﻿using Godot;
+using System.Collections.Generic;
 using Godot.Collections;
 
 public partial class AttackAction : ActionBase
 {
-    public Array<Piece> specificVictims; // Leave null unless needed
+    public List<Piece> specificVictims; // Leave null unless needed
     public Vector2I attackLocation;
     public MoveAction moveAction;
     public AttackAction(Piece owner, Vector2I actionLocation, Vector2I attackLocation, MoveAction moveAction = null) : base(owner, actionLocation)
@@ -16,7 +17,7 @@ public partial class AttackAction : ActionBase
     {
         if (specificVictims == null)
         {
-            specificVictims = new Array<Piece>();
+            specificVictims = new List<Piece>();
         }
         else if (specificVictims.Contains(piece))
         {
