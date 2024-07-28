@@ -59,7 +59,7 @@ public partial class GridCell<T> : Node
             return false;
         }
         items.Add(item);
-        AddChild(item);
+        CallDeferred(Node.MethodName.AddChild, item);
         item.cell = this;
         item.grid = grid;
         return true;
@@ -87,7 +87,7 @@ public partial class GridCell<T> : Node
         {
             return false;
         }
-        RemoveChild(item);
+        CallDeferred(Node.MethodName.RemoveChild, item);
         if (updateItem)
         {
             item.cell = null;
@@ -115,5 +115,4 @@ public partial class GridCell<T> : Node
             RemoveItem(item);
         }
     }
-    
 }

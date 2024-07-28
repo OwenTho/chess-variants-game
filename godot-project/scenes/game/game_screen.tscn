@@ -1,10 +1,11 @@
-[gd_scene load_steps=8 format=3 uid="uid://cssq752gr7m3k"]
+[gd_scene load_steps=9 format=3 uid="uid://cssq752gr7m3k"]
 
 [ext_resource type="Script" path="res://scripts/menu/game_screen.gd" id="1_s3pe2"]
 [ext_resource type="PackedScene" uid="uid://isv1sog82mq8" path="res://scenes/game/highlight.tscn" id="2_c2xco"]
 [ext_resource type="PackedScene" uid="uid://2y6uf3dq2362" path="res://scenes/debug/debug_overlay.tscn" id="2_o62sx"]
 [ext_resource type="TileSet" uid="uid://de3uupic4da2f" path="res://assets/tileset/board_tileset.tres" id="3_fosrn"]
 [ext_resource type="Script" path="res://scripts/game/visual/Board2D.gd" id="4_03kst"]
+[ext_resource type="PackedScene" uid="uid://cvs3hxaru45s1" path="res://scenes/debug/stray_nodes_btn.tscn" id="4_64yrk"]
 [ext_resource type="Script" path="res://scenes/game/game_notices.gd" id="4_q6ob5"]
 [ext_resource type="PackedScene" uid="uid://dkoglthgg2tyq" path="res://scenes/game/cursor_highlight.tscn" id="5_w7pci"]
 
@@ -45,6 +46,13 @@ offset_right = 797.0
 offset_bottom = 101.0
 alignment = 2
 script = ExtResource("4_q6ob5")
+
+[node name="StrayNodesBtn" parent="GameUI" instance=ExtResource("4_64yrk")]
+layout_mode = 1
+offset_left = 119.0
+offset_top = 28.0
+offset_right = -869.0
+offset_bottom = -579.0
 
 [node name="BoardHolder" type="Node2D" parent="."]
 position = Vector2(584, 332)

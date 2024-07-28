@@ -51,3 +51,4 @@ func remove_property(object, property):
 	for prop in props:
 		if prop.object == object and prop.property == property:
 			props.erase(prop)
+			prop.queue_free()

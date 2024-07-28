@@ -46,16 +46,17 @@ func select_cell(cell_pos: Vector2i):
 	if selected_piece != null and selected_piece.piece_data.currentPossibleActions != null: 
 		# Check if there is an action being selected
 		for action in selected_piece.piece_data.currentPossibleActions:
-			if action.actionLocation == cell_pos and GameManager.game_controller.IsActionValid(action, selected_piece.piece_data):
+			if action.actionLocation == cell_pos and GameManager.game_state.IsActionValid(action, selected_piece.piece_data):
 				# If there is, act on the location and stop
 				GameManager.game_controller.RequestActionsAt(cell_pos, selected_piece.piece_data)
+				remove_selection()
 				return
 	
 	# Remove existing selection before moving on	
 	remove_selection()
 	
 	# Get the first piece
-	var piece = GameManager.game_controller.GetFirstPieceAt(cell_pos.x, cell_pos.y)
+	var piece = GameManager.game_state.GetFirstPieceAt(cell_pos.x, cell_pos.y)
 	if piece == null:
 		return
 	
@@ -92,12 +93,25 @@ func select_item(piece: Piece2D) -> void:
 		action_highlights.add_child.call_deferred(new_highlight)
 
 func _on_next_turn(new_player_num: int):
+	print(">> NEW TURN <<")
 	if not is_multiplayer_authority():
 		return
 	remove_selection()
 	next_turn.rpc(new_player_num)
 
+func _on_action_processed(success: bool, action_location: Vector2i, piece):
+	if not success:
+		return
+	
+	if not is_multiplayer_authority():
+		return
+	# Tell everyone to take the action
+	take_action_at.rpc(piece.id, action_location)
+	
+	GameManager.game_controller.NextTurn()
+
 func _on_end_turn() -> void:
+	print("end turn")
 	remove_selection()
 
 @rpc("authority", "call_local", "reliable")
@@ -139,16 +153,7 @@ func request_action(piece_id: int, action_location: Vector2i) -> void:
 		return
 	
 	# Take the actions
-	if not GameManager.game_controller.TakeActionAt(action_location, piece):
-		failed_action.rpc_id(sender_id)
-		# If it failed, return
-		return
-	
-	# Tell everyone to take the action
-	take_action_at.rpc(piece_id, action_location)
-	
-	# Go to the next turn
-	GameManager.game_controller.NextTurn()
+	GameManager.game_controller.TakeActionAt(action_location, piece)
 
 @rpc("authority", "call_remote", "reliable")
 func take_action_at(piece_id: int, action_location: Vector2i):
@@ -159,7 +164,7 @@ func take_action_at(piece_id: int, action_location: Vector2i):
 @rpc("authority", "call_remote", "reliable")
 func next_turn(new_player_num: int) -> void:
 	remove_selection()
-	GameManager.game_state.NextTurn(new_player_num)
+	GameManager.game_controller.NextTurn(new_player_num)
 
 func _on_requested_action(action_location: Vector2i, piece) -> void:
 	request_action.rpc(piece.id, action_location)

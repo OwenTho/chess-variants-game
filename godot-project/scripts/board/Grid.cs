@@ -133,7 +133,7 @@ public partial class Grid<T> : Node
         newCell.SetPos(x, y);
         newCell.grid = this;
         cells.Add(newCell);
-        AddChild(newCell);
+        CallDeferred(Node.MethodName.AddChild, newCell);
         return newCell;
     }
 
@@ -252,5 +252,4 @@ public partial class Grid<T> : Node
 
         SwapCells(cell1, cell2);
     }
-    
 }

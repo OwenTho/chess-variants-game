@@ -11,7 +11,7 @@ public abstract partial class GridItem<T> : Node
         }
         internal set {
             myCell = value;
-            EmitSignal(SignalName.ChangedCell, value);
+            CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.ChangedCell, value);
         }
     }
 

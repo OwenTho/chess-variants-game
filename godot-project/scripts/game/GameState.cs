@@ -19,7 +19,7 @@ public partial class GameState : Node
 
     private Array<Piece> allPieces;
     
-    bool tempState = true;
+    bool tempState = false;
 
     public enum CheckType
     {
@@ -39,9 +39,9 @@ public partial class GameState : Node
     {
         lastId = 0;
         grid = new Grid<GameItem>();
-        AddChild(grid);
+        CallDeferred(Node.MethodName.AddChild, grid);
         actionGrid = new Grid<ActionBase>();
-        AddChild(actionGrid);
+        CallDeferred(Node.MethodName.AddChild, actionGrid);
         allPieces = new Array<Piece>();
         gridSize = new Vector2I(8, 8);
 
@@ -95,24 +95,17 @@ public partial class GameState : Node
     
     public void TakePiece(Piece piece)
     {
-        // Remove piece from board
+        // Remove it from the board
         grid.RemoveItem(piece);
-
+        
         // Move to takenPieces
         allPieces.Remove(piece);
-
-        // Free the Godot data
+        
+        // Free the item. This also frees the action data
         piece.QueueFree();
-
-        // Remove the actions from the grid
-        foreach (ActionBase action in piece.currentPossibleActions)
-        {
-            action.QueueFree();
-            action.cell.RemoveItem(action);
-        }
         
         // Emit signal
-        EmitSignal(SignalName.PieceRemoved, piece);
+        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.PieceRemoved, piece);
     }
     
     public Piece TakePiece(int pieceId)
@@ -285,24 +278,29 @@ public partial class GameState : Node
 
     public bool DoesActionCheck(Vector2I actionLocation, Piece piece)
     {
+        // If it's a temp state, return (to avoid recursion)
+        if (tempState)
+        {
+            return playerCheck[piece.teamId] != CheckType.NONE;
+        }
         // Simulate the movement, and check if the player is still in check
         GameState newState = (GameState)Clone();
-        newState.tempState = false;
+        CallDeferred(Node.MethodName.AddChild, newState);
+        newState.tempState = true;
         
         // Do the actions, and go to the next turn
         bool actionWorked = newState.DoActionsAt(actionLocation, newState.GetPiece(piece.id));
         // If actions didn't work, then return true
         if (!actionWorked)
         {
-            newState.Free();
+            newState.QueueFree();
             return true;
         }
         newState.NextTurn();
         
         // Check if the player is still in check
-        GD.Print(newState.playerCheck[piece.teamId].ToString());
         CheckType result = newState.playerCheck[piece.teamId];
-        newState.Free();
+        newState.QueueFree();
         if (result == CheckType.NONE)
         {
             return false;
@@ -324,23 +322,25 @@ public partial class GameState : Node
         return didAct;
     }
 
-    public bool TakeActionAt(Vector2I actionLocation, Piece piece)
+    public void TakeActionAt(Vector2I actionLocation, Piece piece)
     {
         // Get the possible actions for this piece
         if (piece.currentPossibleActions.Count == 0)
         {
-            EmitSignal(SignalName.SendNotice, currentPlayerNum, "No actions available at selected location.");
-            return false;
+            CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, currentPlayerNum, "No actions available at selected location.");
+            CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.ActionProcessed, false, actionLocation, piece);
+            return;
         }
         
         // If the player is in check, make sure the actions are valid
         if (DoesActionCheck(actionLocation, piece))
         {
-            EmitSignal(SignalName.SendNotice, currentPlayerNum, "Action leads to Check.");
-            return false;
+            CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, currentPlayerNum, "Action leads to Check.");
+            CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.ActionProcessed, false, actionLocation, piece);
+            return;
         }
 
-        return DoActionsAt(actionLocation, piece);
+        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.ActionProcessed, DoActionsAt(actionLocation, piece), actionLocation, piece);
     }
     
     
@@ -461,7 +461,7 @@ public partial class GameState : Node
             }
         }
 
-        if (!tempState)
+        if (tempState)
         {
             return;
         }
@@ -489,7 +489,7 @@ public partial class GameState : Node
                 continue;
             }
             
-            EmitSignal(SignalName.SendNotice, -1, "Checking for Checkmate.");
+            CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, -1, "Checking for Checkmate.");
             
             // If the King is possibly in Checkmate, each possible action needs to be checked.
             bool foundNoCheck = false;
@@ -546,7 +546,7 @@ public partial class GameState : Node
             return;
         }
         // First, end turn
-        EmitSignal(SignalName.EndTurn);
+        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.EndTurn);
         // Tell all pieces that it's the next turn
         foreach (Piece piece in allPieces)
         {
@@ -578,7 +578,7 @@ public partial class GameState : Node
 
         // Tell all pieces that it's the next turn
         PiecesNewTurn();
-        EmitSignal(SignalName.NewTurn, currentPlayerNum);
+        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.NewTurn, currentPlayerNum);
     }
 
     public void NextTurn()

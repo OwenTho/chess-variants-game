@@ -45,21 +45,24 @@ func init() -> void:
 	game_controller = game_controller_script.new()
 	add_child(game_controller)
 	
-	setup_signals()
 	
 	# Initialise the game
 	game_controller.FullInit()
 	game_state = game_controller.currentGameState
 	grid = game_state.grid
 	
+	setup_signals()
+	
 	has_init.emit()
 
 func setup_signals():
 	game_controller.NewTurn.connect(game._on_next_turn)
+	game_controller.ActionProcessed.connect(game._on_action_processed)
 	game_controller.EndTurn.connect(game._on_end_turn)
-	game_controller.RequestedActionAt.connect(game._on_requested_action)
 	game_controller.PieceRemoved.connect(game._on_piece_taken)
 	game_controller.SendNotice.connect(game.send_notice)
+	
+	game_controller.RequestedActionAt.connect(game._on_requested_action)
 	
 
 func start_game():
@@ -83,6 +86,7 @@ func init_board() -> void:
 	place_matching("bishop", 13, 5, 0)
 	place_matching("knight", 14, 6, 0)
 	place_matching("rook", 15, 7, 0)
+	print_orphan_nodes()
 
 func board_to_array() -> Array:
 	var ret_array: Array = []

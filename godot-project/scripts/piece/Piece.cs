@@ -17,7 +17,7 @@ public partial class Piece : GameItem
         internal set
         {
             _info = value;
-            EmitSignal(SignalName.InfoChanged, value);
+            CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.InfoChanged, value);
         }
     }
     public int id { get; internal set; }
@@ -183,7 +183,10 @@ public partial class Piece : GameItem
         // Go through all actions and free them
         foreach (var action in currentPossibleActions)
         {
-            action.QueueFree();
+            if (IsInstanceValid(action))
+            {
+                action.QueueFree();
+            }
         }
         // Clear the list
         actionsToTake.Clear();

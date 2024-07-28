@@ -24,7 +24,7 @@ public abstract partial class ActionBase : GridItem<ActionBase>
     // Extra tags of the Action. Add to this in the Move Rules.
     public Tags tags { get; } = new Tags();
     
-    // Tags used in validation steps. Add thos in Verification Rules.
+    // Tags used in validation steps. Add this in Verification Rules.
     public Tags verifyTags { get; } = new Tags();
 
     // Tags that make this action invalid. Add to this in Verification Rules.

@@ -1,7 +1,7 @@
 ﻿using Godot;
 using System.Collections.Generic;
 
-public partial class GameController : Node
+public partial class GameController
 {
     internal Registry<PieceInfo> pieceInfoRegistry = new Registry<PieceInfo>();
     internal Registry<ActionRuleBase> actionRuleRegistry = new Registry<ActionRuleBase>();
@@ -29,6 +29,7 @@ public partial class GameController : Node
         
         // Connect the signals
         currentGameState.NewTurn += (newPlayerNum) => EmitSignal(SignalName.NewTurn, newPlayerNum);
+        currentGameState.ActionProcessed += (success, actionLocation, piece) => EmitSignal(SignalName.ActionProcessed, success, actionLocation, piece);
         currentGameState.PieceRemoved += (removedPiece) => EmitSignal(SignalName.PieceRemoved, removedPiece);
         currentGameState.EndTurn += () => EmitSignal(SignalName.EndTurn);
         currentGameState.SendNotice += (playerTarget, text) => EmitSignal(SignalName.SendNotice, playerTarget, text);
