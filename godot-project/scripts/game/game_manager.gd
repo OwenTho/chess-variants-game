@@ -5,7 +5,7 @@ var game_controller: Object
 var game_state: Object
 
 var game_scene: PackedScene = preload("res://scenes/game/game_screen.tscn")
-var piece_scene: PackedScene = preload("res://scenes/game/piece.tscn")
+var piece_scene: PackedScene = preload("res://scenes/game/piece/piece.tscn")
 
 var game: Game
 var grid
