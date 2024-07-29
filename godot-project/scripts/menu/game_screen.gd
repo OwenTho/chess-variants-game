@@ -51,18 +51,25 @@ func remove_selection() -> void:
 		child.queue_free()
 
 func select_cell(cell_pos: Vector2i):
+	# Try to get the game mutex
+	if !GameManager.game_mutex.try_lock():
+		# If it couldn't get the mutex, then return
+		return
 	# First check if the player is selecting an action
 	var actions_to_take: Array = []
 	if selected_piece != null and selected_piece.piece_data != null and selected_piece.piece_data.currentPossibleActions != null: 
 		# Check if there is an action being selected
 		for action in selected_piece.piece_data.currentPossibleActions:
-			if action.actionLocation == cell_pos:
+			if action.actionLocation == cell_pos and action.valid and action.acting:
 				# If there is, request to act on that location
+				GameManager.game_mutex.unlock()
 				disabled_selection = true
 				allow_quit = false
 				request_action.rpc(cell_pos, selected_piece.piece_data.id)
 				remove_selection()
 				return
+	# Remove lock
+	GameManager.game_mutex.unlock()
 	
 	# Remove existing selection before moving on	
 	remove_selection()

@@ -297,11 +297,11 @@ public partial class GameState : Node
         
         // Do the actions, and go to the next turn
         bool actionWorked = newState.DoActionsAt(actionLocation, newState.GetPiece(piece.id));
-        // If actions didn't work, then return true
+        // If actions didn't work, then return if it's in check or not
         if (!actionWorked)
         {
             newState.QueueFree();
-            return true;
+            return playerCheck[piece.teamId] != CheckType.NONE;
         }
         newState.NextTurn();
         
