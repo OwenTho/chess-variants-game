@@ -8,9 +8,9 @@ public partial class GameController
     internal Registry<ValidationRuleBase> validationRuleRegistry = new Registry<ValidationRuleBase>();
     List<string> initialValidationRules = new List<string>();
 
-    public void FullInit()
+    public void FullInit(bool isServer)
     {
-        InitGameState();
+        InitGameState(isServer);
         InitValidationRules();
         InitActionRules();
         InitPieceInfo();
@@ -20,11 +20,11 @@ public partial class GameController
         AddChild(validationRuleRegistry);
     }
 
-    public GameState InitGameState()
+    public GameState InitGameState(bool needToCheck)
     {
         // Create the GameState
         currentGameState = new GameState(this);
-        currentGameState.Init();
+        currentGameState.Init(needToCheck);
         AddChild(currentGameState);
         
         // Connect the signals

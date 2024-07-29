@@ -20,6 +20,10 @@ public partial class GameState : Node
     private Array<Piece> allPieces;
     
     bool tempState = false;
+    
+    // If the GameState needs to do Check checks. This is enabled for the server,
+    // and disabled for the clients.
+    bool needToCheck = true;
 
     public enum CheckType
     {
@@ -35,7 +39,7 @@ public partial class GameState : Node
         this.gameController = gameController;
     }
 
-    internal void Init()
+    internal void Init(bool needToCheck)
     {
         lastId = 0;
         grid = new Grid<GameItem>();
@@ -50,6 +54,8 @@ public partial class GameState : Node
         {
             playerCheck[i] = CheckType.NONE;
         }
+
+        this.needToCheck = needToCheck;
     }
 
     public void SetPlayerNum(int newPlayerNum)
@@ -103,6 +109,13 @@ public partial class GameState : Node
         
         // Free the item. This also frees the action data
         piece.QueueFree();
+        
+        // Remove the actions from the grid
+        foreach (var action in piece.currentPossibleActions)
+        {
+            action.cell.RemoveItem(action);
+            action.QueueFree();
+        }
         
         // Emit signal
         CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.PieceRemoved, piece);
@@ -264,17 +277,6 @@ public partial class GameState : Node
         }
         return true;
     }
-    
-    public bool TakeAction(ActionBase action, Piece piece)
-    {
-        if (!IsActionValid(action, piece))
-        {
-            return false;
-        }
-
-        action.ActOn(this, piece);
-        return true;
-    }
 
     public bool DoesActionCheck(Vector2I actionLocation, Piece piece)
     {
@@ -282,6 +284,11 @@ public partial class GameState : Node
         if (tempState)
         {
             return playerCheck[piece.teamId] != CheckType.NONE;
+        }
+        // If it's non-check, ignore as server already did the check
+        if (!needToCheck)
+        {
+            return false;
         }
         // Simulate the movement, and check if the player is still in check
         GameState newState = (GameState)Clone();
@@ -307,6 +314,17 @@ public partial class GameState : Node
         }
         return true;
     }
+    
+    public bool TakeAction(ActionBase action, Piece piece)
+    {
+        if (!IsActionValid(action, piece))
+        {
+            return false;
+        }
+
+        action.ActOn(this, piece);
+        return true;
+    }
 
     private bool DoActionsAt(Vector2I actionLocation, Piece piece)
     {
@@ -316,6 +334,7 @@ public partial class GameState : Node
         {
             if (action.actionLocation == actionLocation)
             {
+                GD.Print($"Doing action {action.GetType().Name} with {piece.GetType().Name}:{piece.info.pieceId}");
                 didAct |= TakeAction(action, piece);
             }
         }
@@ -465,6 +484,11 @@ public partial class GameState : Node
         {
             return;
         }
+        // If it's non-check, ignore as server already did the check
+        if (!needToCheck)
+        {
+            return;
+        }
         
         // Check if each player is in check
         for (int teamNum = 0; teamNum < GameController.NUMBER_OF_PLAYERS; teamNum++)
@@ -596,7 +620,7 @@ public partial class GameState : Node
     {
         // Initialise the new state
         GameState newState = new GameState(gameController);
-        newState.Init();
+        newState.Init(needToCheck);
 
         // Copy over the pieces and their actions
         foreach (var piece in allPieces)

@@ -7,6 +7,8 @@ var last_cell: Vector2i = Vector2.ZERO
 
 signal cell_updated(new_cell: Vector2i)
 
+var active: bool = true
+
 func _update_cell(new_cell: Vector2i):
 	if new_cell != last_cell:
 		last_cell = new_cell
@@ -14,6 +16,11 @@ func _update_cell(new_cell: Vector2i):
 		set_pos(new_cell.x, new_cell.y)
 
 func _process(_delta):
+	if not active:
+		visible = false
+		return
+	else:
+		visible = true
 	# For mouse, do every frame (as that's what the player will see)
 	if input_mouse:
 		# Find the cell the mouse is hovering

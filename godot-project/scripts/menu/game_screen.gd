@@ -12,6 +12,11 @@ class_name Game
 
 var selected_piece: Piece2D
 
+var game_active: bool = false
+var disabled_selection: bool = false
+
+var allow_quit: bool = true
+
 func _ready() -> void:
 	GameManager.has_init.connect(_on_init)
 	var my_num = Lobby.get_player_num(multiplayer.get_unique_id())
@@ -22,17 +27,22 @@ func _ready() -> void:
 func _on_init():
 	cursor.board = GameManager.board
 	
-	Debug.stats.add_property(GameManager.game_state, "currentPlayerNum")
+	Debug.stats.add_property(GameManager.game_controller.currentGameState, "currentPlayerNum")
 
 func _process(delta) -> void:
+	cursor.active = game_active
 	if Input.is_action_pressed("mouse_right"):
 		$BoardHolder.rotation = $BoardHolder.rotation + deg_to_rad(45) * delta
 
 func _input(event) -> void:
+	if not game_active:
+		return
 	if event is InputEventMouseButton and event.is_action_pressed("mouse_left"):
 		# Get the piece the player is selecting
 		var cell_pos: Vector2i = cursor.last_cell
 		
+		if disabled_selection:
+			return
 		select_cell(cell_pos)
 
 func remove_selection() -> void:
@@ -46,8 +56,10 @@ func select_cell(cell_pos: Vector2i):
 	if selected_piece != null and selected_piece.piece_data.currentPossibleActions != null: 
 		# Check if there is an action being selected
 		for action in selected_piece.piece_data.currentPossibleActions:
-			if action.actionLocation == cell_pos and GameManager.game_state.IsActionValid(action, selected_piece.piece_data):
+			if action.actionLocation == cell_pos and await GameManager.is_action_valid(action, selected_piece.piece_data):
 				# If there is, act on the location and stop
+				disabled_selection = true
+				allow_quit = false
 				GameManager.game_controller.RequestActionsAt(cell_pos, selected_piece.piece_data)
 				remove_selection()
 				return
@@ -56,7 +68,7 @@ func select_cell(cell_pos: Vector2i):
 	remove_selection()
 	
 	# Get the first piece
-	var piece = GameManager.game_state.GetFirstPieceAt(cell_pos.x, cell_pos.y)
+	var piece = await GameManager.get_first_piece_at(cell_pos.x, cell_pos.y)
 	if piece == null:
 		return
 	
@@ -72,7 +84,12 @@ func select_item(piece: Piece2D) -> void:
 		return
 	if piece.piece_data.info == null:
 		return
-	var possible_actions = piece.piece_data.currentPossibleActions
+	
+	# If the selection can't get the game mutex, just ignore
+	if !GameManager.game_mutex.try_lock():
+		return
+	var possible_actions: Array = piece.piece_data.currentPossibleActions
+	
 	# If the piece has no actions, then ignore it
 	if possible_actions == null:
 		return
@@ -91,33 +108,25 @@ func select_item(piece: Piece2D) -> void:
 		new_highlight.board = board
 		new_highlight.set_pos(action.actionLocation.x, action.actionLocation.y)
 		action_highlights.add_child.call_deferred(new_highlight)
+	# Unlock the mutex once done
+	GameManager.game_mutex.unlock()
 
 func _on_next_turn(new_player_num: int):
 	if not is_multiplayer_authority():
 		return
 	remove_selection()
-	next_turn.rpc(new_player_num)
-
-func _on_action_processed(success: bool, action_location: Vector2i, piece):
-	if not success:
-		return
-	
-	if not is_multiplayer_authority():
-		return
-	# Tell everyone to take the action
-	take_action_at.rpc(piece.id, action_location)
-	
-	GameManager.game_controller.NextTurn()
+	disabled_selection = false
+	allow_quit = true
+	if game_active:
+		next_turn.rpc(new_player_num)
 
 func _on_end_turn() -> void:
 	remove_selection()
 
-@rpc("authority", "call_local", "reliable")
-func failed_action() -> void:
-	remove_selection()
+
 
 @rpc("any_peer", "call_local", "reliable")
-func request_action(piece_id: int, action_location: Vector2i) -> void:
+func request_action(action_location: Vector2i, piece_id: int) -> void:
 	# Ignore if not authority
 	if not is_multiplayer_authority():
 		return
@@ -131,12 +140,12 @@ func request_action(piece_id: int, action_location: Vector2i) -> void:
 		return
 	
 	# If it's the wrong player number, ignore
-	var cur_player_num = GameManager.game_state.currentPlayerNum
+	var cur_player_num = await GameManager.get_current_player()
 	if Lobby.player_nums[cur_player_num] != sender_id:
 		return
 	
 	# Get piece
-	var piece = GameManager.game_state.GetPiece(piece_id)
+	var piece = await GameManager.get_piece(piece_id)
 	
 	# If piece id is invalid, ignore
 	if piece == null:
@@ -151,29 +160,55 @@ func request_action(piece_id: int, action_location: Vector2i) -> void:
 		return
 	
 	# Take the actions
+	allow_quit = false
 	GameManager.game_controller.TakeActionAt(action_location, piece)
 
+func _on_requested_action(action_location: Vector2i, piece) -> void:
+	request_action.rpc(action_location, piece.id)
+
+
+func _on_action_processed(success: bool, action_location: Vector2i, piece):
+	if not is_multiplayer_authority():
+		allow_quit = true
+		return
+	if not success:
+		allow_quit = true
+		var cur_player_id: int = Lobby.player_nums[await GameManager.get_current_player()]
+		failed_action.rpc_id(cur_player_id)
+		return
+	# Tell everyone to take the action
+	take_action_at.rpc(action_location, piece.id)
+	
+	GameManager.game_controller.NextTurn()
+
+
+@rpc("authority", "call_local", "reliable")
+func failed_action() -> void:
+	remove_selection()
+	disabled_selection = false
+	allow_quit = true
+
 @rpc("authority", "call_remote", "reliable")
-func take_action_at(piece_id: int, action_location: Vector2i):
-	var piece = GameManager.game_state.GetPiece(piece_id)
+func take_action_at(action_location: Vector2i, piece_id: int):
+	var piece = await GameManager.get_piece(piece_id)
 	if piece != null:
+		allow_quit = false
 		GameManager.game_controller.TakeActionAt(action_location, piece)
+
+
 
 @rpc("authority", "call_remote", "reliable")
 func next_turn(new_player_num: int) -> void:
+	disabled_selection = false
+	allow_quit = true
 	remove_selection()
 	GameManager.game_controller.NextTurn(new_player_num)
-
-func _on_requested_action(action_location: Vector2i, piece) -> void:
-	request_action.rpc(piece.id, action_location)
 
 func _on_piece_taken(piece):
 	var remove_piece: Piece2D = GameManager.get_piece_id(piece.id)
 	if remove_piece == null:
 		return
-	
 	remove_piece.queue_free()
-
 
 @rpc("authority", "call_local", "reliable", 2)
 func receive_notice(text: String) -> void:
@@ -224,10 +259,15 @@ func to_menu():
 	get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
 
 func _on_btn_quit_pressed():
+	if not allow_quit:
+		notices.add_notice("Can't quit right now.")
+		return
+	game_active = false
 	# Disconnect GameManager signal to avoid breaking
 	Lobby.server_disconnected.disconnect(GameManager._on_server_disconnect)
 	# Close the game
-	multiplayer.multiplayer_peer.close()
+	if multiplayer.multiplayer_peer != null:
+		multiplayer.multiplayer_peer.close()
 	# Call the GameManager disconnect function (since we stopped it being called)
 	GameManager._on_server_disconnect()
 	# Reconnect the signal

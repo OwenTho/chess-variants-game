@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using Godot;
 using Godot.Collections;
-using Mutex = System.Threading.Mutex;
+using Mutex = Godot.Mutex;
 
 public partial class GameController : Node
 {
@@ -12,28 +11,20 @@ public partial class GameController : Node
     // A copy of the current GameState; This is used when currentGameState is currently working
     public GameState gameStateCopy { get; private set; }
     
-    private Mutex taskMutex = new Mutex();
-    private Mutex threadMutex = new Mutex();
-    private Mutex gameMutex = new Mutex();
+    public Mutex taskMutex = new Mutex();
+    public Mutex threadMutex = new Mutex();
+    public Mutex gameMutex = new Mutex();
     private List<Action> gameTasks = new List<Action>();
-    private Thread gameThread;
+    private GodotThread gameThread;
 
     public const int NUMBER_OF_PLAYERS = 2;
-
-    public Piece PlacePiece(string pieceId, int linkId, int teamId, int x, int y, int id = -1)
-    {
-        return currentGameState.PlacePiece(pieceId, linkId, teamId, x, y, id);
-    }
-
-    public Piece GetPiece(int pieceId)
-    {
-        return currentGameState.GetPiece(pieceId);
-    }
-
-    public bool TryGetPiece(int pieceId, out Piece piece)
-    {
-        return currentGameState.TryGetPiece(pieceId, out piece);
-    }
+    
+    // This will likely be fine, as the grid size will not change during play.
+    public Vector2I gridSize => currentGameState.gridSize;
+    
+    // Grid is also unchanging, only changing its contents. Mutex only has to be
+    // used as needed when altering / using contents.
+    public Grid<GameItem> grid => currentGameState.grid;
 
     public Vector2I GetTeamDirection(int teamId)
     {
@@ -63,20 +54,115 @@ public partial class GameController : Node
         return pieceInfoRegistry.GetValue(key);
     }
 
+    public bool TryGetPieceInfo(string key, out PieceInfo info)
+    {
+        info = GetPieceInfo(key);
+        return info != null;
+    }
+
     public RuleBase GetRule(string key)
     {
         return actionRuleRegistry.GetValue(key);
     }
 
+
+
+
+
+    private void StartGameTask()
+    {
+        gameMutex.Lock();
+        currentGameState.StartGame();
+        gameMutex.Unlock();
+    }
+
+    public void StartGame()
+    {
+        DoTask(StartGameTask);
+    }
+
+    private int GetCurrentPlayerTask()
+    {
+        gameMutex.Lock();
+        int curPlayer = currentGameState.currentPlayerNum;
+        gameMutex.Unlock();
+        return curPlayer;
+    }
+
+    public int GetCurrentPlayer()
+    {
+        gameMutex.Lock();
+        int curPlayer = currentGameState.currentPlayerNum;
+        gameMutex.Unlock();
+        return curPlayer;
+    }
+
+    
+    private Piece PlacePiece(string pieceId, int linkId, int teamId, int x, int y, int id = -1)
+    {
+        gameMutex.Lock();
+        Piece returnPiece = currentGameState.PlacePiece(pieceId, linkId, teamId, x, y, id);
+        gameMutex.Unlock();
+        return returnPiece;
+    }
+
+    public void SwapPieceTo(int piece_id, string info_id)
+    {
+        SwapPieceTo(GetPiece(piece_id), info_id);
+    }
+
+    public void SwapPieceTo(Piece piece, string info_id)
+    {
+        if (piece == null)
+        {
+            return;
+        }
+
+        if (TryGetPieceInfo(info_id, out PieceInfo info))
+        {
+            piece.info = info;
+        }
+    }
+    
+    
+    public Piece GetPiece(int pieceId)
+    {
+        gameMutex.Lock();
+        Piece returnValue = currentGameState.GetPiece(pieceId);
+        gameMutex.Unlock();
+        return returnValue;
+    }
+
+    public Piece GetFirstPieceAt(int x, int y)
+    {
+        gameMutex.Lock();
+        Piece returnPiece = currentGameState.GetFirstPieceAt(x, y);
+        gameMutex.Unlock();
+        return returnPiece;
+    }
+
+
+
+
+    public bool IsActionValid(ActionBase action, Piece piece)
+    {
+        gameMutex.Lock();
+        bool result = currentGameState.IsActionValid(action, piece);
+        gameMutex.Unlock();
+        return result;
+    }
+    
+    
+    
     private void RequestActionAtTask(Vector2I actionLocation, Piece piece)
     {
         // Only use when the game mutex is open
-        gameMutex.WaitOne();
+        gameMutex.Lock();
         if (piece.teamId != currentGameState.currentPlayerNum)
         {
             return;
         }
-        gameMutex.ReleaseMutex();
+        gameMutex.Unlock();
         CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.RequestedActionAt, actionLocation, piece);
     }
 
@@ -94,63 +180,12 @@ public partial class GameController : Node
     
     
     
-    
-    // Function calls to the currentGameState for easier access
-    private void NextTask()
-    {
-        while (true)
-        {
-            // Close thread mutex before, just in case a task is added here
-            threadMutex.WaitOne();
-            taskMutex.WaitOne();
-            
-            // If there are no tasks, stop the thread
-            if (gameTasks.Count == 0)
-            {
-                // Close thread
-                gameThread = null;
-                taskMutex.ReleaseMutex();
-                threadMutex.ReleaseMutex();
-                return;
-            }
-            threadMutex.ReleaseMutex();
-
-            // If there are tasks, run the latest one
-            Action taskToDo = gameTasks[0];
-            gameTasks.RemoveAt(0);
-            taskMutex.ReleaseMutex();
-
-            // GD.Print($"Doing next task: {taskToDo.GetMethodInfo().Name}");
-            taskToDo.Invoke();
-        }
-    }
-    
-    private void DoTask(Action task)
-    {
-        // If there's currently a task running, add to tasks and return
-        taskMutex.WaitOne();
-        gameTasks.Add(task);
-        taskMutex.ReleaseMutex();
-        threadMutex.WaitOne();
-        if (gameThread != null)
-        {
-            threadMutex.ReleaseMutex();
-            return;
-        }
-        threadMutex.ReleaseMutex();
-        
-        // If there is no task running, start a new thread
-        // Create a new thread, and start it
-        gameThread = new Thread(NextTask);
-        
-        gameThread.Start();
-    }
 
     private void TakeActionAtTask(Vector2I actionLocation, Piece piece)
     {
-        gameMutex.WaitOne();
+        gameMutex.Lock();
         currentGameState.TakeActionAt(actionLocation, piece);
-        gameMutex.ReleaseMutex();
+        gameMutex.Unlock();
     }
     
     public void TakeAction(ActionBase action, Piece piece)
@@ -167,6 +202,8 @@ public partial class GameController : Node
         DoTask(() => TakeActionAtTask(actionLocation, piece));
     }
 
+    
+    
     public void NextTurn(int playerNumber)
     {
         // Call on a thread, so that it's faster
@@ -178,21 +215,70 @@ public partial class GameController : Node
     {
         NextTurn(-1);
     }
+    
+    
+    
+    
+    // Function calls to the currentGameState for easier access
+    private void NextTask()
+    {
+        while (true)
+        {
+            // Close thread mutex before, just in case a task is added here
+            threadMutex.Lock();
+            taskMutex.Lock();
+            
+            // If there are no tasks, stop the thread
+            if (gameTasks.Count == 0)
+            {
+                // Close thread
+                taskMutex.Unlock();
+                threadMutex.Unlock();
+                gameThread = null;
+                return;
+            }
+            threadMutex.Unlock();
+
+            // If there are tasks, run the latest one
+            Action taskToDo = gameTasks[0];
+            gameTasks.RemoveAt(0);
+            taskMutex.Unlock();
+
+            // GD.Print($"Doing next task: {taskToDo.GetMethodInfo().Name}");
+            taskToDo.Invoke();
+            // GD.Print($"Task Complete ({taskToDo.GetMethodInfo().Name}), New total: {gameTasks.Count}");
+        }
+    }
+    
+    private void DoTask(Action task)
+    {
+        // If there's currently a task running, add to tasks and return
+        taskMutex.Lock();
+        gameTasks.Add(task);
+        // GD.Print($"New Task ({task.GetMethodInfo().Name}), Total tasks: {gameTasks.Count}");
+        taskMutex.Unlock();
+        threadMutex.Lock();
+        if (gameThread != null)
+        {
+            threadMutex.Unlock();
+            return;
+        }
+        
+        // If there is no task running, start a new thread
+        gameThread = new GodotThread();
+        threadMutex.Unlock();
+        
+        gameThread.Start(Callable.From(NextTask));
+    }
 
 
+    private bool doneFree = false;
     public override void _Notification(int what)
     {
         if (what == NotificationPredelete)
         {
-            // On pre-delete, close both Mutex
-            taskMutex.Close();
-            threadMutex.Close();
-            gameMutex.Close();
+            // Clear task list and wait for thread to finish
             gameTasks.Clear();
-            if (gameThread != null)
-            {
-                gameThread.Join();
-            }
 
             if (currentGameState != null)
             {

@@ -16,6 +16,8 @@ class Property:
 		display = _display
 
 	func set_label():
+		if not is_instance_valid(object):
+			return
 		# Sets the label's text.
 		var s = object.name + "/" + property + " : "
 		var p = object.get_indexed(property)

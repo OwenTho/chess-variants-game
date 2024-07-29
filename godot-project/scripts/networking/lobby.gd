@@ -343,6 +343,9 @@ func setup_game():
 	if not is_multiplayer_authority():
 		return
 	
+	# During setup, allow no connections
+	multiplayer.multiplayer_peer.refuse_new_connections = true
+	
 	players_loaded = 0
 	
 	print("Initialising game.")
@@ -376,6 +379,10 @@ func setup_game():
 	print("Starting game.")
 	# Once init is completely done, start the game
 	start_game.rpc()
+	
+	# Not that setup is completely done, allow new connections
+	# TODO: Allow new connections to open the game while it's active from the lobby.
+	multiplayer.multiplayer_peer.refuse_new_connections = false
 
 
 @rpc("any_peer", "call_local", "reliable")

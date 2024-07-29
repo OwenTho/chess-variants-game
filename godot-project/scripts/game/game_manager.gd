@@ -2,7 +2,6 @@ extends Node
 
 var game_controller_script: CSharpScript = preload("res://scripts/game/GameController.cs")
 var game_controller: Object
-var game_state: Object
 
 var game_scene: PackedScene = preload("res://scenes/game/game_screen.tscn")
 var piece_scene: PackedScene = preload("res://scenes/game/piece/piece.tscn")
@@ -10,6 +9,10 @@ var piece_scene: PackedScene = preload("res://scenes/game/piece/piece.tscn")
 var game: Game
 var grid
 var board: Board2D
+
+var task_mutex: Mutex
+var game_mutex: Mutex
+var thread_mutex: Mutex
 
 signal has_init()
 
@@ -23,12 +26,15 @@ func _on_server_disconnect():
 	#get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
 
 func reset_game():
+	# Before continuing, make sure none of the mutex are locked
 	if game != null:
 		game_controller.queue_free()
 	board = null
 	game = null
 	grid = null
-	game_state = null
+	task_mutex = null
+	game_mutex = null
+	thread_mutex = null
 
 func init() -> void:
 	if game != null:
@@ -48,9 +54,13 @@ func init() -> void:
 	
 	
 	# Initialise the game
-	game_controller.FullInit()
-	game_state = game_controller.currentGameState
-	grid = game_state.grid
+	game_controller.FullInit(is_multiplayer_authority())
+	grid = game_controller.grid
+	
+	# Get the mutex
+	task_mutex = game_controller.taskMutex
+	game_mutex = game_controller.gameMutex
+	thread_mutex = game_controller.threadMutex
 	
 	setup_signals()
 	
@@ -70,7 +80,8 @@ func setup_signals():
 	
 
 func start_game():
-	game_state.StartGame()
+	game_controller.StartGame()
+	game.game_active = true
 
 func init_board() -> void:
 	# Add all of the pieces
@@ -93,6 +104,7 @@ func init_board() -> void:
 
 func board_to_array() -> Array:
 	var ret_array: Array = []
+	game_mutex.lock()
 	for cell in grid.cells:
 		var cell_pos: Vector2i = cell.pos
 		for item in cell.items:
@@ -113,6 +125,7 @@ func board_to_array() -> Array:
 			this_item.append(item.id)
 			
 			ret_array.append(this_item)
+	game_mutex.unlock()
 	return ret_array
 
 func load_board(board_data: Array):
@@ -121,7 +134,7 @@ func load_board(board_data: Array):
 
 func place_piece(piece_id: String, link_id: int, team: int, x: int, y: int, id: int = -1) -> bool:
 	# Request the game controller to make the piece
-	var new_piece_data = game_controller.PlacePiece(piece_id, link_id, team, x, y, id)
+	var new_piece_data = await game_controller.PlacePiece(piece_id, link_id, team, x, y, id)
 	
 	# If it failed to place the piece, return false
 	if new_piece_data == null:
@@ -148,12 +161,49 @@ func place_piece(piece_id: String, link_id: int, team: int, x: int, y: int, id: 
 
 func place_matching(piece_id: String, id: int, x: int, y: int) -> void:
 	place_piece(piece_id, id, 0, x, y)
-	place_piece(piece_id, id, 1, x, game_state.gridSize.y - y - 1)
+	place_piece(piece_id, id, 1, x, game_controller.gridSize.y - y - 1)
+
+
+
 
 func get_piece_id(id: int) -> Piece2D:
 	for piece in get_tree().get_nodes_in_group("piece"):
-		if piece.piece_data.id == id:
+		if piece.piece_data != null and piece.piece_data.id == id:
 			return piece
 	return null
 
 
+## Tasks
+
+func game_controller_valid():
+	if game_controller == null || !is_instance_valid(game_controller):
+		return false
+	return true
+
+
+func is_action_valid(action, piece) -> bool:
+	if not game_controller_valid():
+		return false
+	return await game_controller.IsActionValid(action, piece)
+
+
+func get_current_player() -> int:
+	if not game_controller_valid():
+		return -1
+	return await game_controller.GetCurrentPlayer()
+
+
+func get_piece(id: int) -> Object:
+	if not game_controller_valid():
+		return null
+	return await game_controller.GetPiece(id)
+
+
+func get_first_piece_at(x: int, y: int) -> Object:
+	if not game_controller_valid():
+		return null
+	return await game_controller.GetFirstPieceAt(x,y)
+
+
+func swap_piece_to(piece_id: int, id: String) -> void:
+	game_controller.SwapPieceTo(piece_id, id)
