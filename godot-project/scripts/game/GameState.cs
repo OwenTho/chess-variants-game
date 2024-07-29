@@ -396,6 +396,12 @@ public partial class GameState : Node
         }
 
         // Loop again, to disable certain check moves
+        bool[] hasKing = new bool[GameController.NUMBER_OF_PLAYERS];
+        for (int i = 0; i < GameController.NUMBER_OF_PLAYERS; i++)
+        {
+            hasKing[i] = false;
+        }
+        
         foreach (Piece piece in allPieces)
         {
             // If it's the king, disable any attacks on it and stop it from moving into
@@ -404,6 +410,8 @@ public partial class GameState : Node
             {
                 continue;
             }
+
+            hasKing[piece.teamId] = true;
             
             if (actionGrid.TryGetCellAt(piece.cell.x, piece.cell.y, out GridCell<ActionBase> cell))
             {
@@ -479,6 +487,19 @@ public partial class GameState : Node
                 playerCheck[piece.teamId] = CheckType.POSSIBLE_CHECKMATE;
             }
         }
+        
+        // If no king, put player into check
+        // This prevents players playing and losing their king
+        for (int teamNum = 0 ; teamNum < GameController.NUMBER_OF_PLAYERS; teamNum++)
+        {
+            if (!hasKing[teamNum])
+            {
+                if (playerCheck[teamNum] == CheckType.NONE)
+                {
+                    playerCheck[teamNum] = CheckType.POSSIBLE_CHECKMATE;
+                }
+            }
+        }
 
         if (tempState)
         {
@@ -491,6 +512,7 @@ public partial class GameState : Node
         }
         
         // Check if each player is in check
+        bool checkmate = false;
         for (int teamNum = 0; teamNum < GameController.NUMBER_OF_PLAYERS; teamNum++)
         {
             // Ignore if not in check
@@ -554,15 +576,17 @@ public partial class GameState : Node
             }
 
             // If no check was found, then the player has lost.
-            if (!foundNoCheck)
-            {
-                CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, -1, "Checkmate!");
-                CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.PlayerLost, teamNum);
-            }
-            else
+            checkmate = !foundNoCheck;
+            if (foundNoCheck)
             {
                 CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, -1, "Not Checkmate.");
             }
+        }
+
+        if (checkmate)
+        {
+            CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, -1, "Checkmate!");
+            CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.PlayerLost, currentPlayerNum);
         }
     }
 
