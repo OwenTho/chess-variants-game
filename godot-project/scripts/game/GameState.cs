@@ -334,7 +334,7 @@ public partial class GameState : Node
         {
             if (action.actionLocation == actionLocation)
             {
-                GD.Print($"Doing action {action.GetType().Name} with {piece.GetType().Name}:{piece.info.pieceId}");
+                // GD.Print($"{(tempState ? "(temp) " : "")}Doing action {action.GetType().Name} with {piece.info.pieceId}:{piece.id}");
                 didAct |= TakeAction(action, piece);
             }
         }
@@ -474,7 +474,7 @@ public partial class GameState : Node
             {
                 if (action is MoveAction moveAction)
                 {
-                    if (moveAction.valid)
+                    if (moveAction.valid && moveAction.acting)
                     {
                         canMove = true;
                         break;
@@ -552,7 +552,7 @@ public partial class GameState : Node
                 foreach (var action in piece.currentPossibleActions)
                 {
                     // If action is invalid, then ignore it
-                    if (!action.valid)
+                    if (!action.valid || !action.acting)
                     {
                         continue;
                     }
@@ -564,6 +564,7 @@ public partial class GameState : Node
                     checkedLocations.Add(action.actionLocation);
                     if (!DoesActionCheck(action.actionLocation, piece))
                     {
+                        GD.Print($"Found no check with {piece.info.pieceId}:{piece.id} with action ({action.actionLocation.X}, {action.actionLocation.Y})");
                         foundNoCheck = true;
                         break;
                     }
