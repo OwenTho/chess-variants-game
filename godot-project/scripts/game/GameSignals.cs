@@ -23,6 +23,4 @@ public partial class GameController
 
     
     // Game Controller
-    [Signal]
-    public delegate void RequestedActionAtEventHandler(Vector2I actionLocation, Piece piece);
 }

@@ -156,32 +156,6 @@ public partial class GameController : Node
     
     
     
-    private void RequestActionAtTask(Vector2I actionLocation, Piece piece)
-    {
-        // Only use when the game mutex is open
-        gameMutex.Lock();
-        if (piece.teamId != currentGameState.currentPlayerNum)
-        {
-            return;
-        }
-        gameMutex.Unlock();
-        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.RequestedActionAt, actionLocation, piece);
-    }
-
-    public void RequestAction(ActionBase action, Piece piece)
-    {
-        // Request at the location
-        RequestActionsAt(action.actionLocation, piece);
-    }
-
-    public void RequestActionsAt(Vector2I actionLocation, Piece piece)
-    {
-        // Tell networking "I want to act this piece on this location"
-        DoTask(() => RequestActionAtTask(actionLocation, piece));
-    }
-    
-    
-    
 
     private void TakeActionAtTask(Vector2I actionLocation, Piece piece)
     {

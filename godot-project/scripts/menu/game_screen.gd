@@ -53,14 +53,14 @@ func remove_selection() -> void:
 func select_cell(cell_pos: Vector2i):
 	# First check if the player is selecting an action
 	var actions_to_take: Array = []
-	if selected_piece != null and selected_piece.piece_data.currentPossibleActions != null: 
+	if selected_piece != null and selected_piece.piece_data != null and selected_piece.piece_data.currentPossibleActions != null: 
 		# Check if there is an action being selected
 		for action in selected_piece.piece_data.currentPossibleActions:
-			if action.actionLocation == cell_pos and await GameManager.is_action_valid(action, selected_piece.piece_data):
-				# If there is, act on the location and stop
+			if action.actionLocation == cell_pos:
+				# If there is, request to act on that location
 				disabled_selection = true
 				allow_quit = false
-				GameManager.game_controller.RequestActionsAt(cell_pos, selected_piece.piece_data)
+				request_action.rpc(cell_pos, selected_piece.piece_data.id)
 				remove_selection()
 				return
 	
@@ -137,11 +137,13 @@ func request_action(action_location: Vector2i, piece_id: int) -> void:
 	var player_num: int = Lobby.get_player_num(sender_id)
 	# If it's -1, ignore
 	if (player_num == -1):
+		failed_action.rpc_id(sender_id)
 		return
 	
 	# If it's the wrong player number, ignore
 	var cur_player_num = await GameManager.get_current_player()
 	if Lobby.player_nums[cur_player_num] != sender_id:
+		failed_action.rpc_id(sender_id, "It is not your turn.")
 		return
 	
 	# Get piece
@@ -149,6 +151,7 @@ func request_action(action_location: Vector2i, piece_id: int) -> void:
 	
 	# If piece id is invalid, ignore
 	if piece == null:
+		failed_action.rpc_id(sender_id, "Piece not found.")
 		return
 	
 	# Verify actions at that location
@@ -157,14 +160,12 @@ func request_action(action_location: Vector2i, piece_id: int) -> void:
 	
 	# If there are no actions, ignore
 	if possible_actions.size() == 0:
+		failed_action.rpc_id(sender_id, "This piece has no actions to take.")
 		return
 	
 	# Take the actions
 	allow_quit = false
 	GameManager.game_controller.TakeActionAt(action_location, piece)
-
-func _on_requested_action(action_location: Vector2i, piece) -> void:
-	request_action.rpc(action_location, piece.id)
 
 
 func _on_action_processed(success: bool, action_location: Vector2i, piece):
@@ -183,7 +184,9 @@ func _on_action_processed(success: bool, action_location: Vector2i, piece):
 
 
 @rpc("authority", "call_local", "reliable")
-func failed_action() -> void:
+func failed_action(reason: String = "") -> void:
+	if not reason.is_empty():
+		notices.add_notice(reason)
 	remove_selection()
 	disabled_selection = false
 	allow_quit = true

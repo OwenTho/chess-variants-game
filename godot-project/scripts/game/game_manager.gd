@@ -76,8 +76,6 @@ func setup_signals():
 	game_controller.PieceRemoved.connect(game._on_piece_taken)
 	game_controller.SendNotice.connect(game.send_notice)
 	
-	game_controller.RequestedActionAt.connect(game._on_requested_action)
-	
 
 func start_game():
 	game_controller.StartGame()
