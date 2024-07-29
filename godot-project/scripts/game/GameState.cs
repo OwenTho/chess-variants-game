@@ -467,7 +467,6 @@ public partial class GameState : Node
         }
         
         // Check if each player is in check
-        int checkmatePlayer = -1;
         for (int teamNum = 0; teamNum < GameController.NUMBER_OF_PLAYERS; teamNum++)
         {
             // Ignore if not in check
@@ -526,7 +525,6 @@ public partial class GameState : Node
 
                 if (foundNoCheck)
                 {
-                    checkmatePlayer = teamNum;
                     break;
                 }
             }
@@ -535,7 +533,7 @@ public partial class GameState : Node
             if (!foundNoCheck)
             {
                 CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, -1, "Checkmate!");
-                CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.PlayerLost, checkmatePlayer);
+                CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.PlayerLost, teamNum);
             }
             else
             {

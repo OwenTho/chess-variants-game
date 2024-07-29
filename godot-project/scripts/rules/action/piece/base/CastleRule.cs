@@ -33,7 +33,6 @@ public partial class CastleRule : ActionRuleBase
             {
                 foreach (var checkPiece in pieces)
                 {
-                    GD.Print($"Checking {checkPiece.info.pieceId}");
                     // Make sure piece hasn't moved
                     if (checkPiece.timesMoved > 0)
                     {

@@ -42,8 +42,10 @@ func set_sprite(new_sprite: Texture2D):
 func update_sprite() -> void:
 	# If null, use the error sprite
 	var image_loc: String = "assets/texture/piece/invalid_piece.png"
+	var team_id: int = 0
 	if piece_data.info != null:
 		image_loc = "assets/texture/piece/" + piece_data.info.textureLoc
+		team_id = piece_data.teamId
 	print("Using image %s" % [image_loc])
 	var piece_sprite: Texture
 	if ResourceLoader.exists("res://" + image_loc):
@@ -53,6 +55,11 @@ func update_sprite() -> void:
 		piece_sprite = load("res://assets/texture/piece/default.png")
 	
 	set_sprite(piece_sprite)
+	
+	if team_id == 0:
+		$SprPiece.material.set_shader_parameter("highlight_color", Color.STEEL_BLUE)
+	else:
+		$SprPiece.material.set_shader_parameter("highlight_color", Color.MAROON)
 
 func info_changed(_info) -> void:
 	update_sprite()

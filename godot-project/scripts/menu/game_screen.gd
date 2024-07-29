@@ -93,7 +93,6 @@ func select_item(piece: Piece2D) -> void:
 		action_highlights.add_child.call_deferred(new_highlight)
 
 func _on_next_turn(new_player_num: int):
-	print(">> NEW TURN <<")
 	if not is_multiplayer_authority():
 		return
 	remove_selection()
@@ -111,7 +110,6 @@ func _on_action_processed(success: bool, action_location: Vector2i, piece):
 	GameManager.game_controller.NextTurn()
 
 func _on_end_turn() -> void:
-	print("end turn")
 	remove_selection()
 
 @rpc("authority", "call_local", "reliable")

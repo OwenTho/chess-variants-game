@@ -90,7 +90,6 @@ func init_board() -> void:
 	place_matching("bishop", 13, 5, 0)
 	place_matching("knight", 14, 6, 0)
 	place_matching("rook", 15, 7, 0)
-	print_orphan_nodes()
 
 func board_to_array() -> Array:
 	var ret_array: Array = []

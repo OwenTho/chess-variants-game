@@ -1,13 +1,20 @@
-[gd_scene load_steps=3 format=3 uid="uid://de3wktgc8oh51"]
+[gd_scene load_steps=5 format=3 uid="uid://de3wktgc8oh51"]
 
 [ext_resource type="Script" path="res://scripts/piece/visual/piece.gd" id="1_uexo4"]
 [ext_resource type="Texture2D" uid="uid://doewls0xy2qhi" path="res://assets/texture/piece/default.png" id="2_5orig"]
+[ext_resource type="Shader" path="res://assets/shaders/colour_shader.gdshader" id="2_8hu4m"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ekrv5"]
+resource_local_to_scene = true
+shader = ExtResource("2_8hu4m")
+shader_parameter/highlight_color = Color(1, 1, 1, 1)
 
 [node name="Piece" type="Node2D" groups=["piece"]]
 script = ExtResource("1_uexo4")
 
 [node name="SprPiece" type="Sprite2D" parent="."]
 top_level = true
+material = SubResource("ShaderMaterial_ekrv5")
 texture = ExtResource("2_5orig")
 
 [node name="RemoteTransform2D" type="RemoteTransform2D" parent="."]
