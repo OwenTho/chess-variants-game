@@ -99,7 +99,7 @@ public partial class GameState : Node
         return newPiece;
     }
     
-    public void TakePiece(Piece piece)
+    public void TakePiece(Piece piece, Piece attacker = null)
     {
         // Remove it from the board
         grid.RemoveItem(piece);
@@ -118,7 +118,7 @@ public partial class GameState : Node
         }
         
         // Emit signal
-        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.PieceRemoved, piece);
+        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.PieceRemoved, piece, attacker);
     }
     
     public Piece TakePiece(int pieceId)

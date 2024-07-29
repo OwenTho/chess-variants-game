@@ -15,7 +15,7 @@ public partial class GameState
     public delegate void PlayerLostEventHandler(int playerNum);
 
     [Signal]
-    public delegate void PieceRemovedEventHandler(Piece removedPiece);
+    public delegate void PieceRemovedEventHandler(Piece removedPiece, Piece attackerPiece);
 
     [Signal]
     public delegate void SendNoticeEventHandler(int playerTarget, string text);

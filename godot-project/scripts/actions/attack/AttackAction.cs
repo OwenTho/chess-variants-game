@@ -33,7 +33,7 @@ public partial class AttackAction : ActionBase
         // If there are special victims, only take those
         if (HasSpecificVictims())
         {
-            game.TakePiece(specificVictim);
+            game.TakePiece(specificVictim, piece);
             return;
         }
         // Otherwise, if there are no victims, just take whatever isn't on this
@@ -42,7 +42,7 @@ public partial class AttackAction : ActionBase
         foreach (Piece victim in targetedPieces)
         {
             // Take the piece
-            game.TakePiece(victim);
+            game.TakePiece(victim, piece);
         }
     }
 

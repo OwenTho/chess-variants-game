@@ -33,7 +33,7 @@ public partial class GameController
         currentGameState.EndTurn += () => EmitSignal(SignalName.EndTurn);
         currentGameState.PlayerLost += (playerNum) => EmitSignal(SignalName.PlayerLost, playerNum);
         
-        currentGameState.PieceRemoved += (removedPiece) => EmitSignal(SignalName.PieceRemoved, removedPiece);
+        currentGameState.PieceRemoved += (removedPiece, attackerPiece) => EmitSignal(SignalName.PieceRemoved, removedPiece, attackerPiece);
         
         currentGameState.SendNotice += (playerTarget, text) => EmitSignal(SignalName.SendNotice, playerTarget, text);
         

@@ -204,8 +204,8 @@ func next_turn(new_player_num: int) -> void:
 	remove_selection()
 	GameManager.game_controller.NextTurn(new_player_num)
 
-func _on_piece_taken(piece):
-	var remove_piece: Piece2D = GameManager.get_piece_id(piece.id)
+func _on_piece_taken(taken_piece, attacker):
+	var remove_piece: Piece2D = GameManager.get_piece_id(taken_piece.id)
 	if remove_piece == null:
 		return
 	remove_piece.queue_free()
