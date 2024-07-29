@@ -345,6 +345,7 @@ func setup_game():
 	
 	players_loaded = 0
 	
+	print("Initialising game.")
 	# Tell all clients to Init GameManager
 	init_game.rpc()
 	
@@ -353,22 +354,35 @@ func setup_game():
 	
 	if players.size() > players_loaded:
 		await init_done
+	print("Loading board.")
 	# Once game init is done, send the board contents to the players
-	players_loaded = 1 # 1, as server is already loaded
+	players_loaded = 0 # 1, as server is already loaded
+	done_init()
 	
-	init_board.rpc(GameManager.board_to_array())
+	var board: Array = GameManager.board_to_array()
+	# Send the array in groups of 5
+	
+	const JUMP_IND: int = 5
+	var cur_ind: int = 0
+	while cur_ind <= board.size():
+		init_board.rpc(board.slice(cur_ind, cur_ind + JUMP_IND))
+		cur_ind += JUMP_IND
+	# Transmit an empty array, indicating the end of the board data
+	init_board.rpc([])
 	
 	if players.size() > players_loaded:
 		await init_done
 	
+	print("Starting game.")
 	# Once init is completely done, start the game
 	start_game.rpc()
-	
+
 
 @rpc("any_peer", "call_local", "reliable")
 func done_init():
 	if is_multiplayer_authority():
 		players_loaded += 1
+		print("%s / %s Players done." % [players_loaded, players.size()])
 		if players_loaded >= players.size():
 			init_done.emit()
 
@@ -380,9 +394,10 @@ func init_game():
 
 @rpc("authority", "call_remote", "reliable")
 func init_board(board_content: Array):
-	print(board_content)
+	if board_content.is_empty():
+		done_init.rpc()
+		return
 	GameManager.load_board(board_content)
-	done_init.rpc()
 
 @rpc("authority", "call_local", "reliable")
 func start_game():
