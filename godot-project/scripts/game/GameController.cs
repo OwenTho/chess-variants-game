@@ -10,7 +10,9 @@ public partial class GameController : Node
     public GameState currentGameState { get; private set; }
     // A copy of the current GameState; This is used when currentGameState is currently working
     public GameState gameStateCopy { get; private set; }
-    
+
+    private bool stillTasking = true;
+    public Semaphore threadSemaphore = new Semaphore();
     public Mutex taskMutex = new Mutex();
     public Mutex threadMutex = new Mutex();
     public Mutex gameMutex = new Mutex();
@@ -222,10 +224,11 @@ public partial class GameController : Node
     // Function calls to the currentGameState for easier access
     private void NextTask()
     {
-        while (true)
+        // Thread mutex locks before checking "stillTasking" so that it can be read without issue.
+        threadMutex.Lock();
+        while (stillTasking)
         {
             // Close thread mutex before, just in case a task is added here
-            threadMutex.Lock();
             taskMutex.Lock();
             
             // If there are no tasks, stop the thread
@@ -234,8 +237,9 @@ public partial class GameController : Node
                 // Close thread
                 taskMutex.Unlock();
                 threadMutex.Unlock();
-                gameThread = null;
-                return;
+                threadSemaphore.Wait();
+                threadMutex.Lock();
+                continue;
             }
             threadMutex.Unlock();
 
@@ -247,6 +251,7 @@ public partial class GameController : Node
             // GD.Print($"Doing next task: {taskToDo.GetMethodInfo().Name}");
             taskToDo.Invoke();
             // GD.Print($"Task Complete ({taskToDo.GetMethodInfo().Name}), New total: {gameTasks.Count}");
+            threadMutex.Lock();
         }
     }
     
@@ -256,13 +261,15 @@ public partial class GameController : Node
         taskMutex.Lock();
         gameTasks.Add(task);
         // GD.Print($"New Task ({task.GetMethodInfo().Name}), Total tasks: {gameTasks.Count}");
-        taskMutex.Unlock();
         threadMutex.Lock();
         if (gameThread != null)
         {
             threadMutex.Unlock();
+            taskMutex.Unlock();
+            threadSemaphore.Post();
             return;
         }
+        taskMutex.Unlock();
         
         // If there is no task running, start a new thread
         gameThread = new GodotThread();
@@ -279,6 +286,14 @@ public partial class GameController : Node
         {
             // Clear task list and wait for thread to finish
             gameTasks.Clear();
+            threadMutex.Lock();
+            stillTasking = false;
+            threadMutex.Unlock();
+            threadSemaphore.Post();
+            if (gameThread != null)
+            {
+                gameThread.WaitToFinish();
+            }
 
             if (currentGameState != null)
             {
