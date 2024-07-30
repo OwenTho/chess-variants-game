@@ -23,6 +23,10 @@ func _ready() -> void:
 	# If it's player 2, flip the board
 	if my_num == 1:
 		$BoardHolder.rotation = deg_to_rad(180)
+	
+	# If the game is not opened by a player, hide the quit button
+	if not Lobby.is_player:
+		$GameUI/BtnQuit.visible = false
 
 func _on_init():
 	cursor.board = GameManager.board
@@ -35,6 +39,9 @@ func _process(delta) -> void:
 		$BoardHolder.rotation = $BoardHolder.rotation + deg_to_rad(45) * delta
 
 func _input(event) -> void:
+	# Ignore inputs from non-players
+	if not Lobby.is_player:
+		return
 	if not game_active:
 		return
 	if event is InputEventMouseButton and event.is_action_pressed("mouse_left"):
@@ -52,7 +59,7 @@ func remove_selection() -> void:
 
 func select_cell(cell_pos: Vector2i):
 	# Try to get the game mutex
-	if !GameManager.game_mutex.try_lock():
+	if not GameManager.game_mutex.try_lock():
 		# If it couldn't get the mutex, then return
 		return
 	# First check if the player is selecting an action
@@ -93,7 +100,7 @@ func select_item(piece: Piece2D) -> void:
 		return
 	
 	# If the selection can't get the game mutex, just ignore
-	if !GameManager.game_mutex.try_lock():
+	if not GameManager.game_mutex.try_lock():
 		return
 	var possible_actions: Array = piece.piece_data.currentPossibleActions
 	
@@ -246,6 +253,12 @@ func _on_player_lost(player_num: int):
 
 @rpc("authority", "call_local", "reliable")
 func player_won(winner: int):
+	# Reset game data, given that it's not needed anymore.
+	GameManager.reset_game()
+	if not Lobby.is_player:
+		# Leave the game scene
+		get_tree().unload_current_scene()
+		return
 	var pop_up: AcceptDialog = AcceptDialog.new()
 	pop_up.dialog_text = "Player %s has won." % [winner]
 	pop_up.title = "Checkmate!"

@@ -44,7 +44,8 @@ func init() -> void:
 	game = game_scene.instantiate()
 	get_tree().root.add_child(game)
 	get_tree().current_scene = game
-	cur_scene.queue_free()
+	if cur_scene != null:
+		cur_scene.queue_free()
 	
 	board = game.board
 	
