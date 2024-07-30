@@ -8,11 +8,10 @@ internal partial class EnemyAttackAllowOverlapRule : ValidationRuleBase
     public override void CheckAction(GameState game, Piece piece, ActionBase action)
     {
         // Only continue if action is an attack action
-        if (action is not AttackAction)
+        if (action is not AttackAction attackAction)
         {
             return;
         }
-        AttackAction attackAction = (AttackAction)action;
         // If there is no move action for the attack, just ignore
         if (attackAction.moveAction == null)
         {

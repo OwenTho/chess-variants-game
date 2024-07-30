@@ -83,6 +83,10 @@ func start_game():
 	game.game_active = true
 
 func init_board() -> void:
+	place_matching("king", 0, 0, 0)
+	place_piece("queen", 1, 0, 1, 0)
+	place_piece("rook", 1, 1, 3, 7)
+	return
 	# Add all of the pieces
 	place_matching("pawn", 0, 0, 1)
 	place_matching("pawn", 1, 1, 1)

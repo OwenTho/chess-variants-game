@@ -83,14 +83,6 @@ public partial class GameController : Node
         DoTask(StartGameTask);
     }
 
-    private int GetCurrentPlayerTask()
-    {
-        gameMutex.Lock();
-        int curPlayer = currentGameState.currentPlayerNum;
-        gameMutex.Unlock();
-        return curPlayer;
-    }
-
     public int GetCurrentPlayer()
     {
         gameMutex.Lock();

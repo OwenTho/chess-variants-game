@@ -58,7 +58,7 @@ public partial class AttackAction : ActionBase
 
     public override object Clone()
     {
-        AttackAction newAttack = new AttackAction(null, actionLocation, attackLocation, moveAction);
+        AttackAction newAttack = new AttackAction(null, actionLocation, attackLocation, null);
         CloneTo(newAttack);
         return newAttack;
     }
@@ -81,7 +81,7 @@ public partial class AttackAction : ActionBase
 
     public override void SetExtraCopyLinks(GameState game, System.Collections.Generic.Dictionary<string, int> extraLinks, System.Collections.Generic.Dictionary<int, ActionBase> links)
     {
-        if (extraLinks.TryGetValue("attackAction", out int attackActionId))
+        if (extraLinks.TryGetValue("moveAction", out int attackActionId))
         {
             if (links.TryGetValue(attackActionId, out ActionBase linkedMoveAction))
             {

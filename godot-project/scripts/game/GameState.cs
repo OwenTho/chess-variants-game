@@ -417,9 +417,13 @@ public partial class GameState : Node
             {
                 foreach (GridItem<ActionBase> item in cell.items)
                 {
-                    if (item is AttackAction)
+                    if (item is AttackAction attackAction)
                     {
-                        AttackAction attackAction = (AttackAction)item;
+                        // If invalid, or not acting, ignore the attack
+                        if (!attackAction.valid || !attackAction.acting)
+                        {
+                            continue;
+                        }
                         // If attack is valid, and is able to check, then mark it down for the player
                         if (playerCheck[piece.teamId] == CheckType.NONE)
                         {
@@ -432,6 +436,8 @@ public partial class GameState : Node
                             }
                         }
                         
+                        // Once done, make the attack action, and a move action if it has it, invalid
+                        // as the king can't be attacked.
                         attackAction.MakeInvalid();
                         if (attackAction.moveAction != null)
                         {
@@ -443,6 +449,11 @@ public partial class GameState : Node
 
             foreach (ActionBase action in piece.currentPossibleActions)
             {
+                // If action is invalid, ignore
+                if (!action.valid)
+                {
+                    continue;
+                }
                 if (action is not MoveAction moveAction)
                 {
                     continue;
@@ -450,6 +461,14 @@ public partial class GameState : Node
                 foreach (var item in moveAction.cell.items)
                 {
                     if (item is not AttackAction attackAction)
+                    {
+                        continue;
+                    }
+                    // If action is not acting, ignore
+                    // invalid actions are not ignored as, for example, bishops movement would be
+                    // considered "invalid" beyond the king, but the king can't move onto these spaces as they
+                    // are in check
+                    if (!attackAction.acting)
                     {
                         continue;
                     }
@@ -557,11 +576,10 @@ public partial class GameState : Node
                         continue;
                     }
                     // If action location is already done, ignore
-                    if (checkedLocations.Contains(action.actionLocation))
+                    if (!checkedLocations.Add(action.actionLocation))
                     {
                         continue;
                     }
-                    checkedLocations.Add(action.actionLocation);
                     if (!DoesActionCheck(action.actionLocation, piece))
                     {
                         GD.Print($"Found no check with {piece.info.pieceId}:{piece.id} with action ({action.actionLocation.X}, {action.actionLocation.Y})");

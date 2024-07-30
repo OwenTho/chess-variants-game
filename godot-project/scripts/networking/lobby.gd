@@ -332,7 +332,7 @@ func request_start_game():
 	
 	# If player isn't an admin, ignore
 	if not player_is_admin(player_id):
-		send_error("You must be an admin to start the game.", player_id)
+		send_error("You must be the lobby admin to start the game.", player_id)
 		return
 	
 	# If player is an admin, start game
