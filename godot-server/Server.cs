@@ -104,6 +104,11 @@ public partial class Server : Node
                         failed = false;
                         serverPeer.PutU8(SendingTransmissions.LobbyPort);
                         serverPeer.PutVar(lobby.Port);
+                        GD.Print($"Sending Lobby port: {lobby.Port}.");
+                    }
+                    else
+                    {
+                        GD.Print($"Lobby {code} does not exist.");
                     }
                 }
                 
