@@ -25,14 +25,10 @@ public abstract partial class ActionBase : GridItem<ActionBase>
     public Tags tags { get; } = new Tags();
     
     // Tags used in validation steps. Add this in Verification Rules.
-    public Tags verifyTags { get; } = new Tags();
+    public CountingTags verifyTags { get; } = new CountingTags();
 
     // Tags that make this action invalid. Add to this in Verification Rules.
-    public Tags invalidTags { get; } = new Tags();
-
-    // Dictionary which holds the invalid tags, and the number of occurrences.
-    // If it's positive, it's added. If it's negative, it's removed.
-    internal Dictionary<string, int> invalidTagCounts;
+    public CountingTags invalidTags { get; } = new CountingTags();
 
     public ActionBase(Piece owner, Vector2I actionLocation)
     {
@@ -41,7 +37,6 @@ public abstract partial class ActionBase : GridItem<ActionBase>
 
         dependencies = new List<ActionBase>();
         dependents = new List<ActionBase>();
-        invalidTagCounts = new Dictionary<string, int>();
     }
 
     public abstract void ActOn(GameState game, Piece piece);
@@ -169,7 +164,7 @@ public abstract partial class ActionBase : GridItem<ActionBase>
         }
         if (carryType == CarryType.UP)
         {
-            TagDependancies(tag);
+            TagDependencies(tag);
         }
     }
 
@@ -181,7 +176,7 @@ public abstract partial class ActionBase : GridItem<ActionBase>
         }
     }
 
-    public void TagDependancies(string tag)
+    public void TagDependencies(string tag)
     {
         foreach (ActionBase dependency in dependencies)
         {
@@ -189,9 +184,7 @@ public abstract partial class ActionBase : GridItem<ActionBase>
         }
     }
     
-    
-    
-    public void VerifyTag(string tag, CarryType carryType = CarryType.DOWN)
+    public void VerifyTag(string tag, CarryType carryType = CarryType.DOWN, int tagCount = 1)
     {
         // If this already has the tag, ignore to avoid
         // infinite loops.
@@ -203,125 +196,93 @@ public abstract partial class ActionBase : GridItem<ActionBase>
         // If carry, also tag dependents
         if (carryType == CarryType.DOWN)
         {
-            VerifyTagDependents(tag);
+            VerifyTagDependents(tag, tagCount);
         }
         if (carryType == CarryType.UP)
         {
-            VerifyTagDependancies(tag);
+            VerifyTagDependencies(tag, tagCount);
         }
     }
 
-    public void VerifyTagDependents(string tag)
+    public void VerifyTagDependents(string tag, int tagCount = 1)
     {
         foreach (ActionBase dependent in dependents)
         {
-            dependent.VerifyTag(tag, CarryType.DOWN);
+            dependent.VerifyTag(tag, CarryType.DOWN, tagCount);
         }
     }
 
-    public void VerifyTagDependancies(string tag)
+    public void VerifyTagDependencies(string tag, int tagCount = 1)
     {
         foreach (ActionBase dependency in dependencies)
         {
-            dependency.VerifyTag(tag, CarryType.UP);
+            dependency.VerifyTag(tag, CarryType.UP, tagCount);
         }
+    }
+
+    public void RemoveVerifyTag(string tag, CarryType carryType = CarryType.DOWN, int tagCount = 1)
+    {
+        VerifyTag(tag, carryType, -tagCount);
+    }
+
+    public void RemoveVerifyTagDependents(string tag, int tagCount = 1)
+    {
+        VerifyTagDependents(tag, -tagCount);
+    }
+
+    public void RemoveVerifyTagDependencies(string tag, int tagCount = 1)
+    {
+        VerifyTagDependencies(tag, -tagCount);
     }
 
 
 
 
-    private void AddInvalidTag(string tag)
-    {
 
-        int num = 1;
-        if (invalidTagCounts.TryGetValue(tag, out int count))
-        {
-            num = count + 1;
-            invalidTagCounts.Remove(tag);
-        }
-        // If 1 or higher, then add the tag
-        invalidTagCounts.Add(tag, num);
-        if (num > 0)
-        {
-            invalidTags.Add(tag);
-        }
-        //GD.Print($"Tag {tag} upped to {num}");
-    }
 
-    private void RemoveInvalidTag(string tag)
+    public void InvalidTag(string tag, CarryType carryType = CarryType.DOWN, int tagCount = 1)
     {
-        int num = -1;
-        if (invalidTagCounts.TryGetValue(tag, out int count))
-        {
-            num = count - 1;
-            invalidTagCounts.Remove(tag);
-        }
-        invalidTagCounts.Add(tag, num);
-        if (num <= 0)
-        {
-            invalidTags.Remove(tag);
-        }
-        //GD.Print($"Tag {tag} lowered to {num}");
-    }
-
-    public void InvalidTag(string tag, CarryType carryType = CarryType.DOWN)
-    {
-        AddInvalidTag(tag);
+        invalidTags.Add(tag, tagCount);
         // If carry, also tag dependents
         if (carryType == CarryType.DOWN)
         {
-            InvalidTagDependents(tag);
+            InvalidTagDependents(tag, tagCount);
         }
         if (carryType == CarryType.UP)
         {
-            InvalidTagDependencies(tag);
+            InvalidTagDependencies(tag, tagCount);
         }
     }
 
-    public void InvalidTagDependents(string tag)
+    public void InvalidTagDependents(string tag, int tagCount = 1)
     {
         foreach (ActionBase dependent in dependents)
         {
-            dependent.InvalidTag(tag, CarryType.DOWN);
+            dependent.InvalidTag(tag, CarryType.DOWN, tagCount);
         }
     }
 
-    public void InvalidTagDependencies(string tag)
+    public void InvalidTagDependencies(string tag, int tagCount = 1)
     {
         foreach (ActionBase dependency in dependencies)
         {
-            dependency.InvalidTag(tag, CarryType.UP);
+            dependency.InvalidTag(tag, CarryType.UP, tagCount);
         }
     }
 
-    public void RemoveInvalidTag(string tag, CarryType carryType = CarryType.DOWN)
+    public void RemoveInvalidTag(string tag, CarryType carryType = CarryType.DOWN, int tagCount = 1)
     {
-        RemoveInvalidTag(tag);
-        // If carry, also remove the tag from dependents
-        if (carryType == CarryType.DOWN)
-        {
-            RemoveInvalidTagDependents(tag);
-        }
-        if (carryType == CarryType.UP)
-        {
-            RemoveInvalidTagDependencies(tag);
-        }
+        InvalidTag(tag, CarryType.DOWN, -tagCount);
     }
 
-    public void RemoveInvalidTagDependents(string tag)
+    public void RemoveInvalidTagDependents(string tag, int tagCount = 1)
     {
-        foreach (ActionBase dependent in dependents)
-        {
-            dependent.RemoveInvalidTag(tag, CarryType.DOWN);
-        }
+        InvalidTagDependents(tag, -tagCount);
     }
 
-    public void RemoveInvalidTagDependencies(string tag)
+    public void RemoveInvalidTagDependencies(string tag, int tagCount = 1)
     {
-        foreach (ActionBase dependency in dependencies)
-        {
-            dependency.RemoveInvalidTag(tag, CarryType.UP);
-        }
+        InvalidTagDependents(tag, -tagCount);
     }
 
     internal void ResetValidity()
@@ -331,7 +292,6 @@ public abstract partial class ActionBase : GridItem<ActionBase>
         // Clear tags
         verifyTags.Clear();
         invalidTags.Clear();
-        invalidTagCounts.Clear();
     }
 
     public void SetOwner(Piece newOwner, CarryType carryType = CarryType.DOWN)
@@ -373,14 +333,13 @@ public abstract partial class ActionBase : GridItem<ActionBase>
     
 
     public abstract object Clone();
-
+    
     protected void CloneTo(ActionBase action)
     {
         // First clear the action
         action.verifyTags.Clear();
         action.invalidTags.Clear();
         action.tags.Clear();
-        action.invalidTagCounts.Clear();
         
         // Then copy over the tags
         foreach (var tag in tags)
@@ -390,17 +349,20 @@ public abstract partial class ActionBase : GridItem<ActionBase>
         
         foreach (var tag in verifyTags)
         {
-            action.verifyTags.Add(tag);
+            // Get the tag counts, and add it that number of times
+            if (verifyTags.TryGetTagCount(tag, out int tagCount))
+            {
+                action.verifyTags.Add(tag, tagCount);
+            }
         }
 
         foreach (var tag in invalidTags)
         {
-            action.invalidTags.Add(tag);
-        }
-
-        foreach (var keyValue in invalidTagCounts)
-        {
-            action.invalidTagCounts.Add(keyValue.Key, keyValue.Value);
+            // Get the tag counts, and add it that number of times
+            if (invalidTags.TryGetTagCount(tag, out int tagCount))
+            {
+                action.invalidTags.Add(tag, tagCount);
+            }
         }
         
         // Copy over the other variables

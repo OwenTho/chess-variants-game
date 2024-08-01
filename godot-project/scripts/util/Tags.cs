@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 // GodotObject wrapper for a string HashSet, so that it can be used in GDScript if needed.
 public partial class Tags : IEnumerable<string>
 {
-    private HashSet<string> tags = new HashSet<string>();
+    private HashSet<string> tags = new();
     public int Count { get { return tags.Count; } }
     public bool Add(string tag)
     {
@@ -54,5 +54,16 @@ public partial class Tags : IEnumerable<string>
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
+    }
+
+    public Tags Clone()
+    {
+        Tags newTags = new Tags();
+        foreach (var tag in newTags)
+        {
+            newTags.Add(tag);
+        }
+
+        return newTags;
     }
 }

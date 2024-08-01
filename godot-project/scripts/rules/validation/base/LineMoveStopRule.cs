@@ -30,7 +30,7 @@ internal partial class LineMoveStopRule : ValidationRuleBase
                 moveAction.VerifyTagDependents("no_check");
                 if (moveAction.attackAction != null)
                 {
-                    moveAction.attackAction.verifyTags.Remove("no_check");
+                    moveAction.attackAction.RemoveVerifyTag("no_check");
                 }
             }
             if (moveAction.attackAction != null)
