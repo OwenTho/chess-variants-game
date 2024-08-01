@@ -12,8 +12,14 @@ public partial class MoveAction : ActionBase
 
     public override void ActOn(GameState game, Piece piece)
     {
+        game.lastMovePiece = piece;
+        // Announce the event, and stop if cancelled / not continuing
+        if (!game.gameEvents.AnnounceEvent(GameEvents.MovePiece))
+        {
+            return;
+        }
         // Move piece
-        game.grid.PlaceItemAt(piece, moveLocation.X, moveLocation.Y);
+        game.MovePiece(piece, moveLocation.X, moveLocation.Y);
         // Now that piece has moved, it needs to be updated
         piece.EnableActionsUpdate();
         piece.timesMoved += 1;

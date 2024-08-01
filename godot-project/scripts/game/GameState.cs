@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Godot;
 using Godot.Collections;
+using Array = Godot.Collections.Array;
 
 public partial class GameState : Node
 {
@@ -21,9 +22,17 @@ public partial class GameState : Node
     
     bool tempState = false;
     
-    // If the GameState needs to do Check checks. This is enabled for the server,
-    // and disabled for the clients.
-    bool needToCheck = true;
+    // If the State is on the server. Allows game to avoid checking Checkmate if it's on
+    // a Client side, given the Client can be told by the server.
+    bool isServer = true;
+
+    public GameEvents gameEvents;
+    public Array<CardBase> cards;
+    
+    // Game variables for cards
+    public Piece lastMovePiece { get; internal set; }
+    public Piece lastTakenPiece { get; private set; }
+    public Piece lastAttackerPiece { get; private set; }
 
     public enum CheckType
     {
@@ -49,13 +58,16 @@ public partial class GameState : Node
         allPieces = new Array<Piece>();
         gridSize = new Vector2I(8, 8);
 
+        gameEvents = new GameEvents(this);
+        cards = new Array<CardBase>();
+
         playerCheck = new CheckType[GameController.NUMBER_OF_PLAYERS];
         for (int i = 0; i < playerCheck.Length; i++)
         {
             playerCheck[i] = CheckType.NONE;
         }
 
-        this.needToCheck = needToCheck;
+        this.isServer = needToCheck;
     }
 
     public void SetPlayerNum(int newPlayerNum)
@@ -98,6 +110,13 @@ public partial class GameState : Node
 
         return newPiece;
     }
+
+    public void MovePiece(Piece piece, int x, int y)
+    {
+        lastMovePiece = piece;
+        grid.PlaceItemAt(piece, x, y);
+        gameEvents.AnnounceEvent(GameEvents.PieceMoved);
+    }
     
     public void TakePiece(Piece piece, Piece attacker = null)
     {
@@ -116,6 +135,11 @@ public partial class GameState : Node
             action.cell.RemoveItem(action);
             action.QueueFree();
         }
+
+        lastTakenPiece = piece;
+        lastAttackerPiece = attacker;
+        
+        gameEvents.AnnounceEvent(GameEvents.PieceTaken);
         
         // Emit signal
         CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.PieceRemoved, piece, attacker);
@@ -286,7 +310,7 @@ public partial class GameState : Node
             return playerCheck[piece.teamId] != CheckType.NONE;
         }
         // If it's non-check, ignore as server already did the check
-        if (!needToCheck)
+        if (!isServer)
         {
             return false;
         }
@@ -525,7 +549,7 @@ public partial class GameState : Node
             return;
         }
         // If it's non-check, ignore as server already did the check
-        if (!needToCheck)
+        if (!isServer)
         {
             return;
         }
@@ -617,6 +641,7 @@ public partial class GameState : Node
             return;
         }
         // First, end turn
+        gameEvents.AnnounceEvent(GameEvents.EndTurn);
         CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.EndTurn);
         // Tell all pieces that it's the next turn
         foreach (Piece piece in allPieces)
@@ -649,6 +674,7 @@ public partial class GameState : Node
 
         // Tell all pieces that it's the next turn
         PiecesNewTurn();
+        gameEvents.AnnounceEvent(GameEvents.NewTurn);
         CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.NewTurn, currentPlayerNum);
     }
 
@@ -657,18 +683,32 @@ public partial class GameState : Node
         NextTurn(-1);
     }
 
-    
 
-    public object Clone()
+    internal void AddCard(CardBase card)
+    {
+        cards.Add(card);
+        card.MakeListeners(gameEvents);
+        CallDeferred(Node.MethodName.AddChild, card);
+    }
+    
+    
+    
+    public GameState Clone()
     {
         // Initialise the new state
         GameState newState = new GameState(gameController);
-        newState.Init(needToCheck);
+        newState.Init(isServer);
+        
+        // Copy the Cards
+        foreach (var card in cards)
+        {
+            newState.AddCard(card.Clone());
+        }
 
-        // Copy over the pieces and their actions
+        // Copy over the pieces
         foreach (var piece in allPieces)
         {
-            Piece newPiece = (Piece)piece.Clone();
+            Piece newPiece = piece.Clone();
             newState.allPieces.Add(newPiece);
             newState.grid.PlaceItemAt(newPiece, piece.cell.x, piece.cell.y);
         }
@@ -696,16 +736,6 @@ public partial class GameState : Node
                 actionDependents.Add(newAction.actionId, dependents);
                 
                 System.Collections.Generic.Dictionary<string, int> links = action.GetExtraCopyLinks();
-                /*if (links != null)
-                {
-                    string text = "{ ";
-                    foreach (var keyValue in links)
-                    {
-                        text += $"({keyValue.Key} :: {keyValue.Value}), ";
-                    }
-
-                    GD.Print($"{text} }}");
-                }*/
 
                 if (links != null && links.Count > 0)
                 {

@@ -186,6 +186,10 @@ public partial class Piece : GameItem
             if (IsInstanceValid(action))
             {
                 action.QueueFree();
+                if (action.cell != null)
+                {
+                    action.cell.RemoveItem(action);
+                }
             }
         }
         // Clear the list
@@ -229,7 +233,7 @@ public partial class Piece : GameItem
     }
     
 
-    public object Clone()
+    public override Piece Clone()
     {
         Piece newPiece = new Piece();
         // Copy variables

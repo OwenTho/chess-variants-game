@@ -7,6 +7,7 @@ public partial class GameController
     internal Registry<ActionRuleBase> actionRuleRegistry = new Registry<ActionRuleBase>();
     internal Registry<ValidationRuleBase> validationRuleRegistry = new Registry<ValidationRuleBase>();
     List<string> initialValidationRules = new List<string>();
+    internal Registry<CardFactory> cardFactoryRegistry = new Registry<CardFactory>();
 
     public void FullInit(bool isServer)
     {
@@ -14,10 +15,12 @@ public partial class GameController
         InitValidationRules();
         InitActionRules();
         InitPieceInfo();
+        InitCardFactories();
 
         AddChild(pieceInfoRegistry);
         AddChild(actionRuleRegistry);
         AddChild(validationRuleRegistry);
+        AddChild(cardFactoryRegistry);
     }
 
     public GameState InitGameState(bool needToCheck)
@@ -85,6 +88,15 @@ public partial class GameController
         MakeNewPieceInfo("king", 2, "king.png").AddActionRule(actionRuleRegistry.GetValue("king_move")).AddActionRule(actionRuleRegistry.GetValue("castle"));
     }
 
+    internal void InitCardFactories()
+    {
+        // Make sure registry is cleared
+        cardFactoryRegistry.Clear();
+        
+        // Register Card Factories
+        AddNewFactory("major_shapeshift", new SimpleCardFactory<ShapeshiftCard>());
+    }
+
     private void MakeNewValidationRule(string id, ValidationRuleBase newRule, bool makeInitialRule = false)
     {
         newRule.ruleId = id;
@@ -116,5 +128,11 @@ public partial class GameController
         pieceInfoRegistry.Register(id, newInfo);
         GD.Print($"Made new Piece Info: {id} (initialLeveL: {initialLevel}, textureLocation: {textureLocation})");
         return newInfo;
+    }
+
+    private void AddNewFactory(string id, CardFactory newFactory)
+    {
+        newFactory.cardId = id;
+        cardFactoryRegistry.Register(id, newFactory);
     }
 }

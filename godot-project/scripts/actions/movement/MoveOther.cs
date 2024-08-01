@@ -13,7 +13,7 @@ public partial class MoveOther : MoveAction
     public override void ActOn(GameState game, Piece piece)
     {
         // Move piece
-        game.grid.PlaceItemAt(movePiece, moveLocation.X, moveLocation.Y);
+        game.MovePiece(movePiece, moveLocation.X, moveLocation.Y);
         // Now that piece has moved, it needs to be updated
         movePiece.EnableActionsUpdate();
         movePiece.timesMoved += 1;

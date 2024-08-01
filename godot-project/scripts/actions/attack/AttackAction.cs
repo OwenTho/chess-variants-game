@@ -30,6 +30,11 @@ public partial class AttackAction : ActionBase
 
     public override void ActOn(GameState game, Piece piece)
     {
+        // Announce the event, and stop if cancelled / not continuing
+        if (!game.gameEvents.AnnounceEvent(GameEvents.AttackPiece))
+        {
+            return;
+        }
         // If there are special victims, only take those
         if (HasSpecificVictims())
         {
