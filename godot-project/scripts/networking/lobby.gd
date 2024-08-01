@@ -1,10 +1,10 @@
 extends Node
 
-const DEFAULT_SERVER_IP: String = "127.0.0.1"
-const DEFAULT_PORT: int = 9813
-const MAX_CONNECTIONS: int = 5
+var DEFAULT_SERVER_IP: String = "127.0.0.1"
+var DEFAULT_PORT: int = 9813
+var MAX_CONNECTIONS: int = 5
 
-const NAME_LENGTH_LIMIT: int = 13
+var NAME_LENGTH_LIMIT: int = 13
 
 var players: Dictionary = {}
 
@@ -15,6 +15,7 @@ var player_info: PlayerInfo = PlayerInfo.new(-1)
 var players_loaded: int = 0
 
 var is_player: bool = false
+var close_on_noone: bool = false
 
 
 
@@ -220,6 +221,10 @@ func _on_player_disconnected(id):
 		if id == player_nums[i]:
 			set_player(-1, i)
 			break
+	
+	# If not a player, close when there's 0 players
+	if not is_player and close_on_noone:
+		multiplayer.multiplayer_peer.close()
 
 func _on_connected_fail():
 	remove_multiplayer_peer()

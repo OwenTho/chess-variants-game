@@ -15,7 +15,12 @@ func check_entries() -> bool:
 	
 	var server_port: String = server_port_entry.text
 	if not server_port.is_empty() and not server_port.is_valid_int():
-		error_dialog("Invalid Port", "Please enter a valid Port (1025 - 49151, or it will default to %s)." % [Lobby.DEFAULT_PORT + 1])
+		error_dialog("Invalid Port", "Please enter a valid Port (1024 - 49151, or it will default to %s)." % [Lobby.DEFAULT_PORT + 1])
+		return false
+	
+	var server_port_int: int = int(server_port)
+	if server_port_int < 1024 or server_port_int > 49151:
+		error_dialog("Invalid Port", "Please enter a valid Port (1024 - 49151, or it will default to %s)." % [Lobby.DEFAULT_PORT + 1])
 		return false
 	return true
 

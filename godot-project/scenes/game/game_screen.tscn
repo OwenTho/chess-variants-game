@@ -6,7 +6,7 @@
 [ext_resource type="TileSet" uid="uid://de3uupic4da2f" path="res://assets/tileset/board_tileset.tres" id="3_fosrn"]
 [ext_resource type="Script" path="res://scripts/game/visual/Board2D.gd" id="4_03kst"]
 [ext_resource type="PackedScene" uid="uid://cvs3hxaru45s1" path="res://scenes/debug/stray_nodes_btn.tscn" id="4_64yrk"]
-[ext_resource type="Script" path="res://scenes/game/game_notices.gd" id="4_q6ob5"]
+[ext_resource type="Script" path="res://scripts/game/visual/game_notices.gd" id="4_q6ob5"]
 [ext_resource type="PackedScene" uid="uid://dkoglthgg2tyq" path="res://scenes/game/cursor_highlight.tscn" id="5_w7pci"]
 
 [node name="GameScreen" type="Node2D" node_paths=PackedStringArray("board", "cursor", "action_highlights", "notices") groups=["game_screen"]]

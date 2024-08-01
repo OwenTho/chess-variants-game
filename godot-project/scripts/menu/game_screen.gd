@@ -247,7 +247,9 @@ func send_notice(player_target: int, text: String) -> void:
 
 
 
-
+# TODO: Rather than calling player_won, instead remove the player from
+# the game. When new turn is called, determine who wins at that point.
+# This allows for draws (not the same as stalemates)
 func _on_player_lost(player_num: int):
 	if not is_multiplayer_authority():
 		return
