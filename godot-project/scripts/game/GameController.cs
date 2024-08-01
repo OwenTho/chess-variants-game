@@ -75,6 +75,7 @@ public partial class GameController : Node
     {
         gameMutex.Lock();
         currentGameState.StartGame();
+        currentGameState.AddCard(cardFactoryRegistry.GetValue("major_shapeshift").CreateNewCard(currentGameState));
         gameMutex.Unlock();
     }
 
