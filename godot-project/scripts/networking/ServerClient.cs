@@ -129,7 +129,7 @@ public partial class ServerClient : Node
     {
         if (status != StreamPeerTcp.Status.Connected)
         {
-            GD.Print("Can't request to join a Lobby as the Stream is not connected.");
+            GD.Print("Can't request to create a Lobby as the Stream is not connected.");
             return;
         }
         
