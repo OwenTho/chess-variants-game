@@ -6,6 +6,7 @@ func _ready():
 	var command_args: PackedStringArray = OS.get_cmdline_args()
 	# Loop for specific arguments
 	for arg in command_args:
+		print(arg)
 		# Lower case
 		arg = arg.to_lower()
 		# If it does not start with "--", ignore
@@ -20,9 +21,10 @@ func _ready():
 		process_argument(split_arg[0], split_arg[1])
 		
 	# Check if this is a server
-	if OS.has_feature("dedicated_server"):
+	if OS.has_feature("dedicated_server") or OS.get_cmdline_args().has("--server"):
 		print("Running as server.")
 		Lobby.is_player = false
+		Lobby.close_on_noone = true
 		# If it's a dedicated server, immediately go and make a lobby
 		Lobby.create_game()
 		return
@@ -43,7 +45,7 @@ func process_argument(name: String, value: String = ""):
 			
 			
 			### Parameters with Arguments
-			# Maximum server connections
+			## Maximum server connections
 			"name-limit":
 				if not value.is_valid_int():
 					push_error("Name limit must be an int. Leaving at default.")
@@ -64,14 +66,16 @@ func process_argument(name: String, value: String = ""):
 					get_tree().quit()
 					return
 				Lobby.MAX_CONNECTIONS = connections
-			# Default ip to use in Lobby
+			## Default ip to use in Lobby
+			# Used for Clients
 			"default-ip":
 				if not value.is_valid_ip_address():
 					push_error("Invalid IP: " % value)
 					get_tree().quit()
 				Lobby.DEFAULT_SERVER_IP = value
-			# Default port to use in Lobby
+			## Default port to use in Lobby
 			# Fails if incorrect, for servers
+			# Servers use this for their Port.
 			"default-port":
 				if not value.is_valid_int():
 					push_error("Port must be an integer.")
@@ -99,5 +103,9 @@ func process_argument(name: String, value: String = ""):
 				# If port is valid, assign to the port
 				Lobby.DEFAULT_PORT = port_number
 				print("Default port has been set to %s." % [port_number])
+			## The code of the lobby
+			"lobby-code":
+				Lobby.code = value
+				print("Lobby code is %s" % value)
 			_:
 				print("Unknown argument \"%s\"" % [name])

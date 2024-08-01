@@ -19,6 +19,7 @@ config/features=PackedStringArray("4.2", "C#", "Mobile")
 GameManager="*res://scripts/game/game_manager.gd"
 Debug="*res://scripts/debug/debug.gd"
 Lobby="*res://scripts/networking/lobby.gd"
+ServerClient="*res://scripts/networking/ServerClient.cs"
 
 [display]
 

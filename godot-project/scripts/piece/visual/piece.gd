@@ -56,10 +56,11 @@ func update_sprite() -> void:
 	
 	set_sprite(piece_sprite)
 	
-	if team_id == 0:
-		$SprPiece.material.set_shader_parameter("highlight_color", Color.STEEL_BLUE)
-	else:
-		$SprPiece.material.set_shader_parameter("highlight_color", Color.MAROON)
+	if $SprPiece.material is ShaderMaterial:
+		if team_id == 0:
+			$SprPiece.material.set_shader_parameter("highlight_color", Color.STEEL_BLUE)
+		else:
+			$SprPiece.material.set_shader_parameter("highlight_color", Color.MAROON)
 
 func info_changed(_info) -> void:
 	update_sprite()
