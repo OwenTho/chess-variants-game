@@ -530,19 +530,6 @@ public partial class GameState : Node
                 playerCheck[piece.teamId] = CheckType.POSSIBLE_CHECKMATE;
             }
         }
-        
-        // If no king, put player into check
-        // This prevents players playing and losing their king
-        for (int teamNum = 0 ; teamNum < GameController.NUMBER_OF_PLAYERS; teamNum++)
-        {
-            if (!hasKing[teamNum])
-            {
-                if (playerCheck[teamNum] == CheckType.NONE)
-                {
-                    playerCheck[teamNum] = CheckType.POSSIBLE_CHECKMATE;
-                }
-            }
-        }
 
         if (tempState)
         {
@@ -554,16 +541,25 @@ public partial class GameState : Node
             return;
         }
         
+        // Check if either player is missing a King
+        // This is prioritised over being in Checkmate, as having no King means Checkmate
+        // isn't possible
+        for (int teamNum = 0; teamNum < GameController.NUMBER_OF_PLAYERS; teamNum++)
+        {
+            if (!hasKing[teamNum])
+            {
+                // Signal that the player has lost.
+                CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, -1, $"With no King, Player {teamNum+1}'s army is lost.");
+                CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.PlayerLost, teamNum);
+                // Return, ignoring Check
+                return;
+            }
+        }
+        
         // Check if each player is in check
         bool checkmate = false;
         for (int teamNum = 0; teamNum < GameController.NUMBER_OF_PLAYERS; teamNum++)
         {
-            // Ignore if not in check
-            if (playerCheck[teamNum] == CheckType.NONE)
-            {
-                continue;
-            }
-            
             // If the team is not the one playing, it means they won't be able to move anyway
             if (teamNum != currentPlayerNum)
             {
@@ -571,10 +567,18 @@ public partial class GameState : Node
             }
             
             // If they are playing, then check if they're in check or checkmate
-            if (playerCheck[teamNum] == CheckType.IN_CHECK)
+            if (playerCheck[teamNum] != CheckType.NONE)
             {
                 // Check can be ignored, as it means the King, at least, can move out of Check
-                continue;
+                break;
+            }
+            
+            // If King can move, they have an action they can take
+            // TODO: Certain cards may change this fact. King movement check will need to take Cards into account by
+            // checking if MoveAction checks, rather than if the King is in Checkmate.
+            if (playerCheck[teamNum] != CheckType.POSSIBLE_CHECKMATE)
+            {
+                break;
             }
             
             CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, -1, "Checking for Checkmate.");
