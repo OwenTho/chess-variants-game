@@ -24,7 +24,6 @@ layout_mode = 2
 [node name="HSplitContainer" type="HSplitContainer" parent="HBoxContainer"]
 custom_minimum_size = Vector2(125.44, 0)
 layout_mode = 2
-dragger_visibility = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/HSplitContainer"]
 layout_mode = 2

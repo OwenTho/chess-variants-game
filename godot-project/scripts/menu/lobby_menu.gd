@@ -9,8 +9,6 @@ extends Control
 @export var message_entry: TextEdit
 @export var scroll_container: ScrollContainer
 
-@export var lobby_code: Label
-
 var max_scroll: int = 0
 
 var player_labels: Dictionary = {}
@@ -31,8 +29,6 @@ func _ready():
 	max_scroll = scroll_bar.max_value
 	
 	name_edit.max_length = Lobby.NAME_LENGTH_LIMIT
-	
-	lobby_code.text = Lobby.code.to_upper()
 	
 	# Display all data currently obtained. This should be
 	# the people in the lobby before this player joined

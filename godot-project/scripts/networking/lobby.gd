@@ -17,10 +17,7 @@ var players_loaded: int = 0
 var is_player: bool = false
 var close_on_noone: bool = false
 
-var code: String = "None"
 
-# Timer used on close_on_noone
-var exit_timer: Timer
 
 signal connection_successful()
 signal connection_failed()
@@ -89,7 +86,6 @@ func _ready():
 func join_game(address: String = "", port: int = DEFAULT_PORT):
 	# If server, ignore
 	if OS.has_feature("dedicated_server"):
-		print("Can't join a Lobby as a dedicated server.")
 		return FAILED
 	if address.is_empty():
 		address = DEFAULT_SERVER_IP
@@ -98,12 +94,11 @@ func join_game(address: String = "", port: int = DEFAULT_PORT):
 	var peer = ENetMultiplayerPeer.new()
 	var error = peer.create_client(address, port)
 	if error:
-		print(error_string(error))
 		return error
 	players.clear()
 	player_info.is_admin = false
 	multiplayer.multiplayer_peer = peer
-	return OK
+	
 
 func create_game(online: bool = true, port: int = DEFAULT_PORT):
 	if port <= 1024 or port >= 49152:
@@ -114,7 +109,6 @@ func create_game(online: bool = true, port: int = DEFAULT_PORT):
 		var error = peer.create_server(port, MAX_CONNECTIONS)
 		if error:
 			return error
-		print("Started server on port %s." % port)
 	else:
 		peer = OfflineMultiplayerPeer.new()
 	# Initialise both player_nums to -1
@@ -131,21 +125,6 @@ func create_game(online: bool = true, port: int = DEFAULT_PORT):
 		player_info.is_admin = true
 		_on_connected_ok()
 	connection_successful.emit()
-	
-	if close_on_noone:
-		print("Timer started to free if no players join.")
-		# If there is noone for 20 seconds, close
-		exit_timer = Timer.new()
-		add_child(exit_timer)
-		exit_timer.wait_time = 15.0
-		exit_timer.one_shot = true
-		exit_timer.start()
-		exit_timer.timeout.connect(_delete_timer_end)
-	return OK
-
-func _delete_timer_end() -> void:
-	print("Delete timer ended. Quitting.")
-	get_tree().quit()
 
 func leave_game():
 	if multiplayer.multiplayer_peer:
@@ -160,10 +139,6 @@ func remove_multiplayer_peer():
 	multiplayer.multiplayer_peer = null
 
 func _on_player_connected(id: int):
-	if exit_timer != null:
-		print("Player joined. Freeing deletion timer.")
-		exit_timer.queue_free()
-		exit_timer = null
 	player_connected_server.emit(id)
 	print("Player connected: " + str(id))
 
@@ -196,9 +171,6 @@ func _register_player_server(new_player_info: Dictionary):
 	for p_id in players:
 		_register_player.rpc_id(new_player_id, p_id, players[p_id].to_dictionary())
 	
-	# Tell the player the lobby code
-	_set_lobby_code.rpc_id(new_player_id, code)
-	
 	# As for the player themselves, just tell everyone
 	_register_player.rpc(new_player_id, new_player_info)
 	
@@ -211,10 +183,6 @@ func _register_player_server(new_player_info: Dictionary):
 			set_yet = true
 		else:
 			_update_player_num.rpc_id(new_player_id, player_nums[i], i)
-
-@rpc("authority", "call_local", "reliable")
-func _set_lobby_code(code: String) -> void:
-	self.code = code
 
 @rpc("authority", "call_local", "reliable")
 func _register_player(new_player_id: int, new_player_info: Dictionary):
@@ -256,9 +224,7 @@ func _on_player_disconnected(id):
 	
 	# If not a player, close when there's 0 players
 	if not is_player and close_on_noone:
-		print("No players left, so Lobby is closed.")
 		multiplayer.multiplayer_peer.close()
-		get_tree().quit()
 
 func _on_connected_fail():
 	remove_multiplayer_peer()

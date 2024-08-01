@@ -30,7 +30,7 @@ offset_right = 1130.0
 offset_bottom = 636.0
 alignment = 2
 
-[node name="BtnServer" type="Button" parent="ServerControls" groups=["btn_disable"]]
+[node name="BtnServer" type="Button" parent="ServerControls"]
 custom_minimum_size = Vector2(0, 55)
 layout_mode = 2
 text = "Create Server"
@@ -82,11 +82,11 @@ layout_mode = 2
 placeholder_text = "Lobby Code"
 alignment = 1
 
-[node name="BtnJoin" type="Button" parent="ServerControls/VBoxContainer" groups=["btn_disable"]]
+[node name="BtnJoin" type="Button" parent="ServerControls/VBoxContainer"]
 layout_mode = 2
 text = "Join Lobby"
 
-[node name="BtnPlay" type="Button" parent="." groups=["btn_disable"]]
+[node name="BtnPlay" type="Button" parent="."]
 layout_mode = 0
 offset_left = 472.0
 offset_top = 381.0
