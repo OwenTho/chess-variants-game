@@ -272,7 +272,7 @@ public abstract partial class ActionBase : GridItem<ActionBase>
 
     public void RemoveInvalidTag(string tag, CarryType carryType = CarryType.DOWN, int tagCount = 1)
     {
-        InvalidTag(tag, CarryType.DOWN, -tagCount);
+        InvalidTag(tag, carryType, -tagCount);
     }
 
     public void RemoveInvalidTagDependents(string tag, int tagCount = 1)

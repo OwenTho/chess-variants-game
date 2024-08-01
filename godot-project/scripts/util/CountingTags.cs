@@ -21,6 +21,7 @@ public class CountingTags : Tags
     {
         if (AddCount(tag, additions) <= 0)
         {
+            base.Remove(tag);
             return false;
         }
         return base.Add(tag);
@@ -31,6 +32,7 @@ public class CountingTags : Tags
         // If there is none left, ignore remove
         if (AddCount(tag, -removals) > 0)
         {
+            base.Add(tag);
             return false;
         }
         return base.Remove(tag);
