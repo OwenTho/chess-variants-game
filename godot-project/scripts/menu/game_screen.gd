@@ -34,9 +34,12 @@ func _on_init():
 	Debug.stats.add_property(GameManager.game_controller.currentGameState, "currentPlayerNum")
 
 func _process(delta) -> void:
-	cursor.active = game_active
 	if Input.is_action_pressed("mouse_right"):
 		$BoardHolder.rotation = $BoardHolder.rotation + deg_to_rad(45) * delta
+
+func _on_cursor_highlight_cell_updated(new_cell: Vector2i) -> void:
+	# If cursor is outside range, then hide it
+	cursor.visible = (GameManager.spaces_off_board(cursor.last_cell.x, cursor.last_cell.y) == 0) and cursor.active
 
 func _input(event) -> void:
 	# Ignore inputs from non-players

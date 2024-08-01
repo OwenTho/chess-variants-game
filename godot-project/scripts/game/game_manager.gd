@@ -8,6 +8,7 @@ var piece_scene: PackedScene = preload("res://scenes/game/piece/piece.tscn")
 
 var game: Game
 var grid
+var grid_size: Vector2i
 var board: Board2D
 
 var task_mutex: Mutex
@@ -57,6 +58,8 @@ func init() -> void:
 	# Initialise the game
 	game_controller.FullInit(is_multiplayer_authority())
 	grid = game_controller.grid
+	
+	grid_size = game_controller.gridSize
 	
 	# Get the mutex
 	task_mutex = game_controller.taskMutex
@@ -171,6 +174,20 @@ func get_piece_id(id: int) -> Piece2D:
 			return piece
 	return null
 
+
+func spaces_off_board(x: int, y: int) -> int:
+	# If it's on the board, return 0
+	var return_val: int = 0
+	# Return the largest distance off the board
+	if x < 0:
+		return_val = max(return_val, abs(x))
+	elif x >= grid_size.x:
+		return_val = max(return_val, abs(grid_size.x - 1 - x))
+	if y < 0:
+		return_val = max(return_val, abs(y))
+	elif y >= grid_size.y:
+		return_val = max(return_val, abs(grid_size.y - 1 - y))
+	return return_val
 
 ## Tasks
 

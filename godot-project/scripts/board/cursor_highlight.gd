@@ -19,8 +19,6 @@ func _process(_delta):
 	if not active:
 		visible = false
 		return
-	else:
-		visible = true
 	# For mouse, do every frame (as that's what the player will see)
 	if input_mouse:
 		# Find the cell the mouse is hovering
