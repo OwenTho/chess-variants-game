@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Godot;
 using Godot.Collections;
-using Array = Godot.Collections.Array;
 
 public partial class GameState : Node
 {
@@ -344,11 +342,8 @@ public partial class GameState : Node
         newState.NextTurn();
         
         // Check if the player is still in check
-        CheckType result = newState.playerCheck[piece.teamId];
+        bool playerInCheck = newState.PlayerInCheck(piece.teamId);
         newState.QueueFree();
-        if (result == CheckType.NONE)
-        {
-            return false;
         }
         return true;
     }
@@ -406,6 +401,17 @@ public partial class GameState : Node
     {
         // Tell all pieces to update their possible moves
         PiecesNewTurn();
+    }
+
+    public bool PlayerInCheck(int playerNum)
+    {
+        if (playerNum < 0 || playerNum >= playerCheck.Length)
+        {
+            GD.PushError($"Tried to check if player {playerNum + 1} is in check, when there are only {playerCheck.Length} players (0 - {playerCheck.Length - 1}.");
+            return false;
+        }
+
+        return playerCheck[playerNum] == CheckType.IN_CHECK || playerCheck[playerNum] == CheckType.POSSIBLE_CHECKMATE;
     }
     
     private void PiecesNewTurn()

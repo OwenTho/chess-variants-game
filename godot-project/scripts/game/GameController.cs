@@ -17,7 +17,9 @@ public partial class GameController : Node
     public Mutex threadMutex = new Mutex();
     public Mutex gameMutex = new Mutex();
     private List<Action> gameTasks = new List<Action>();
+    
     private GodotThread gameThread;
+    public bool singleThread = false;
 
     public const int NUMBER_OF_PLAYERS = 2;
     
@@ -233,6 +235,17 @@ public partial class GameController : Node
     
     private void DoTask(Action task)
     {
+        // If using a single thread, just run the task
+        if (singleThread)
+        {
+            // If there are Tasks in the queue, wait until they are done
+            while (gameTasks.Count > 0)
+            {
+                
+            }
+            task();
+            return;
+        }
         // If there's currently a task running, add to tasks and return
         taskMutex.Lock();
         gameTasks.Add(task);
