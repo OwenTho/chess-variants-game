@@ -25,8 +25,30 @@ internal partial class LineMoveStopRule : ValidationRuleBase
         {
             // If it does, cancel movement of dependent actions if it's a line movement
             moveAction.InvalidTagDependents("line_stop");
-            if (!game.HasPieceIdAt("king", moveAction.moveLocation.X, moveAction.moveLocation.Y))
+            bool checkCanPass = false;
+            if (game.HasPieceIdAt("king", moveAction.moveLocation.X, moveAction.moveLocation.Y))
             {
+                // If there is a king, check can pass if king is not on the same team
+                checkCanPass = true;
+                // Make sure there isn't a teammate king. This prevents checking through the king
+                bool sameTeam = false;
+                foreach (var pieceAtPos in game.GetPiecesAt(moveAction.moveLocation.X, moveAction.moveLocation.Y))
+                {
+                    // Ignore if not king
+                    if (pieceAtPos.info == null || pieceAtPos.info.pieceId != "king")
+                    {
+                        continue;
+                    }
+                    // If it's a king with the same id, break from the loop
+                    if (pieceAtPos.teamId == piece.teamId)
+                    {
+                        checkCanPass = false;
+                    }
+                }
+            }
+            if (!checkCanPass)
+            {
+                // If check can't pass through, add the tag to the dependent actions
                 moveAction.VerifyTagDependents("no_check");
                 if (moveAction.attackAction != null)
                 {
