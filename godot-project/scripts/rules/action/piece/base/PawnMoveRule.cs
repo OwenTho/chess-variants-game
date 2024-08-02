@@ -57,7 +57,8 @@ internal partial class PawnMoveRule : ActionRuleBase
         {
             foreach (Piece victim in pieces)
             {
-                if (victim.tags.Contains("pawn_initial"))
+                // Ignore pieces of the same id, and that don't have the pawn_initial tag
+                if (victim.teamId != piece.teamId && victim.tags.Contains("pawn_initial"))
                 {
                     Vector2I attackPos = position + piece.forwardDirection;
                     AttackAction newAttack = new AttackAction(piece, attackPos, attackPos);
