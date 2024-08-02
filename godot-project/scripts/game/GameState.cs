@@ -328,7 +328,7 @@ public partial class GameState : Node
             return false;
         }
         // Simulate the movement, and check if the player is still in check
-        GameState newState = (GameState)Clone();
+        GameState newState = Clone();
         CallDeferred(Node.MethodName.AddChild, newState);
         newState.tempState = true;
         
