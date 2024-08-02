@@ -8,7 +8,8 @@ public partial class GameController
     internal Registry<ValidationRuleBase> validationRuleRegistry = new Registry<ValidationRuleBase>();
     List<string> initialValidationRules = new List<string>();
     internal Registry<CardFactory> cardFactoryRegistry = new Registry<CardFactory>();
-
+    private bool hasInitBefore = false;
+    
     public void FullInit(bool isServer)
     {
         InitGameState(isServer);
@@ -17,10 +18,14 @@ public partial class GameController
         InitPieceInfo();
         InitCardFactories();
 
-        AddChild(pieceInfoRegistry);
-        AddChild(actionRuleRegistry);
-        AddChild(validationRuleRegistry);
-        AddChild(cardFactoryRegistry);
+        if (!hasInitBefore)
+        {
+            hasInitBefore = true;
+            AddChild(pieceInfoRegistry);
+            AddChild(actionRuleRegistry);
+            AddChild(validationRuleRegistry);
+            AddChild(cardFactoryRegistry);
+        }
     }
 
     public GameState InitGameState(bool needToCheck)
