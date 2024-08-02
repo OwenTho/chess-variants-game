@@ -17,14 +17,15 @@ func before_all() -> void:
 
 # Before each test, initialise the board
 func before_each() -> void:
-	# Free the current game state
-	if game_state != null:
-		game_state.Free()
 	# And then initialise a new game
 	game_controller.FullInit(true)
 	
 	# Store the GameController variables so that they're easy to access
 	game_state = game_controller.currentGameState
+
+func after_each() -> void:
+	# Free the game state
+	game_state.queue_free()
 
 
 func print_current_board() -> void:

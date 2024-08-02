@@ -1,12 +1,10 @@
 ﻿using Godot;
 using Godot.Collections;
-using System.Collections.Generic;
 
 internal partial class PawnMoveRule : ActionRuleBase
 {
     public override void AddPossibleActions(GameState game, Piece piece)
     {
-        /// Movement
         // Allow moving forward a number of spaces
         int maxForward = piece.info.level;
         Vector2I thisPosition = new Vector2I(piece.cell.x, piece.cell.y);
@@ -36,7 +34,7 @@ internal partial class PawnMoveRule : ActionRuleBase
             piece.AddAction(newMove);
         }
 
-        /// Attacking
+        
         // Attacking is possible at diagonals
         MoveAction prevRight = null;
         MoveAction prevLeft = null;
@@ -89,17 +87,34 @@ internal partial class PawnMoveRule : ActionRuleBase
         return false;
     }
 
+    private bool CheckNextToPawn(GameState game, Piece piece)
+    {
+        return CheckForPawn(game, piece.cell.pos + Vector2I.Left) ||
+               CheckForPawn(game, piece.cell.pos + Vector2I.Right);
+    }
+
     public override void EndTurn(GameState game, Piece piece)
     {
         // If next to a pawn, EnPassant needs another check
-        if (CheckForPawn(game, piece.cell.pos + Vector2I.Left) || CheckForPawn(game, piece.cell.pos + Vector2I.Right))
+        if (piece.tags.Contains("by_pawn") || CheckNextToPawn(game, piece))
+        {
+            piece.tags.Add("by_pawn");
+        }
+
+        if (piece.tags.Contains("by_pawn"))
         {
             piece.EnableActionsUpdate();
+            piece.tags.Remove("by_pawn");
         }
     }
 
     public override void NewTurn(GameState game, Piece piece)
     {
+        // If next to a pawn, add the tag
+        if (CheckNextToPawn(game, piece))
+        {
+            piece.tags.Add("by_pawn");
+        }
         // If it's the piece's turn, remove pawn_initial
         if (piece.teamId == game.currentPlayerNum)
         {

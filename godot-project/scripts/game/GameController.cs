@@ -73,13 +73,13 @@ public partial class GameController : Node
 
 
 
-    private void StartGameTask(ushort seed)
+    private void StartGameTask(ulong seed)
     {
         gameMutex.Lock();
         
         currentGameState.gameRandom.Seed = seed;
         
-        currentGameState.AddCard(cardFactoryRegistry.GetValue("shuffle").CreateNewCard(currentGameState));
+        // currentGameState.AddCard(cardFactoryRegistry.GetValue("shuffle").CreateNewCard(currentGameState));
         //currentGameState.AddCard(cardFactoryRegistry.GetValue("major_shapeshift").CreateNewCard(currentGameState));
         //SinglePieceArmyCard card = (SinglePieceArmyCard)cardFactoryRegistry.GetValue("single_piece_army").CreateNewCard(currentGameState);
         //card.armyPiece = "rook";
@@ -90,9 +90,15 @@ public partial class GameController : Node
         gameMutex.Unlock();
     }
 
-    public void StartGame(ushort seed)
+    public void StartGame(ulong seed)
     {
         DoTask(() => StartGameTask(seed));
+    }
+
+    public void StartGame()
+    {
+        // If called without the seed, use the current seed
+        StartGame(currentGameState.gameRandom.Seed);
     }
 
     public int GetCurrentPlayer()

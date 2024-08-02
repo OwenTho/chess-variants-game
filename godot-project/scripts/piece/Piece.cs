@@ -231,6 +231,11 @@ public partial class Piece : GameItem
 
         return info.pieceId == id;
     }
+
+    public bool HasTag(string tag)
+    {
+        return tags.Contains(tag);
+    }
     
 
     public override Piece Clone()

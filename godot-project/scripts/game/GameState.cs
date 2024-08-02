@@ -20,7 +20,7 @@ public partial class GameState : Node
     
     public RandomNumberGenerator gameRandom { get; private set; }
     
-    bool tempState = false;
+    bool tempState;
     
     // If the State is on the server. Allows game to avoid checking Checkmate if it's on
     // a Client side, given the Client can be told by the server.
@@ -374,14 +374,14 @@ public partial class GameState : Node
         return didAct;
     }
 
-    public void TakeActionAt(Vector2I actionLocation, Piece piece)
+    public bool TakeActionAt(Vector2I actionLocation, Piece piece)
     {
         // Get the possible actions for this piece
         if (piece.currentPossibleActions.Count == 0)
         {
             CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, currentPlayerNum, "No actions available at selected location.");
             CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.ActionProcessed, false, actionLocation, piece);
-            return;
+            return false;
         }
         
         // If the player is in check, make sure the actions are valid
@@ -389,10 +389,12 @@ public partial class GameState : Node
         {
             CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, currentPlayerNum, "Action leads to Check.");
             CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.ActionProcessed, false, actionLocation, piece);
-            return;
+            return false;
         }
 
-        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.ActionProcessed, DoActionsAt(actionLocation, piece), actionLocation, piece);
+        bool returnVal = DoActionsAt(actionLocation, piece);
+        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.ActionProcessed, returnVal, actionLocation, piece);
+        return returnVal;
     }
     
     

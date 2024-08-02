@@ -28,6 +28,7 @@ func test_kings() -> void:
 	assert_false(game_state.PlayerInCheck(1))
 	
 	# Move King on team 0 to the middle
+	# Has to be forced as the Action is invalid
 	# .  .  👑  
 	# .  👑 .
 	# .  .  .
