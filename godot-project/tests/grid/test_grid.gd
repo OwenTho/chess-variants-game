@@ -7,13 +7,15 @@ var items: Array
 var cells: Array
 
 func before_all() -> void:
-	grid_script = load("res://scripts/board/Grid.cs")
-	grid_item = load("res://scripts/board/GridItem.cs")
+	grid_script = load("res://tests/grid/TestGrid.cs")
+	grid_item = load("res://tests/grid/TestGridItem.cs")
 	items = []
 	cells = []
 
 
 func before_each() -> void:
+	if grid_script == null:
+		print("huh")
 	# Make a simple board
 	grid = grid_script.new()
 	
