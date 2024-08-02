@@ -95,11 +95,14 @@ internal partial class PawnMoveRule : ActionRuleBase
         {
             piece.EnableActionsUpdate();
         }
-        piece.tags.Remove("pawn_initial");
-        if (piece.tags.Contains("setup_pawn_initial"))
+    }
+
+    public override void NewTurn(GameState game, Piece piece)
+    {
+        // If it's the piece's turn, remove pawn_initial
+        if (piece.teamId == game.currentPlayerNum)
         {
-            piece.tags.Remove("setup_pawn_initial");
-            piece.tags.Add("pawn_initial");
+            piece.tags.Remove("pawn_initial");
         }
     }
 }

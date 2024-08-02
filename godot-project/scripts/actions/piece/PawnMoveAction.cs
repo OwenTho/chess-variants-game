@@ -8,7 +8,7 @@ internal partial class PawnMoveAction : MoveAction
     public override void ActOn(GameState game, Piece piece)
     {
         base.ActOn(game, piece);
-        piece.tags.Add("setup_pawn_initial");
+        piece.tags.Add("pawn_initial");
     }
 
     public override object Clone()
