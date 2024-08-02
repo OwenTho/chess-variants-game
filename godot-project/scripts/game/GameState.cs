@@ -37,6 +37,7 @@ public partial class GameState : Node
     public enum CheckType
     {
         NONE,
+        NO_KING,
         IN_CHECK,
         POSSIBLE_CHECKMATE
     }
@@ -319,7 +320,7 @@ public partial class GameState : Node
         // If it's a temp state, return (to avoid recursion)
         if (tempState)
         {
-            return playerCheck[piece.teamId] != CheckType.NONE;
+            return PlayerInCheck(piece.teamId);
         }
         // If it's non-check, ignore as server already did the check
         if (!isServer)
@@ -337,15 +338,14 @@ public partial class GameState : Node
         if (!actionWorked)
         {
             newState.QueueFree();
-            return playerCheck[piece.teamId] != CheckType.NONE;
+            return PlayerInCheck(piece.teamId);
         }
         newState.NextTurn();
         
         // Check if the player is still in check
         bool playerInCheck = newState.PlayerInCheck(piece.teamId);
         newState.QueueFree();
-        }
-        return true;
+        return playerInCheck;
     }
     
     public bool TakeAction(ActionBase action, Piece piece)
@@ -446,6 +446,8 @@ public partial class GameState : Node
             hasKing[i] = false;
         }
         
+        List<Piece> kings = new List<Piece>();
+        
         foreach (Piece piece in allPieces)
         {
             // If it's the king, disable any attacks on it and stop it from moving into
@@ -454,7 +456,9 @@ public partial class GameState : Node
             {
                 continue;
             }
-
+            
+            kings.Add(piece);
+            
             hasKing[piece.teamId] = true;
             
             if (actionGrid.TryGetCellAt(piece.cell.x, piece.cell.y, out GridCell<ActionBase> cell))
@@ -490,8 +494,22 @@ public partial class GameState : Node
                     }
                 }
             }
-
-            foreach (ActionBase action in piece.currentPossibleActions)
+        }
+        
+        // Stop temp states here as they don't need to do the following checks
+        if (tempState)
+        {
+            return;
+        }
+        
+        // Go through the Kings again, and disable moves that would move into
+        // check.
+        foreach (var king in kings)
+        {
+            // TODO: Change Kings to check all possible actions to see if they're possible (with DoesActionCheck)
+            // This will only check the possible actions for a single piece, so it shouldn't take
+            // too much time to do, while also improving the functionality.
+            foreach (ActionBase action in king.currentPossibleActions)
             {
                 // If action is invalid, ignore
                 if (!action.valid)
@@ -523,7 +541,7 @@ public partial class GameState : Node
                         continue;
                     }
 
-                    if (attackAction.owner.teamId != piece.teamId)
+                    if (attackAction.owner.teamId != king.teamId)
                     {
                         moveAction.MakeInvalid();
                     }
@@ -533,7 +551,7 @@ public partial class GameState : Node
             // Check for a single valid move action. If there is none, and the piece is in
             // check, then it's a possible checkmate
             bool canMove = false;
-            foreach (ActionBase action in piece.currentPossibleActions)
+            foreach (ActionBase action in king.currentPossibleActions)
             {
                 if (action is MoveAction moveAction)
                 {
@@ -545,16 +563,12 @@ public partial class GameState : Node
                 }
             }
 
-            if (!canMove && playerCheck[piece.teamId] == CheckType.IN_CHECK)
+            if (!canMove && playerCheck[king.teamId] == CheckType.IN_CHECK)
             {
-                playerCheck[piece.teamId] = CheckType.POSSIBLE_CHECKMATE;
+                playerCheck[king.teamId] = CheckType.POSSIBLE_CHECKMATE;
             }
         }
-
-        if (tempState)
-        {
-            return;
-        }
+        
         // If it's non-check, ignore as server already did the check
         if (!isServer)
         {
@@ -569,10 +583,9 @@ public partial class GameState : Node
             if (!hasKing[teamNum])
             {
                 // Signal that the player has lost.
-                CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, -1, $"With no King, Player {teamNum+1}'s army is lost.");
+                playerCheck[teamNum] = CheckType.NO_KING; // Put player as having No King, so that checkmate isn't checked for
+                CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, -1, $"With no {StringUtil.ToTitleCase(KingId)}, Player {teamNum+1}'s army is lost.");
                 CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.PlayerLost, teamNum);
-                // Return, ignoring Check
-                return;
             }
         }
         
