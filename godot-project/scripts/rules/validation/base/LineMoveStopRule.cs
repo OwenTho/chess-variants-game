@@ -58,7 +58,7 @@ internal partial class LineMoveStopRule : ValidationRuleBase
             if (moveAction.attackAction != null)
             {
                 // Remove the tag from the attack action, as it is a dependent
-                moveAction.attackAction.RemoveInvalidTag("line_stop", ActionBase.CarryType.NONE);
+                moveAction.attackAction.RemoveInvalidTag("line_stop", ActionBase.CarryType.None);
             }
         }
     }

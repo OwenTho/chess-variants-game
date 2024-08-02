@@ -36,10 +36,10 @@ public partial class GameState : Node
 
     public enum CheckType
     {
-        NONE,
-        NO_KING,
-        IN_CHECK,
-        POSSIBLE_CHECKMATE
+        None,
+        NoKing,
+        InCheck,
+        PossibleCheckmate
     }
 
     public CheckType[] playerCheck;
@@ -66,7 +66,7 @@ public partial class GameState : Node
         playerCheck = new CheckType[GameController.NUMBER_OF_PLAYERS];
         for (int i = 0; i < playerCheck.Length; i++)
         {
-            playerCheck[i] = CheckType.NONE;
+            playerCheck[i] = CheckType.None;
         }
 
         this.isServer = needToCheck;
@@ -413,7 +413,17 @@ public partial class GameState : Node
             return false;
         }
 
-        return playerCheck[playerNum] == CheckType.IN_CHECK || playerCheck[playerNum] == CheckType.POSSIBLE_CHECKMATE;
+        return playerCheck[playerNum] == CheckType.InCheck || playerCheck[playerNum] == CheckType.PossibleCheckmate;
+    }
+
+    public bool PlayerHasNoKing(int playerNum)
+    {if (playerNum < 0 || playerNum >= playerCheck.Length)
+        {
+            GD.PushError($"Tried to check if player {playerNum + 1} has no King, when there are only {playerCheck.Length} players (0 - {playerCheck.Length - 1}.");
+            return false;
+        }
+
+        return playerCheck[playerNum] == CheckType.NoKing;
     }
     
     private void PiecesNewTurn()
@@ -438,7 +448,7 @@ public partial class GameState : Node
         // Reset player check
         for (int i = 0; i < playerCheck.Length; i++)
         {
-            playerCheck[i] = CheckType.NONE;
+            playerCheck[i] = CheckType.None;
         }
 
         // Loop again, to disable certain check moves
@@ -475,13 +485,13 @@ public partial class GameState : Node
                             continue;
                         }
                         // If attack is valid, and is able to check, then mark it down for the player
-                        if (playerCheck[piece.teamId] == CheckType.NONE)
+                        if (playerCheck[piece.teamId] == CheckType.None)
                         {
                             if (attackAction.owner.teamId != piece.teamId)
                             {
                                 if (!attackAction.verifyTags.Contains("no_check"))
                                 {
-                                    playerCheck[piece.teamId] = CheckType.IN_CHECK;
+                                    playerCheck[piece.teamId] = CheckType.InCheck;
                                 }
                             }
                         }
@@ -565,9 +575,9 @@ public partial class GameState : Node
                 }
             }
 
-            if (!canMove && playerCheck[king.teamId] == CheckType.IN_CHECK)
+            if (!canMove && playerCheck[king.teamId] == CheckType.InCheck)
             {
-                playerCheck[king.teamId] = CheckType.POSSIBLE_CHECKMATE;
+                playerCheck[king.teamId] = CheckType.PossibleCheckmate;
             }
         }
         
@@ -585,7 +595,7 @@ public partial class GameState : Node
             if (!hasKing[teamNum])
             {
                 // Signal that the player has lost.
-                playerCheck[teamNum] = CheckType.NO_KING; // Put player as having No King, so that checkmate isn't checked for
+                playerCheck[teamNum] = CheckType.NoKing; // Put player as having No King, so that checkmate isn't checked for
                 CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, -1, $"With no {StringUtil.ToTitleCase(KingId)}, Player {teamNum+1}'s army is lost.");
                 CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.PlayerLost, teamNum);
             }
@@ -602,7 +612,7 @@ public partial class GameState : Node
             }
             
             // If they are playing, then check if they're in check or checkmate
-            if (playerCheck[teamNum] != CheckType.NONE)
+            if (playerCheck[teamNum] != CheckType.None)
             {
                 // Check can be ignored, as it means the King, at least, can move out of Check
                 break;
@@ -611,7 +621,7 @@ public partial class GameState : Node
             // If King can move, they have an action they can take
             // TODO: Certain cards may change this fact. King movement check will need to take Cards into account by
             // checking if MoveAction checks, rather than if the King is in Checkmate.
-            if (playerCheck[teamNum] != CheckType.POSSIBLE_CHECKMATE)
+            if (playerCheck[teamNum] != CheckType.PossibleCheckmate)
             {
                 break;
             }

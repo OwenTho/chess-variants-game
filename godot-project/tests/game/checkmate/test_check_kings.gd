@@ -8,8 +8,8 @@ func test_nothing() -> void:
 	game_controller.StartGame(game_state.gameRandom.seed)
 	
 	# Both players should immediately be in check
-	assert_true(game_state.PlayerInCheck(0))
-	assert_true(game_state.PlayerInCheck(1))
+	assert_true(game_state.PlayerHasNoKing(0))
+	assert_true(game_state.PlayerHasNoKing(1))
 
 # No pieces but two kings. Taking one should result in check
 func test_kings() -> void:
@@ -47,6 +47,7 @@ func test_kings() -> void:
 	
 	game_state.NextTurn()
 	
-	# Team 0 not in check, Team 1 in check
+	# Neither should be in check, but player 2 should have no king
 	assert_false(game_state.PlayerInCheck(0))
-	assert_true(game_state.PlayerInCheck(1))
+	assert_false(game_state.PlayerInCheck(1))
+	assert_true(game_state.PlayerHasNoKing(1))

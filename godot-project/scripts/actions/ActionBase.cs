@@ -143,12 +143,12 @@ public abstract partial class ActionBase : GridItem<ActionBase>
 
     public enum CarryType
     {
-        NONE,
-        DOWN,
-        UP
+        None,
+        Down,
+        Up
     }
 
-    public void Tag(string tag, CarryType carryType = CarryType.DOWN)
+    public void Tag(string tag, CarryType carryType = CarryType.Down)
     {
         // If this already has the tag, ignore to avoid
         // infinite loops.
@@ -158,11 +158,11 @@ public abstract partial class ActionBase : GridItem<ActionBase>
         }
         tags.Add(tag);
         // If carry, also tag dependents
-        if (carryType == CarryType.DOWN)
+        if (carryType == CarryType.Down)
         {
             TagDependents(tag);
         }
-        if (carryType == CarryType.UP)
+        if (carryType == CarryType.Up)
         {
             TagDependencies(tag);
         }
@@ -172,7 +172,7 @@ public abstract partial class ActionBase : GridItem<ActionBase>
     {
         foreach (ActionBase dependent in dependents)
         {
-            dependent.Tag(tag, CarryType.DOWN);
+            dependent.Tag(tag, CarryType.Down);
         }
     }
 
@@ -180,11 +180,11 @@ public abstract partial class ActionBase : GridItem<ActionBase>
     {
         foreach (ActionBase dependency in dependencies)
         {
-            dependency.Tag(tag, CarryType.UP);
+            dependency.Tag(tag, CarryType.Up);
         }
     }
     
-    public void VerifyTag(string tag, CarryType carryType = CarryType.DOWN, int tagCount = 1)
+    public void VerifyTag(string tag, CarryType carryType = CarryType.Down, int tagCount = 1)
     {
         // If this already has the tag, ignore to avoid
         // infinite loops.
@@ -194,11 +194,11 @@ public abstract partial class ActionBase : GridItem<ActionBase>
         }
         verifyTags.Add(tag);
         // If carry, also tag dependents
-        if (carryType == CarryType.DOWN)
+        if (carryType == CarryType.Down)
         {
             VerifyTagDependents(tag, tagCount);
         }
-        if (carryType == CarryType.UP)
+        if (carryType == CarryType.Up)
         {
             VerifyTagDependencies(tag, tagCount);
         }
@@ -208,7 +208,7 @@ public abstract partial class ActionBase : GridItem<ActionBase>
     {
         foreach (ActionBase dependent in dependents)
         {
-            dependent.VerifyTag(tag, CarryType.DOWN, tagCount);
+            dependent.VerifyTag(tag, CarryType.Down, tagCount);
         }
     }
 
@@ -216,11 +216,11 @@ public abstract partial class ActionBase : GridItem<ActionBase>
     {
         foreach (ActionBase dependency in dependencies)
         {
-            dependency.VerifyTag(tag, CarryType.UP, tagCount);
+            dependency.VerifyTag(tag, CarryType.Up, tagCount);
         }
     }
 
-    public void RemoveVerifyTag(string tag, CarryType carryType = CarryType.DOWN, int tagCount = 1)
+    public void RemoveVerifyTag(string tag, CarryType carryType = CarryType.Down, int tagCount = 1)
     {
         VerifyTag(tag, carryType, -tagCount);
     }
@@ -240,15 +240,15 @@ public abstract partial class ActionBase : GridItem<ActionBase>
 
 
 
-    public void InvalidTag(string tag, CarryType carryType = CarryType.DOWN, int tagCount = 1)
+    public void InvalidTag(string tag, CarryType carryType = CarryType.Down, int tagCount = 1)
     {
         invalidTags.Add(tag, tagCount);
         // If carry, also tag dependents
-        if (carryType == CarryType.DOWN)
+        if (carryType == CarryType.Down)
         {
             InvalidTagDependents(tag, tagCount);
         }
-        if (carryType == CarryType.UP)
+        if (carryType == CarryType.Up)
         {
             InvalidTagDependencies(tag, tagCount);
         }
@@ -258,7 +258,7 @@ public abstract partial class ActionBase : GridItem<ActionBase>
     {
         foreach (ActionBase dependent in dependents)
         {
-            dependent.InvalidTag(tag, CarryType.DOWN, tagCount);
+            dependent.InvalidTag(tag, CarryType.Down, tagCount);
         }
     }
 
@@ -266,11 +266,11 @@ public abstract partial class ActionBase : GridItem<ActionBase>
     {
         foreach (ActionBase dependency in dependencies)
         {
-            dependency.InvalidTag(tag, CarryType.UP, tagCount);
+            dependency.InvalidTag(tag, CarryType.Up, tagCount);
         }
     }
 
-    public void RemoveInvalidTag(string tag, CarryType carryType = CarryType.DOWN, int tagCount = 1)
+    public void RemoveInvalidTag(string tag, CarryType carryType = CarryType.Down, int tagCount = 1)
     {
         InvalidTag(tag, carryType, -tagCount);
     }
@@ -294,7 +294,7 @@ public abstract partial class ActionBase : GridItem<ActionBase>
         invalidTags.Clear();
     }
 
-    public void SetOwner(Piece newOwner, CarryType carryType = CarryType.DOWN)
+    public void SetOwner(Piece newOwner, CarryType carryType = CarryType.Down)
     {
         
         // If owner is the same, ignore
@@ -311,7 +311,7 @@ public abstract partial class ActionBase : GridItem<ActionBase>
         
         owner = newOwner;
 
-        if (carryType == CarryType.DOWN)
+        if (carryType == CarryType.Down)
         {
             foreach (var dependent in dependents)
             {
@@ -319,11 +319,11 @@ public abstract partial class ActionBase : GridItem<ActionBase>
             }
         }
 
-        if (carryType == CarryType.UP)
+        if (carryType == CarryType.Up)
         {
             foreach (var dependency in dependencies)
             {
-                dependency.SetOwner(newOwner, CarryType.UP);
+                dependency.SetOwner(newOwner, CarryType.Up);
             }
         }
         
