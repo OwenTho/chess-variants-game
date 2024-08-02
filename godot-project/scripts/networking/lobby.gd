@@ -29,6 +29,10 @@ signal player_num_updated(peer_id: int, player_num: int)
 signal player_disconnected(peer_id: int)
 signal server_disconnected()
 
+## Channels
+# 0 (Default) - Game
+# 1 - Player data
+# 2 - Messages
 
 class PlayerInfo:
 	
@@ -149,7 +153,7 @@ func _on_connected_ok():
 	_register_player_server.rpc(player_info.to_dictionary())
 	connection_successful.emit()
 
-@rpc("any_peer", "call_local", "reliable")
+@rpc("any_peer", "call_local", "reliable", 1)
 func _register_player_server(new_player_info: Dictionary):
 	# Only server runs this
 	if not is_multiplayer_authority():
@@ -184,7 +188,7 @@ func _register_player_server(new_player_info: Dictionary):
 		else:
 			_update_player_num.rpc_id(new_player_id, player_nums[i], i)
 
-@rpc("authority", "call_local", "reliable")
+@rpc("authority", "call_local", "reliable", 1)
 func _register_player(new_player_id: int, new_player_info: Dictionary):
 	# Add to the dictionary
 	players[new_player_id] = PlayerInfo.from_dictionary(new_player_info, new_player_id)
@@ -200,7 +204,7 @@ func _registered():
 	player_connected.emit(player_info)
 	connected_and_registered.emit()
 
-@rpc("authority", "call_local", "reliable")
+@rpc("authority", "call_local", "reliable", 1)
 func _update_player(id: int, new_player_info: Dictionary):
 	players[id] = PlayerInfo.from_dictionary(new_player_info, id)
 	player_data_received.emit(players[id])
@@ -235,7 +239,7 @@ func _on_server_disconnected():
 	players.clear()
 	server_disconnected.emit()
 
-@rpc("any_peer", "call_local")
+@rpc("any_peer", "call_local", "reliable", 1)
 func request_data():
 	if is_multiplayer_authority():
 		# Loop through all the player data, and return it
@@ -388,7 +392,7 @@ func setup_game():
 	
 	print("Starting game.")
 	# Once init is completely done, start the game
-	start_game.rpc()
+	start_game.rpc(GameManager.game_controller.currentGameState.gameRandom.seed)
 	
 	# Not that setup is completely done, allow new connections
 	# TODO: Allow new connections to open the game while it's active from the lobby.
@@ -417,8 +421,8 @@ func init_board(board_content: Array):
 	GameManager.load_board(board_content)
 
 @rpc("authority", "call_local", "reliable")
-func start_game():
-	GameManager.start_game()
+func start_game(game_seed: int):
+	GameManager.start_game(game_seed)
 
 ### Game Initialisation RPCs
 

@@ -81,8 +81,8 @@ func setup_signals():
 	game_controller.SendNotice.connect(game.send_notice)
 	
 
-func start_game():
-	game_controller.StartGame()
+func start_game(game_seed: int):
+	game_controller.StartGame(game_seed)
 	game.game_active = true
 
 func init_board() -> void:

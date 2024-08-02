@@ -71,9 +71,11 @@ public partial class GameController : Node
 
 
 
-    private void StartGameTask()
+    private void StartGameTask(ushort seed)
     {
         gameMutex.Lock();
+        
+        currentGameState.gameRandom.Seed = seed;
         
         currentGameState.AddCard(cardFactoryRegistry.GetValue("shuffle").CreateNewCard(currentGameState));
         //currentGameState.AddCard(cardFactoryRegistry.GetValue("major_shapeshift").CreateNewCard(currentGameState));
@@ -86,9 +88,9 @@ public partial class GameController : Node
         gameMutex.Unlock();
     }
 
-    public void StartGame()
+    public void StartGame(ushort seed)
     {
-        DoTask(StartGameTask);
+        DoTask(() => StartGameTask(seed));
     }
 
     public int GetCurrentPlayer()
