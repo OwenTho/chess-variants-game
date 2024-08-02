@@ -32,6 +32,8 @@ func after_each() -> void:
 	cells = []
 
 
+
+
 # If setup is successful, then adding items is also successful
 func test_setup():
 	assert_eq(grid.CellCount(), 5, "There should be exactly 5 cells.")
@@ -42,6 +44,8 @@ func test_setup():
 		assert_true(items[i].grid == grid, "Item %s should be on the grid." % [i])
 		assert_true(items[i].cell != null, "Item %s should have a cell." % [i])
 		assert_true(cells[i].grid == grid, "Cell %s should be on the grid." % [i])
+
+
 
 
 func test_remove():
@@ -61,6 +65,8 @@ func test_remove():
 			assert_true(grid.HasCellAt(j-2, j-2), "Grid should still have the cell at %s,%s" % [j-2, j-2])
 
 
+
+
 func test_place_new():
 	# Move 0,0 to 1,0
 	var middle_item = items[2]
@@ -71,6 +77,8 @@ func test_place_new():
 	assert_true(grid.HasCellAt(1,0), "There should now be a cell at 1,0.")
 	assert_true(cell_before == grid.GetCellAt(1,0), "The cell the item is in should have moved, not made a new one.")
 	assert_true(middle_item.cell == cell_before, "The cell the item is in should have moved, not made a new one.")
+
+
 
 
 func test_place_move():
@@ -93,6 +101,8 @@ func test_place_move():
 			assert_true(items[i].cell == middle_cell, "Item %s should have been moved to the middle cell." % [i])
 			assert_true(items[i].cell.ItemCount() == items_in_middle, "There should be %s items in the middle cell." % [items_in_middle])
 			assert_false(grid.HasCellAt(i-2,i-2), "Cell should have been removed at %s,%s after item %s was moved." % [i-2, i-2, i])
+
+
 
 
 func test_swap():

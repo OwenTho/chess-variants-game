@@ -25,7 +25,7 @@ func before_each() -> void:
 
 func after_each() -> void:
 	# Free the game state
-	game_state.queue_free()
+	game_state.free()
 
 
 func print_current_board() -> void:

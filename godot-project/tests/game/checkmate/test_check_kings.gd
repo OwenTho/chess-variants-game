@@ -11,6 +11,9 @@ func test_nothing() -> void:
 	assert_true(game_state.PlayerHasNoKing(0))
 	assert_true(game_state.PlayerHasNoKing(1))
 
+
+
+
 # No pieces but two kings. Taking one should result in check
 func test_kings() -> void:
 	
@@ -18,8 +21,8 @@ func test_kings() -> void:
 	# .  .  👑  
 	# .  .  .
 	# 👑 .  .
-	var king1 = game_state.PlacePiece("king", 0, 0, 0, 0, -1)
-	var king2 = game_state.PlacePiece("king", 0, 1, 2, 2, -1)
+	var king = game_state.PlacePiece("king", 0, 0, 0, 0, -1)
+	var e_king = game_state.PlacePiece("king", 0, 1, 2, 2, -1)
 	
 	game_controller.StartGame(game_state.gameRandom.seed)
 	
@@ -32,8 +35,8 @@ func test_kings() -> void:
 	# .  .  👑  
 	# .  👑 .
 	# .  .  .
-	game_state.MovePiece(king1, 1, 1)
-	king1.EnableActionsUpdate();
+	game_state.MovePiece(king, 1, 1)
+	king.EnableActionsUpdate();
 	
 	game_state.NextTurn()
 	
@@ -43,7 +46,7 @@ func test_kings() -> void:
 	
 	# Removing one King should result in that king
 	# being in check, and the other not.
-	game_state.TakePiece(king2, king1)
+	game_state.TakePiece(e_king, king)
 	
 	game_state.NextTurn()
 	
