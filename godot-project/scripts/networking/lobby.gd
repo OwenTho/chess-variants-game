@@ -253,8 +253,8 @@ func player_is_admin(player_id: int) -> bool:
 	return player_data.is_admin
 
 func verify_name(name) -> String:
-	if name.length() < 0:
-		name = "missing"
+	if name.length() == 0:
+		return ""
 	if name.length() > NAME_LENGTH_LIMIT:
 		name = name.substr(0,NAME_LENGTH_LIMIT)
 	return name
@@ -265,19 +265,24 @@ func _update_name(id, name):
 
 
 @rpc("call_remote", "authority", "reliable", 1)
-func _change_name(id, name):
-	name = verify_name(name)
-	_update_name(id, name)
+func _change_name(id, name) -> String:
+	var new_name: String = verify_name(name)
+	if new_name.is_empty():
+		return new_name
+	_update_name(id, new_name)
+	return new_name
 
 @rpc("call_local", "any_peer", "reliable", 1)
 func change_name(name):
 	if not is_multiplayer_authority():
 		return
 	# Make sure name is valid
-	name = verify_name(name)
+	var new_name: String = verify_name(name)
+	if new_name.is_empty():
+		return
 	var other_id = multiplayer.get_remote_sender_id()
-	_update_name(other_id, name)
-	_change_name.rpc(other_id, name)
+	_update_name(other_id, new_name)
+	_change_name.rpc(other_id, new_name)
 
 @rpc("authority", "call_local", "reliable")
 func _update_player_num(id: int, player_num: int) -> void:

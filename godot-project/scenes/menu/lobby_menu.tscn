@@ -70,6 +70,7 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="NameChangeTimer" type="Timer" parent="."]
+wait_time = 0.3
 one_shot = true
 
 [node name="Control" type="PanelContainer" parent="."]
