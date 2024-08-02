@@ -14,7 +14,7 @@ public partial class GameState : Node
     private int lastId = 0;
     public int currentPlayerNum;
 
-    public const string KingId = "king";
+    public string KingId { get; internal set; } = "king";
 
     public Vector2I gridSize;
 
