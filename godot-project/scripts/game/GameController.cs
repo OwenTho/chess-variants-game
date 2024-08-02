@@ -74,8 +74,15 @@ public partial class GameController : Node
     private void StartGameTask()
     {
         gameMutex.Lock();
+        
+        currentGameState.AddCard(cardFactoryRegistry.GetValue("shuffle").CreateNewCard(currentGameState));
+        //currentGameState.AddCard(cardFactoryRegistry.GetValue("major_shapeshift").CreateNewCard(currentGameState));
+        //SinglePieceArmyCard card = (SinglePieceArmyCard)cardFactoryRegistry.GetValue("single_piece_army").CreateNewCard(currentGameState);
+        //card.armyPiece = "rook";
+        //currentGameState.AddCard(card);
+        currentGameState.gameEvents.AnnounceEvent(GameEvents.StartGame);
         currentGameState.StartGame();
-        currentGameState.AddCard(cardFactoryRegistry.GetValue("major_shapeshift").CreateNewCard(currentGameState));
+        currentGameState.gameEvents.AnnounceEvent(GameEvents.GameStarted);
         gameMutex.Unlock();
     }
 

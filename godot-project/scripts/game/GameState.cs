@@ -18,7 +18,9 @@ public partial class GameState : Node
 
     public Vector2I gridSize;
 
-    private Array<Piece> allPieces;
+    public Array<Piece> allPieces;
+    
+    public RandomNumberGenerator gameRandom { get; private set; }
     
     bool tempState = false;
     
@@ -59,6 +61,7 @@ public partial class GameState : Node
         gridSize = new Vector2I(8, 8);
 
         gameEvents = new GameEvents(this);
+        gameRandom = new RandomNumberGenerator();
         cards = new Array<CardBase>();
 
         playerCheck = new CheckType[GameController.NUMBER_OF_PLAYERS];
@@ -79,6 +82,17 @@ public partial class GameState : Node
             currentPlayerNum = 0;
         }
     }
+
+    public PieceInfo GetPieceInfo(string pieceId)
+    {
+        return gameController.GetPieceInfo(pieceId);
+    }
+
+    public bool TryGetPieceInfo(string pieceId, out PieceInfo info)
+    {
+        return gameController.TryGetPieceInfo(pieceId, out info);
+    }
+    
     
     public Piece PlacePiece(string pieceId, int linkId, int teamId, int x, int y, int id = -1)
     {
@@ -702,6 +716,8 @@ public partial class GameState : Node
         // Initialise the new state
         GameState newState = new GameState(gameController);
         newState.Init(isServer);
+        // Copy over the seed so any randomness follows the same
+        newState.gameRandom.Seed = gameRandom.Seed;
         
         // Copy the Cards
         foreach (var card in cards)

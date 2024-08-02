@@ -95,6 +95,8 @@ public partial class GameController
         
         // Register Card Factories
         AddNewFactory("major_shapeshift", new SimpleCardFactory<ShapeshiftCard>());
+        AddNewFactory("single_piece_army", new SimpleCardFactory<SinglePieceArmyCard>());
+        AddNewFactory("shuffle", new SimpleCardFactory<ShuffleCard>());
     }
 
     private void MakeNewValidationRule(string id, ValidationRuleBase newRule, bool makeInitialRule = false)
