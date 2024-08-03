@@ -15,6 +15,7 @@ func before_all() -> void:
 	# after the game is done processing
 	game_controller.singleThread = true
 
+
 # Before each test, initialise the board
 func before_each() -> void:
 	# And then initialise a new game
@@ -23,13 +24,34 @@ func before_each() -> void:
 	# Store the GameController variables so that they're easy to access
 	game_state = game_controller.currentGameState
 
+
 func after_each() -> void:
 	# Free the game state
 	game_state.free()
 
+
 func after_all() -> void:
 	# Free the game controller
 	game_controller.free()
+
+
+
+
+func piece_has_actions_at(piece, location: Vector2i, num_ignored: int = 0) -> bool:
+	var actions_at_pos: int = 0
+	for cell in game_state.actionGrid.cells:
+		if cell.pos == location:
+			for action in cell.items:
+				if piece.currentPossibleActions.has(action):
+					actions_at_pos += 1
+					if actions_at_pos > num_ignored:
+						return true
+	
+	return false
+
+
+
+
 
 func print_current_board() -> void:
 	# Get all of the cell positions

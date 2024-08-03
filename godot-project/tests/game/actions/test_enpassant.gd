@@ -83,18 +83,9 @@ func test_teammate() -> void:
 	# Move to next turn
 	game_state.NextTurn()
 	
-	# Pawn 1 should not be able to use En Passant
-	var actions_at_pos: int = 0
-	for cell in game_state.actionGrid.cells:
-		if cell.pos == Vector2i(0,1):
-			for item in cell.items:
-				if item.owner == e_pawn:
-					actions_at_pos += 1
-	
-	# Pawn should only be able to Move + Attack
-	if actions_at_pos > 2:
+	# Pawn 1 should not be able to use En Passant, (but can also move + attack)
+	if piece_has_actions_at(e_pawn, Vector2i(0,1), 2):
 		fail_test("Pawn2 is still able to En Passant, when it shouldn't be able to.")
-
 
 
 
@@ -125,14 +116,7 @@ func test_enemy() -> void:
 	assert_true(pawn.HasTag("pawn_initial"))
 	
 	# Enemy should be able to use En Passant
-	var failed: bool = true
-	for cell in game_state.actionGrid.cells:
-		if cell.pos == Vector2i(0,1):
-			for item in cell.items:
-				if item.owner == e_pawn:
-					failed = false
-	
-	if failed:
+	if not piece_has_actions_at(e_pawn, Vector2i(0,1)):
 		fail_test("Pawn2 is unable to En Passant")
 	
 	# Make sure pawn can En Passant
@@ -181,14 +165,7 @@ func test_pawn_taken() -> void:
 	game_state.NextTurn()
 	
 	# Enemy should be able to use En Passant
-	var failed := true
-	for cell in game_state.actionGrid.cells:
-		if cell.pos == Vector2i(0,1):
-			for item in cell.items:
-				if item.owner == e_pawn:
-					failed = false
-	
-	if failed:
+	if not piece_has_actions_at(e_pawn, Vector2i(0,1)):
 		fail_test("Pawn2 is unable to En Passant")
 	
 	# Pawn 1 is taken by the bishop
@@ -203,16 +180,8 @@ func test_pawn_taken() -> void:
 	
 	game_state.NextTurn()
 	
-	# Enemy should not be able to use En Passant
-	var actions_at_pos: int = 0
-	for cell in game_state.actionGrid.cells:
-		if cell.pos == Vector2i(0,1):
-			for item in cell.items:
-				if item.owner == e_pawn:
-					actions_at_pos += 1
-	
-	# Pawn should only be able to Move + Attack
-	if actions_at_pos > 2:
+	# Enemy should not be able to use En Passant, and only be able to Move + Attack
+	if piece_has_actions_at(e_pawn, Vector2i(0,1), 2):
 		fail_test("Pawn2 is still able to En Passant, when it shouldn't be able to.")
 	
 	# Also try to act it out

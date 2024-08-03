@@ -5,7 +5,9 @@ using Godot.Collections;
 
 public partial class CastleRule : ActionRuleBase
 {
-    private const int MIN_DIST = 1;
+    private const int MinDist = 3;
+    private const int MaxDist = 6;
+    private const int ActionDist = 2;
     
     public override void AddPossibleActions(GameState game, Piece piece)
     {
@@ -22,9 +24,9 @@ public partial class CastleRule : ActionRuleBase
     private void CheckCastle(GameState game, Piece piece, Vector2I direction)
     {
         // TODO: Use level instead of repeating 4 times
-        // Repeat up to 4 away, from a distance of 2.
-        Vector2I actionLocation = piece.cell.pos + direction * (MIN_DIST - 1);
-        for (int i = MIN_DIST; i < 5; i++)
+        // Repeat a number of spaces away, from a minimum distance away.
+        Vector2I actionLocation = piece.cell.pos + direction * ActionDist;
+        for (int i = MinDist; i <= MaxDist; i++)
         {
             Vector2I checkLocation = piece.cell.pos + direction * i;
             
@@ -33,6 +35,11 @@ public partial class CastleRule : ActionRuleBase
             {
                 foreach (var checkPiece in pieces)
                 {
+                    // Make sure the piece is on the same team
+                    if (checkPiece.teamId != piece.teamId)
+                    {
+                        continue;
+                    }
                     // Make sure piece hasn't moved
                     if (checkPiece.timesMoved > 0)
                     {
@@ -44,7 +51,7 @@ public partial class CastleRule : ActionRuleBase
                         continue;
                     }
                     
-                    // If it is a rook, we need to create a move for the castling piece 1 space before
+                    // If it is a rook, we need to create a move for the castling piece 2 spaces from the King
                     MoveAction newMove = new MoveAction(piece, actionLocation, actionLocation);
                     piece.AddAction(newMove);
                     
@@ -56,18 +63,16 @@ public partial class CastleRule : ActionRuleBase
                     otherMove.AddDependency(newMove);
 
                     MoveAction prevMove = newMove;
-                    for (int j = i - 2; j > 0 ; j--)
+                    for (int j = i - 1; j > 0 ; j--)
                     {
-                        SlideAction newSlide = new SlideAction(piece, actionLocation, actionLocation - direction * j);
+                        Vector2I loc = actionLocation - direction * j;
+                        SlideAction newSlide = new SlideAction(piece, actionLocation, checkLocation - direction * j);
                         prevMove.AddDependency(newSlide);
                         piece.AddAction(newSlide);
                         prevMove = newSlide;
                     }
                 }
             }
-            
-            // Update the action location, as it moves one over
-            actionLocation = checkLocation;
         }
     }
 }

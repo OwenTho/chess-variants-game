@@ -377,7 +377,7 @@ public partial class GameState : Node
     public bool TakeActionAt(Vector2I actionLocation, Piece piece)
     {
         // Get the possible actions for this piece
-        if (piece.currentPossibleActions.Count == 0)
+        if (piece.currentPossibleActions == null || piece.currentPossibleActions.Count == 0)
         {
             CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, currentPlayerNum, "No actions available at selected location.");
             CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.ActionProcessed, false, actionLocation, piece);
