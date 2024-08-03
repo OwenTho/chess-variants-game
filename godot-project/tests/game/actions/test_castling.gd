@@ -32,8 +32,7 @@ func castle_test(king, dir: Vector2i, act_pos: Vector2i) -> void:
 		else:
 			assert_true(game_state.TakeActionAt(act_pos, king), "[Distance %s] King should have castled." % i)
 			# Check that the Rook has moved
-			assert_true(rook.cell.x == (act_pos.x - dir.x))
-		print_current_board()
+			assert_eq(rook.cell.x, (act_pos.x - dir.x), "[Distance %s] Rook should not have moved." % i)
 		# Remove the rook before continuing
 		game_state.TakePiece(rook.id)
 		# Move the King back
@@ -93,7 +92,7 @@ func test_castle_blocked() -> void:
 	# King should be able to castle
 	assert_true(game_state.TakeActionAt(Vector2i(2,0), king), "King should have been able to castle with the pawn out of the way.")
 	# Rook should also have moved
-	assert_true(rook.cell.pos == Vector2i(1,0), "Rook should have moved.")
+	assert_eq(rook.cell.pos, Vector2i(1,0), "Rook should have moved.")
 
 
 
@@ -114,7 +113,7 @@ func test_cant_castle_after_move() -> void:
 	# Move King right one
 	# . 👑. . 🏰
 	assert_true(game_state.TakeActionAt(Vector2i(1,0), king), "King should be able to move right.")
-	assert_true(rook.cell.pos == Vector2i(4,0), "Rook should not have moved.")
+	assert_eq(rook.cell.pos, Vector2i(4,0), "Rook should not have moved.")
 	
 	# Skip to next turn
 	game_state.NextTurn()
@@ -127,7 +126,7 @@ func test_cant_castle_after_move() -> void:
 	# King should not be able to castle
 	assert_false(game_state.TakeActionAt(Vector2i(3,0), king), "King should not be able to castle.")
 	# Rook should not have moved
-	assert_true(rook.cell.pos == Vector2i(4,0), "Rook should not have moved.")
+	assert_eq(rook.cell.pos, Vector2i(4,0), "Rook should not have moved.")
 
 
 
@@ -149,4 +148,4 @@ func test_enemy_rook() -> void:
 	assert_false(game_state.TakeActionAt(Vector2i(2,0), king), "King was able to castle, when it shouldn't be able to.")
 	
 	# Check that rook is in the same place
-	assert_true(rook.cell.pos == Vector2i(3,0), "Rook moved, when it shouldn't have been moved.")
+	assert_eq(rook.cell.pos, Vector2i(3,0), "Rook moved, when it shouldn't have been moved.")
