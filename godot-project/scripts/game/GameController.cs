@@ -21,7 +21,7 @@ public partial class GameController : Node
     private GodotThread gameThread;
     public bool singleThread = false;
 
-    public const int NUMBER_OF_PLAYERS = 2;
+    public int NUMBER_OF_PLAYERS = 2;
     
     // This will likely be fine, as the grid size will not change during play.
     public Vector2I gridSize => currentGameState.gridSize;

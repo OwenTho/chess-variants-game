@@ -27,6 +27,9 @@ func after_each() -> void:
 	# Free the game state
 	game_state.free()
 
+func after_all() -> void:
+	# Free the game controller
+	game_controller.free()
 
 func print_current_board() -> void:
 	# Get all of the cell positions
@@ -57,14 +60,43 @@ func print_current_board() -> void:
 			# Get all first Piece at this position
 			var piece = game_state.GetFirstPieceAt(min_pos.x + x, min_pos.y + y)
 			if piece == null:
-				cur_arr.append(". ")
+				# If no pieces, check if there's an action
+				var skip_empty := false
+				var is_acting := false
+				var is_valid := false
+				for cell in game_state.actionGrid.cells:
+					# Find at least one active / acting action
+					for action in cell.items:
+						if action.valid:
+							is_valid = true
+						if action.acting:
+							is_acting = true
+					if cell.pos.x == x and cell.pos.y == y:
+						if is_valid:
+							cur_arr.append("  @  ")
+						elif is_acting:
+							cur_arr.append("  #  ")
+						skip_empty = true
+						break
+				if not skip_empty:
+					cur_arr.append("  .  ")
 			elif piece.info == null:
 				cur_arr.append("X")
 			else:
 				cur_arr.append(get_piece_string(piece.info.pieceId))
 	
+	var player_status: Array[String] = []
 	
-	print(total_pos)
+	for player_num in game_controller.NUMBER_OF_PLAYERS:
+		player_status.append("Ok")
+		if game_state.PlayerInCheck(player_num):
+			player_status[player_num] = "Check"
+		elif game_state.PlayerHasNoKing(player_num):
+			player_status[player_num] = "No King"
+	
+	print("Player turn: %s" % [game_state.currentPlayerNum])
+	print("P1 status: %s" % [player_status[0]])
+	print("P2 status: %s" % [player_status[1]])
 	
 	# Print each individual line
 	for i in range(total_pos.y, -1, -1):
