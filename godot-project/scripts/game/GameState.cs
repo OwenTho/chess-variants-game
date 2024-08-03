@@ -401,8 +401,10 @@ public partial class GameState : Node
 
     public void StartGame()
     {
+        gameEvents.AnnounceEvent(GameEvents.StartGame);
         // Tell all pieces to update their possible moves
         PiecesNewTurn();
+        gameEvents.AnnounceEvent(GameEvents.GameStarted);
     }
 
     public bool PlayerInCheck(int playerNum)

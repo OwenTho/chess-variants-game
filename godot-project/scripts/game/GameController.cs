@@ -84,9 +84,7 @@ public partial class GameController : Node
         //SinglePieceArmyCard card = (SinglePieceArmyCard)cardFactoryRegistry.GetValue("single_piece_army").CreateNewCard(currentGameState);
         //card.armyPiece = "rook";
         //currentGameState.AddCard(card);
-        currentGameState.gameEvents.AnnounceEvent(GameEvents.StartGame);
         currentGameState.StartGame();
-        currentGameState.gameEvents.AnnounceEvent(GameEvents.GameStarted);
         gameMutex.Unlock();
     }
 
