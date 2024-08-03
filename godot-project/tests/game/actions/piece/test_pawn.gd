@@ -427,6 +427,35 @@ func test_initial_move_blocked_far_enemy() -> void:
 
 
 
+
+func test_initial_not_first_move() -> void:
+	
+	# Place Piece
+	# .
+	# .
+	# ♟️
+	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
+	
+	# Set pawn to have moved at least once
+	pawn.timesMoved = 1
+	
+	# Start the game
+	game_controller.StartGame()
+	# Piece should not have the actions to move forwards 2 spaces
+	if piece_has_actions_at(pawn, Vector2i(0,2)):
+		fail_test("Pawn should have the action to move forward two spaces.")
+	
+	# Try (and fail) to move 2 spaces forward
+	# . 
+	# .
+	# ♟️
+	assert_false(game_state.TakeActionAt(Vector2i(0,2), pawn), "Pawn should not be able to move two spaces forwards.")
+	
+	assert_eq(pawn.cell.pos, Vector2i(0,0), "Pawn should not have moved.")
+
+
+
+
 func test_attack_team_right() -> void:
 	
 	# Place pieces

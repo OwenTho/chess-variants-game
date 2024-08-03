@@ -95,11 +95,8 @@ func test_enemy() -> void:
 	assert_true(pawn.HasTag("pawn_initial"))
 	
 	# Action should be gone
-	for cell in game_state.actionGrid.cells:
-		if cell.pos == Vector2i(0,1):
-			for item in cell.items:
-				if item.owner == e_pawn:
-					fail_test("Action on Pawn 2's space, when there should not be one.")
+	if piece_has_actions_at(e_pawn, Vector2i(0,1)):
+		fail_test("Action on Pawn 2's space, when there should not be one.")
 
 
 
