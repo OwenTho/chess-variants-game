@@ -45,7 +45,10 @@ func test_kings() -> void:
 	assert_true(game_state.PlayerInCheck(1))
 	
 	# Removing one King should result in that king
-	# being in check, and the other not.
+	# "check" (having check set to "NoKing"), and the other not.
+	# .  .  .  
+	# .  👑 .
+	# .  .  .
 	game_state.TakePiece(e_king, king)
 	
 	game_state.NextTurn()

@@ -42,7 +42,7 @@ func piece_has_actions_at(piece, location: Vector2i, num_ignored: int = 0) -> bo
 	for cell in game_state.actionGrid.cells:
 		if cell.pos == location:
 			for action in cell.items:
-				if piece.currentPossibleActions.has(action):
+				if piece == null or piece.currentPossibleActions.has(action):
 					actions_at_pos += 1
 					if actions_at_pos > num_ignored:
 						return true

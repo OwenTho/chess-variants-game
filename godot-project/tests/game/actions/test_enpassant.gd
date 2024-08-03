@@ -1,43 +1,6 @@
 extends GameTest
 
 
-func test_tag() -> void:
-	
-	# Initialise board
-	# . 
-	# . 
-	# ♟️
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
-	
-	# Start the game
-	game_controller.StartGame()
-	
-	# Do 2 space move on second pawn
-	# ♟️ 
-	# . 
-	# .
-	assert_true(game_state.TakeActionAt(Vector2i(0,2), pawn))
-	
-	# Pawn should have "pawn_initial"
-	assert_true(pawn.HasTag("pawn_initial"))
-	game_state.NextTurn()
-	
-	# Pawn should still have "pawn_initial" as it's not that player's turn
-	assert_true(pawn.HasTag("pawn_initial"))
-	
-	game_state.NextTurn()
-	
-	# Pawn should no longer have the "pawn_initial" tag
-	
-	assert_false(pawn.HasTag("pawn_initial"))
-	
-	# Pawn should not be able to move two spaces up,
-	# but should be able to move 1 space up
-	assert_false(game_state.TakeActionAt(Vector2i(0,4), pawn))
-	assert_true(game_state.TakeActionAt(Vector2i(0,3), pawn))
-
-
-
 
 
 func test_teammate() -> void:

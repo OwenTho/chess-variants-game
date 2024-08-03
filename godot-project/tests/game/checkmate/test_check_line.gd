@@ -30,7 +30,11 @@ func test_protected_by_king() -> void:
 	# King should not be in check
 	assert_false(game_state.PlayerInCheck(0))
 	
+	# King should not be able to move right because it would be check
+	assert_false(game_state.TakeActionAt(Vector2i(2,0), king))
+	
 	# King should be able to move left
+	# 👑. . 👑🏰
 	assert_true(game_state.TakeActionAt(Vector2i(0,0), king))
 	
 	game_state.NextTurn()
@@ -76,6 +80,8 @@ func test_attack_miss() -> void:
 	assert_false(game_state.TakeActionAt(Vector2i(0,1), king))
 	
 	# King should be able to move right
+	# . . . 🏰
+	# . 👑. . 
 	assert_true(game_state.TakeActionAt(Vector2i(1,0), king))
 	
 	game_state.NextTurn()
