@@ -614,7 +614,7 @@ public partial class GameState : Node
             }
             
             // If they are playing, then check if they're in check or checkmate
-            if (playerCheck[teamNum] != CheckType.None)
+            if (playerCheck[teamNum] == CheckType.None)
             {
                 // Check can be ignored, as it means the King, at least, can move out of Check
                 break;
