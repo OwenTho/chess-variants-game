@@ -6,6 +6,9 @@ var showing_cards: bool = false
 var last_hovered: int = -1
 
 signal card_selected(card_id: int)
+signal cards_showing()
+
+var cards: Array[Control] = []
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -15,7 +18,19 @@ func _ready() -> void:
 	for child in %CardContainer.get_children():
 		child.hover.connect(_hovered)
 		child.unhover.connect(_unhovered)
-	show_cards()
+
+func _enter_tree() -> void:
+	# On first frame the cards are shown, hide the cards
+	await get_tree().process_frame
+	hide_cards()
+
+func hide_cards() -> void:
+	if showing_cards:
+		await cards_showing
+	for child in %CardContainer.get_children():
+		child.set_enabled(false)
+		child.reset_offset()
+		child.position.y = 500
 
 func show_cards() -> void:
 	if showing_cards:
@@ -25,9 +40,6 @@ func show_cards() -> void:
 	var child_num: int = 0
 	var last_tween: Tween
 	for child in %CardContainer.get_children():
-		child.set_enabled(false)
-		child.reset_offset()
-		child.position.y = 200
 		var tween: Tween = create_tween()
 		tween.tween_callback(func(): child.position.y = 500)
 		tween.tween_interval(0.5 * (child_num+1))
@@ -38,7 +50,7 @@ func show_cards() -> void:
 		child_num += 1
 	
 	if last_tween != null:
-		last_tween.tween_callback(enable_cards)
+		last_tween.tween_callback(_cards_showing)
 	else:
 		showing_cards = false
 
@@ -57,6 +69,11 @@ func add_card(card_data: Dictionary) -> void:
 	if card_data.has("card_id"):
 		card.card_id = card_data["card_id"]
 	%CardContainer.add_child(card)
+	cards.append(card)
+
+func _cards_showing() -> void:
+	cards_showing.emit()
+	enable_cards()
 
 func enable_cards() -> void:
 	showing_cards = false
@@ -70,6 +87,7 @@ func _process(delta: float) -> void:
 			card_selected.emit(last_hovered)
 			print("Selected: %s" % last_hovered)
 	if Input.is_action_just_pressed("mouse_right"):
+		hide_cards()
 		show_cards()
 
 func _hovered(card_id: int) -> void:

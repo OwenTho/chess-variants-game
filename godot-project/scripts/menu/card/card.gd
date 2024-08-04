@@ -8,7 +8,7 @@ var cur_tween: Tween
 
 var card_id: int = -1
 
-
+var hold_up: bool = false
 var _hover: bool = false
 @onready var card_panel: PanelContainer = $CardOffset/CardPanel
 
@@ -77,7 +77,7 @@ func _on_panel_container_mouse_exited() -> void:
 	# Move card back down
 	if cur_tween != null:
 		cur_tween.stop()
-	if _hover:
+	if _hover and not hold_up:
 		cur_tween = create_tween()
 		cur_tween.tween_property(card_panel, "position:y", 0.0, hover_time)
 		cur_tween.tween_callback(_tween_end)
