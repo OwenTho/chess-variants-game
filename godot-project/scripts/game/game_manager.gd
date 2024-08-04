@@ -6,6 +6,7 @@ var game_controller: Object
 var game_scene: PackedScene = preload("res://scenes/game/game_screen.tscn")
 var piece_scene: PackedScene = preload("res://scenes/game/piece/piece.tscn")
 
+var in_game: bool
 var game: Game
 var grid
 var grid_size: Vector2i
@@ -17,19 +18,35 @@ var thread_mutex: Mutex
 
 signal has_init()
 
-func _ready():
+# Game signals
+signal starting_next_turn(player_num: int)
+signal next_turn(player_num: int)
+signal end_turn()
+
+signal taking_action_at(action_location: Vector2i, piece)
+signal action_processed(success: bool, action_location: Vector2i, piece)
+signal action_was_failed(reason: String)
+
+signal player_has_won(player_num: int)
+signal player_lost(player_num: int)
+signal piece_taken(taken_piece, attacker)
+
+signal notice_received(message: String)
+
+func _ready() -> void:
 	Lobby.server_disconnected.connect(_on_server_disconnect)
 
-func _on_server_disconnect():
+func _on_server_disconnect() -> void:
 	if game != null:
 		game.to_menu()
 	reset_game()
 	#get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
 
-func reset_game():
+func reset_game() -> void:
 	# Before continuing, make sure none of the mutex are locked
 	if game != null:
 		game_controller.queue_free()
+	in_game = false
 	board = null
 	game = null
 	grid = null
@@ -70,20 +87,20 @@ func init() -> void:
 	
 	has_init.emit()
 
-func setup_signals():
-	game_controller.NewTurn.connect(game._on_next_turn)
-	game_controller.ActionProcessed.connect(game._on_action_processed)
-	game_controller.EndTurn.connect(game._on_end_turn)
+func setup_signals() -> void:
+	game_controller.NewTurn.connect(_on_next_turn)
+	game_controller.ActionProcessed.connect(_on_action_processed)
 	
-	game_controller.PlayerLost.connect(game._on_player_lost)
+	game_controller.PlayerLost.connect(_on_player_lost)
 	
-	game_controller.PieceRemoved.connect(game._on_piece_taken)
-	game_controller.SendNotice.connect(game.send_notice)
+	game_controller.PieceRemoved.connect(_on_piece_taken)
+	game_controller.SendNotice.connect(send_notice)
 	
 
-func start_game(game_seed: int):
+func start_game(game_seed: int) -> void:
 	game_controller.StartGame(game_seed)
 	game.game_active = true
+	in_game = true
 
 func init_board() -> void:
 	# Add all of the pieces
@@ -130,7 +147,7 @@ func board_to_array() -> Array:
 	game_mutex.unlock()
 	return ret_array
 
-func load_board(board_data: Array):
+func load_board(board_data: Array) -> void:
 	for item in board_data:
 		place_piece(item[0], item[1], item[2], item[3].x, item[3].y, item[4])
 
@@ -191,7 +208,7 @@ func spaces_off_board(x: int, y: int) -> int:
 
 ## Tasks
 
-func game_controller_valid():
+func game_controller_valid() -> bool:
 	if game_controller == null || !is_instance_valid(game_controller):
 		return false
 	return true
@@ -223,3 +240,153 @@ func get_first_piece_at(x: int, y: int) -> Object:
 
 func swap_piece_to(piece_id: int, id: String) -> void:
 	game_controller.SwapPieceTo(piece_id, id)
+
+
+
+
+### Events
+
+func _on_next_turn(player_num: int) -> void:
+	next_turn.emit(player_num)
+	if is_multiplayer_authority():
+		to_next_turn.rpc(player_num)
+
+
+
+func _on_action_processed(success: bool, action_location: Vector2i, piece) -> void:
+	action_processed.emit()
+	if not is_multiplayer_authority():
+		return
+	if not success:
+		var cur_player_id: int = Lobby.player_nums[await get_current_player()]
+		failed_action.rpc_id(cur_player_id)
+		return
+	# Tell everyone to take the action
+	take_action_at.rpc(action_location, piece.id)
+	
+	game_controller.NextTurn()
+
+
+func _on_piece_taken(taken_piece, attacker) -> void:
+	piece_taken.emit(taken_piece, attacker)
+
+
+# TODO: Rather than calling player_won, instead remove the player from
+# the game. When new turn is called, determine who wins at that point.
+# This allows for draws (not the same as stalemates)
+func _on_player_lost(player_num: int) -> void:
+	if not is_multiplayer_authority():
+		return
+	
+	player_won.rpc(2 - player_num)
+
+
+func send_notice(player_target: int, text: String) -> void:
+	if not is_multiplayer_authority():
+		return
+	# If it's -1, rpc to all
+	if player_target == -1:
+		receive_notice.rpc(text)
+		return
+	# Otherwise, get the id of the player
+	var player_id: int = Lobby.player_nums[player_target]
+	receive_notice.rpc_id(player_id, text)
+
+
+
+
+### Rpcs
+
+@rpc("any_peer", "call_local", "reliable")
+func request_action(action_location: Vector2i, piece_id: int) -> void:
+	# Only run if game is on
+	if not in_game:
+		return
+	# Ignore if not authority
+	if not is_multiplayer_authority():
+		return
+	
+	var sender_id: int = multiplayer.get_remote_sender_id()
+	
+	# Get the player number of this player
+	var player_num: int = Lobby.get_player_num(sender_id)
+	# If it's -1, ignore
+	if (player_num == -1):
+		failed_action.rpc_id(sender_id)
+		return
+	
+	# If it's the wrong player number, ignore
+	var cur_player_num = await GameManager.get_current_player()
+	if Lobby.player_nums[cur_player_num] != sender_id:
+		failed_action.rpc_id(sender_id, "It is not your turn.")
+		return
+	
+	# Get piece
+	var piece = await GameManager.get_piece(piece_id)
+	
+	# If piece id is invalid, ignore
+	if piece == null:
+		failed_action.rpc_id(sender_id, "Piece not found.")
+		return
+	
+	# Verify actions at that location
+	var valid_actions: bool = true
+	var possible_actions: Array = piece.currentPossibleActions
+	
+	# If there are no actions, ignore
+	if possible_actions.size() == 0:
+		failed_action.rpc_id(sender_id, "This piece has no actions to take.")
+		return
+	
+	# Take the actions
+	taking_action_at.emit(action_location, piece)
+	GameManager.game_controller.TakeActionAt(action_location, piece)
+
+
+@rpc("authority", "call_local", "reliable")
+func failed_action(reason: String = "") -> void:
+	# Only run if game is on
+	if not in_game:
+		return
+	action_was_failed.emit(reason)
+
+
+@rpc("authority", "call_remote", "reliable")
+func take_action_at(action_location: Vector2i, piece_id: int) -> void:
+	# Only run if game is on
+	if not in_game:
+		return
+	var piece = await GameManager.get_piece(piece_id)
+	if piece != null:
+		taking_action_at.emit(action_location, piece)
+		game_controller.TakeActionAt(action_location, piece)
+
+
+@rpc("authority", "call_remote", "reliable")
+func to_next_turn(new_player_num: int) -> void:
+	# Only run if game is on
+	if not in_game:
+		return
+	starting_next_turn.emit(new_player_num)
+	game_controller.NextTurn(new_player_num)
+
+@rpc("authority", "call_local", "reliable")
+func player_won(winner: int) -> void:
+	# Only run if game is on
+	if not in_game:
+		return
+	# Reset game data, given that it's not needed anymore.
+	reset_game()
+	if not Lobby.is_player:
+		# Leave the game scene
+		get_tree().unload_current_scene()
+		return
+	player_has_won.emit(winner)
+
+
+@rpc("authority", "call_local", "reliable", 2)
+func receive_notice(text: String) -> void:
+	# Only run if game is on
+	if not in_game:
+		return
+	notice_received.emit(text)

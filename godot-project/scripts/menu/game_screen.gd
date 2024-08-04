@@ -19,6 +19,18 @@ var allow_quit: bool = true
 
 func _ready() -> void:
 	GameManager.has_init.connect(_on_init)
+	GameManager.next_turn.connect(_on_next_turn)
+	GameManager.end_turn.connect(_on_end_turn)
+	
+	GameManager.taking_action_at.connect(_on_taking_action)
+	GameManager.action_was_failed.connect(_on_action_failed)
+	
+	GameManager.player_has_won.connect(_on_player_won)
+	GameManager.player_lost.connect(_on_player_lost)
+	GameManager.piece_taken.connect(_on_piece_taken)
+	
+	GameManager.notice_received.connect(_on_notice_received)
+	
 	var my_num = Lobby.get_player_num(multiplayer.get_unique_id())
 	# If it's player 2, flip the board
 	if my_num == 1:
@@ -28,7 +40,7 @@ func _ready() -> void:
 	if not Lobby.is_player:
 		$GameUI/BtnQuit.visible = false
 
-func _on_init():
+func _on_init() -> void:
 	cursor.board = GameManager.board
 	
 	Debug.stats.add_property(GameManager.game_controller.currentGameState, "currentPlayerNum")
@@ -60,7 +72,7 @@ func remove_selection() -> void:
 	for child in action_highlights.get_children():
 		child.queue_free()
 
-func select_cell(cell_pos: Vector2i):
+func select_cell(cell_pos: Vector2i) -> void:
 	# Try to get the game mutex
 	if not GameManager.game_mutex.try_lock():
 		# If it couldn't get the mutex, then return
@@ -75,7 +87,7 @@ func select_cell(cell_pos: Vector2i):
 				GameManager.game_mutex.unlock()
 				disabled_selection = true
 				allow_quit = false
-				request_action.rpc(cell_pos, selected_piece.piece_data.id)
+				GameManager.request_action.rpc(cell_pos, selected_piece.piece_data.id)
 				remove_selection()
 				return
 	# Remove lock
@@ -128,142 +140,44 @@ func select_item(piece: Piece2D) -> void:
 	# Unlock the mutex once done
 	GameManager.game_mutex.unlock()
 
-func _on_next_turn(new_player_num: int):
-	if not is_multiplayer_authority():
-		return
+
+
+
+
+func _on_next_turn(new_player_num: int) -> void:
 	remove_selection()
 	disabled_selection = false
 	allow_quit = true
-	if game_active:
-		next_turn.rpc(new_player_num)
 
 func _on_end_turn() -> void:
-	remove_selection()
+	pass
 
-
-
-@rpc("any_peer", "call_local", "reliable")
-func request_action(action_location: Vector2i, piece_id: int) -> void:
-	# Ignore if not authority
-	if not is_multiplayer_authority():
-		return
-	
-	var sender_id: int = multiplayer.get_remote_sender_id()
-	
-	# Get the player number of this player
-	var player_num: int = Lobby.get_player_num(sender_id)
-	# If it's -1, ignore
-	if (player_num == -1):
-		failed_action.rpc_id(sender_id)
-		return
-	
-	# If it's the wrong player number, ignore
-	var cur_player_num = await GameManager.get_current_player()
-	if Lobby.player_nums[cur_player_num] != sender_id:
-		failed_action.rpc_id(sender_id, "It is not your turn.")
-		return
-	
-	# Get piece
-	var piece = await GameManager.get_piece(piece_id)
-	
-	# If piece id is invalid, ignore
-	if piece == null:
-		failed_action.rpc_id(sender_id, "Piece not found.")
-		return
-	
-	# Verify actions at that location
-	var valid_actions: bool = true
-	var possible_actions: Array = piece.currentPossibleActions
-	
-	# If there are no actions, ignore
-	if possible_actions.size() == 0:
-		failed_action.rpc_id(sender_id, "This piece has no actions to take.")
-		return
-	
-	# Take the actions
+func _on_taking_action(action_location: Vector2i, piece) -> void:
 	allow_quit = false
-	GameManager.game_controller.TakeActionAt(action_location, piece)
 
-
-func _on_action_processed(success: bool, action_location: Vector2i, piece):
+func _on_action_processed(success: bool, action_location: Vector2i, piece) -> void:
 	if not is_multiplayer_authority():
 		allow_quit = true
 		return
 	if not success:
 		allow_quit = true
-		var cur_player_id: int = Lobby.player_nums[await GameManager.get_current_player()]
-		failed_action.rpc_id(cur_player_id)
 		return
-	# Tell everyone to take the action
-	take_action_at.rpc(action_location, piece.id)
-	
-	GameManager.game_controller.NextTurn()
 
-
-@rpc("authority", "call_local", "reliable")
-func failed_action(reason: String = "") -> void:
+func _on_action_failed(reason: String) -> void:
 	if not reason.is_empty():
 		notices.add_notice(reason)
 	remove_selection()
 	disabled_selection = false
 	allow_quit = true
 
-@rpc("authority", "call_remote", "reliable")
-func take_action_at(action_location: Vector2i, piece_id: int):
-	var piece = await GameManager.get_piece(piece_id)
-	if piece != null:
-		allow_quit = false
-		GameManager.game_controller.TakeActionAt(action_location, piece)
-
-
-
-@rpc("authority", "call_remote", "reliable")
-func next_turn(new_player_num: int) -> void:
-	disabled_selection = false
-	allow_quit = true
-	remove_selection()
-	GameManager.game_controller.NextTurn(new_player_num)
-
-func _on_piece_taken(taken_piece, attacker):
+func _on_piece_taken(taken_piece, attacker) -> void:
 	var remove_piece: Piece2D = GameManager.get_piece_id(taken_piece.id)
 	if remove_piece == null:
 		return
 	remove_piece.queue_free()
 
-@rpc("authority", "call_local", "reliable", 2)
-func receive_notice(text: String) -> void:
-	notices.add_notice(text)
 
-func send_notice(player_target: int, text: String) -> void:
-	if not is_multiplayer_authority():
-		return
-	# If it's -1, rpc to all
-	if player_target == -1:
-		receive_notice.rpc(text)
-		return
-	# Otherwise, get the id of the player
-	var player_id: int = Lobby.player_nums[player_target]
-	receive_notice.rpc_id(player_id, text)
-
-
-
-# TODO: Rather than calling player_won, instead remove the player from
-# the game. When new turn is called, determine who wins at that point.
-# This allows for draws (not the same as stalemates)
-func _on_player_lost(player_num: int):
-	if not is_multiplayer_authority():
-		return
-	
-	player_won.rpc(2 - player_num)
-
-@rpc("authority", "call_local", "reliable")
-func player_won(winner: int):
-	# Reset game data, given that it's not needed anymore.
-	GameManager.reset_game()
-	if not Lobby.is_player:
-		# Leave the game scene
-		get_tree().unload_current_scene()
-		return
+func _on_player_won(winner: int) -> void:
 	var pop_up: AcceptDialog = AcceptDialog.new()
 	pop_up.dialog_text = "Player %s has won." % [winner]
 	pop_up.title = "Checkmate!"
@@ -276,17 +190,25 @@ func player_won(winner: int):
 	
 	pop_up.popup_centered()
 
-func to_lobby():
+func _on_player_lost(player_num: int) -> void:
+	pass
+
+func _on_notice_received(text: String) -> void:
+	notices.add_notice(text)
+
+
+
+func to_lobby() -> void:
 	GameManager.reset_game()
 	if multiplayer.multiplayer_peer is OfflineMultiplayerPeer:
 		get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
 	else:
 		get_tree().change_scene_to_file("res://scenes/menu/lobby_menu.tscn")
 
-func to_menu():
+func to_menu() -> void:
 	get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
 
-func _on_btn_quit_pressed():
+func _on_btn_quit_pressed() -> void:
 	if not allow_quit:
 		notices.add_notice("Can't quit right now.")
 		return
