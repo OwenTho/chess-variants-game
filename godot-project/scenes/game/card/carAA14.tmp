@@ -1,0 +1,36 @@
+[gd_scene load_steps=3 format=3 uid="uid://bjpv55bvyut4l"]
+
+[ext_resource type="Script" path="res://scenes/game/card/card_selection.gd" id="1_6vab3"]
+[ext_resource type="PackedScene" uid="uid://bh4j6mauhkkkr" path="res://scenes/game/card/card.tscn" id="1_yfy6j"]
+
+[node name="CardSelection" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_6vab3")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 0
+offset_left = 575.0
+offset_top = 335.0
+offset_right = 596.0
+offset_bottom = 363.0
+use_top_left = true
+
+[node name="CardContainer" type="HBoxContainer" parent="CenterContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 235
+alignment = 1
+
+[node name="PanelContainer" parent="CenterContainer/CardContainer" instance=ExtResource("1_yfy6j")]
+layout_mode = 2
+
+[node name="PanelContainer2" parent="CenterContainer/CardContainer" instance=ExtResource("1_yfy6j")]
+layout_mode = 2
+
+[node name="PanelContainer3" parent="CenterContainer/CardContainer" instance=ExtResource("1_yfy6j")]
+layout_mode = 2

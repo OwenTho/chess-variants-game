@@ -1,0 +1,80 @@
+extends Control
+
+var card_scene: PackedScene = preload("res://scenes/game/card/card.tscn")
+
+var showing_cards: bool = false
+var last_hovered: int = -1
+
+signal card_selected(card_id: int)
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	add_card({"name":"Card 1", "image_loc":"assets/texture/piece/invalid_piece.png", "card_id":0, "description":"Information about [color=salmon]this[/color] card."})
+	add_card({"name":"Card 2", "image_loc":"assets/texture/piece/king.png", "card_id":1, "description":"Information about [i]this[/i] card."})
+	add_card({"name":"Card 3", "image_loc":"invalid_loc", "card_id":2, "description":"Information about [b]this[/b] card."})
+	for child in %CardContainer.get_children():
+		child.hover.connect(_hovered)
+		child.unhover.connect(_unhovered)
+	show_cards()
+
+func show_cards() -> void:
+	if showing_cards:
+		return
+	showing_cards = true
+	last_hovered = -1
+	var child_num: int = 0
+	var last_tween: Tween
+	for child in %CardContainer.get_children():
+		child.set_enabled(false)
+		child.reset_offset()
+		child.position.y = 200
+		var tween: Tween = create_tween()
+		tween.tween_callback(func(): child.position.y = 500)
+		tween.tween_interval(0.5 * (child_num+1))
+		tween.set_ease(Tween.EASE_OUT)
+		tween.set_trans(Tween.TRANS_CUBIC)
+		tween.tween_property(child, "position:y", 0.0, 0.8)
+		last_tween = tween
+		child_num += 1
+	
+	if last_tween != null:
+		last_tween.tween_callback(enable_cards)
+	else:
+		showing_cards = false
+
+func clear_cards() -> void:
+	for child in %CardContainer.get_children():
+		child.queue_free()
+
+func add_card(card_data: Dictionary) -> void:
+	var card = card_scene.instantiate()
+	if card_data.has("name"):
+		card.set_card_name(card_data["name"])
+	if card_data.has("image_loc"):
+		card.set_card_image(card_data["image_loc"])
+	if card_data.has("description"):
+		card.set_card_description(card_data["description"])
+	if card_data.has("card_id"):
+		card.card_id = card_data["card_id"]
+	%CardContainer.add_child(card)
+
+func enable_cards() -> void:
+	showing_cards = false
+	for child in %CardContainer.get_children():
+		child.set_enabled(true)
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	if Input.is_action_just_pressed("mouse_left"):
+		if last_hovered != -1:
+			card_selected.emit(last_hovered)
+			print("Selected: %s" % last_hovered)
+	if Input.is_action_just_pressed("mouse_right"):
+		show_cards()
+
+func _hovered(card_id: int) -> void:
+	last_hovered = card_id
+
+func _unhovered(card_id: int) -> void:
+	if last_hovered == card_id:
+		last_hovered = -1

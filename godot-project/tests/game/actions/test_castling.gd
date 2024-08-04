@@ -39,6 +39,7 @@ func castle_test(king, dir: Vector2i, act_pos: Vector2i) -> void:
 		game_state.MovePiece(king, king_start.x, king_start.y)
 		king.timesMoved = 0
 
+
 func test_distance_right() -> void:
 	
 	game_controller.StartGame()
