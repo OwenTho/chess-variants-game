@@ -746,6 +746,16 @@ public partial class GameState : Node
         card.MakeListeners(gameEvents);
         CallDeferred(Node.MethodName.AddChild, card);
     }
+
+
+
+
+
+
+    public string[] GetAllPieceIds()
+    {
+        return gameController.pieceInfoRegistry.GetKeys();
+    }
     
     
     

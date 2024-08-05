@@ -104,7 +104,7 @@ public partial class GameController
         
         // Register Card Factories
         AddNewFactory("major_shapeshift", new SimpleCardFactory<ShapeshiftCard>());
-        AddNewFactory("major_single_piece_army", new SimpleCardFactory<SinglePieceArmyCard>());
+        AddNewFactory("major_single_piece_army", new SinglePieceArmyCardFactory());
         AddNewFactory("major_shuffle", new SimpleCardFactory<ShuffleCard>());
     }
 
