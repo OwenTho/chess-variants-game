@@ -1,5 +1,7 @@
 extends Node
 
+const MAJOR_SELECT_COUNT: int = 3
+
 var game_controller_script: CSharpScript = preload("res://scripts/game/GameController.cs")
 var game_controller: Object
 
@@ -17,6 +19,12 @@ var game_mutex: Mutex
 var thread_mutex: Mutex
 
 signal has_init()
+
+# Card signals
+signal display_card(card_data: Dictionary)
+signal clear_cards()
+signal show_cards()
+signal card_selected(card_id: int)
 
 # Game signals
 signal starting_next_turn(player_num: int)
@@ -95,12 +103,164 @@ func setup_signals() -> void:
 	
 	game_controller.PieceRemoved.connect(_on_piece_taken)
 	game_controller.SendNotice.connect(send_notice)
-	
+
+var currently_selecting: int = -1
 
 func start_game(game_seed: int) -> void:
+	in_game = true
+	clear_cards.emit()
+	# Ignore if not the server
+	if not is_multiplayer_authority():
+		return
+	
+	# Start the game by generating 3 Major Cards that the players have to select
+	var selected_cards: Array = []
+	for i in range(Lobby.player_nums.size()):
+		var player_id: int = Lobby.get_player_id_from_num(i)
+		if player_id == -1:
+			continue
+		var player_cards: Array[Node] = []
+		for j in range(MAJOR_SELECT_COUNT):
+			# Pull a new card
+			var new_card = game_controller.PullMajorCard()
+			# If new card is null, break as there is no more cards available
+			if new_card == null:
+				break
+			# Temporarily add as a child to avoid possible memory leak
+			game.add_child(new_card)
+			player_cards.append(new_card)
+			# Send the card to the player
+			var card_data: Dictionary = game_controller.ConvertCardToDict(new_card)
+			# Add the card number
+			card_data.card_num = j
+			receive_card.rpc_id(player_id, card_data)
+		
+		# If there are no cards, break out of the loop
+		if player_cards.size() == 0:
+			break
+		
+		currently_selecting = i
+		# Tell the player to display the cards
+		display_cards.rpc_id(player_id)
+		# Wait for the player to select the card
+		var selected_card: int = -1
+		while selected_card < 0 or selected_card >= player_cards.size():
+			selected_card = await card_selected
+			if selected_card < 0 or selected_card >= player_cards.size():
+				invalid_card.rpc_id(player_id)
+		
+		# Free the unused cards
+		for j in range(player_cards.size()):
+			if j != selected_card:
+				game_controller.ReturnMajorCard(player_cards[j])
+				player_cards[j].queue_free()
+		# Remove the child now that we can add it to the game
+		game.remove_child(player_cards[selected_card])
+		var card_data = game_controller.ConvertCardToDict(player_cards[selected_card])
+		if card_data == null:
+			continue
+		# Add the card to the server
+		add_card(player_cards[selected_card])
+		# Tell all players to add the card, if it's a valid selection
+		add_card_from_data.rpc(card_data)
+	currently_selecting = -1
+	# Now that the cards are initialised, finally start the chess game
+	start_chess_game.rpc(game_seed)
+
+@rpc("authority", "call_local", "reliable")
+func receive_card(card_data: Dictionary) -> void:
+	if not in_game:
+		return
+	if not "card_id" in card_data:
+		push_error("Server sent card data without a card_id to display.")
+		return
+	if not "card_num" in card_data:
+		push_error("Server sent card data without providing the id to return.")
+		return
+	var card = game_controller.MakeCardFromDict(card_data)
+	# If it's null, ignore
+	if card == null:
+		push_error("Server sent card data with an unregistered card_id %s to display." % card_data.card_id)
+		return
+	
+	# If it's not, get the data to display
+	display_card.emit({
+		"card_id": card_data.card_num,
+		"name": card.GetName(),
+		"image_loc": card.GetImageLoc(),
+		"description": card.GetDescription()
+	})
+	# Free the card from memory now that it's used
+	card.queue_free()
+
+@rpc("authority", "call_local", "reliable")
+func display_cards() -> void:
+	if not in_game:
+		return
+	await get_tree().process_frame
+	
+	game.card_selection.show_cards()
+	
+	# TEMP: Wait 5 seconds and then select first card
+	await get_tree().create_timer(3.0).timeout
+	
+	clear_cards.emit()
+	await get_tree().process_frame
+	select_card.rpc(0)
+
+@rpc("any_peer", "call_local", "reliable")
+func select_card(card_number: int) -> void:
+	if not is_multiplayer_authority():
+		return
+	if not in_game:
+		return
+	
+	var player_id: int = multiplayer.get_remote_sender_id()
+	var player_num: int = Lobby.get_player_num(player_id)
+	
+	# Ignore non-players
+	if player_num == -1:
+		return
+	
+	# Ignore if it's not the right player
+	if Lobby.player_nums[currently_selecting] != player_id:
+		return
+	# Signal that card was selected
+	card_selected.emit(card_number)
+
+
+@rpc("authority", "call_remote", "reliable")
+func add_card_from_data(card_data: Dictionary) -> void:
+	if not in_game:
+		return
+	var card = game_controller.MakeCardFromDict(card_data)
+	if card == null:
+		push_error("Received an invalid card from the server.")
+		return
+	add_card(card)
+
+func add_card(card) -> void:
+	game_controller.AddCard(card)
+
+@rpc("authority", "call_local", "reliable")
+func invalid_card() -> void:
+	if not in_game:
+		return
+
+
+
+
+
+
+
+@rpc("authority", "call_local", "reliable")
+func start_chess_game(game_seed: int) -> void:
+	print("Start game")
+	if not in_game:
+		return
+	clear_cards.emit()
 	game_controller.StartGame(game_seed)
 	game.game_active = true
-	in_game = true
 
 func init_board() -> void:
 	# Add all of the pieces
@@ -170,7 +330,6 @@ func place_piece(piece_id: String, link_id: int, team: int, x: int, y: int, id: 
 	
 	# Update the position and sprite
 	new_piece.update_pos()
-	new_piece.update_sprite()
 	
 	# Add node to tree
 	get_tree().get_first_node_in_group("piece_holder").add_child(new_piece)
@@ -295,7 +454,7 @@ func send_notice(player_target: int, text: String) -> void:
 
 
 
-### Rpcs
+### Chess Rpcs
 
 @rpc("any_peer", "call_local", "reliable")
 func request_action(action_location: Vector2i, piece_id: int) -> void:
@@ -316,13 +475,13 @@ func request_action(action_location: Vector2i, piece_id: int) -> void:
 		return
 	
 	# If it's the wrong player number, ignore
-	var cur_player_num = await GameManager.get_current_player()
+	var cur_player_num = await get_current_player()
 	if Lobby.player_nums[cur_player_num] != sender_id:
 		failed_action.rpc_id(sender_id, "It is not your turn.")
 		return
 	
 	# Get piece
-	var piece = await GameManager.get_piece(piece_id)
+	var piece = await get_piece(piece_id)
 	
 	# If piece id is invalid, ignore
 	if piece == null:
@@ -340,7 +499,7 @@ func request_action(action_location: Vector2i, piece_id: int) -> void:
 	
 	# Take the actions
 	taking_action_at.emit(action_location, piece)
-	GameManager.game_controller.TakeActionAt(action_location, piece)
+	game_controller.TakeActionAt(action_location, piece)
 
 
 @rpc("authority", "call_local", "reliable")
@@ -356,7 +515,7 @@ func take_action_at(action_location: Vector2i, piece_id: int) -> void:
 	# Only run if game is on
 	if not in_game:
 		return
-	var piece = await GameManager.get_piece(piece_id)
+	var piece = await get_piece(piece_id)
 	if piece != null:
 		taking_action_at.emit(action_location, piece)
 		game_controller.TakeActionAt(action_location, piece)

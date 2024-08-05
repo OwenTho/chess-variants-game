@@ -5,6 +5,8 @@ class_name Game
 @export var board: Board2D
 @export var cursor: BoardItem2D
 
+@export var card_selection: Control
+
 @export var action_highlights: Node2D
 @export var highlight_scene: PackedScene
 
@@ -18,6 +20,10 @@ var disabled_selection: bool = false
 var allow_quit: bool = true
 
 func _ready() -> void:
+	GameManager.clear_cards.connect(card_selection.clear_cards)
+	GameManager.display_card.connect(card_selection.add_card)
+	GameManager.show_cards.connect(card_selection.show_cards)
+	
 	GameManager.has_init.connect(_on_init)
 	GameManager.next_turn.connect(_on_next_turn)
 	GameManager.end_turn.connect(_on_end_turn)
@@ -139,6 +145,7 @@ func select_item(piece: Piece2D) -> void:
 		action_highlights.add_child.call_deferred(new_highlight)
 	# Unlock the mutex once done
 	GameManager.game_mutex.unlock()
+
 
 
 

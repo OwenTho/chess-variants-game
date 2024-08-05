@@ -19,7 +19,7 @@ public static class StringUtil
                 returnText += Char.ToLower(character);
             }
 
-            if (character == ' ')
+            if (character == ' ' || character == '_')
             {
                 newWord = true;
             }

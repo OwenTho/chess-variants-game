@@ -124,6 +124,11 @@ public partial class GameState : Node
         return newPiece;
     }
 
+    public void PutPiece(Piece piece, int x, int y)
+    {
+        grid.PlaceItemAt(piece, x, y);
+    }
+
     public void MovePiece(Piece piece, int x, int y)
     {
         lastMovePiece = piece;

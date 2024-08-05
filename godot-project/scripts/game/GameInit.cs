@@ -9,6 +9,9 @@ public partial class GameController
     List<string> initialValidationRules = new List<string>();
     internal Registry<CardFactory> cardFactoryRegistry = new Registry<CardFactory>();
     private bool hasInitBefore = false;
+
+    public CardDeck MajorCardDeck;
+    public CardDeck MinorCardDeck;
     
     public void FullInit(bool isServer)
     {
@@ -17,6 +20,7 @@ public partial class GameController
         InitActionRules();
         InitPieceInfo();
         InitCardFactories();
+        InitCardDecks(isServer);
 
         if (!hasInitBefore)
         {
@@ -100,8 +104,42 @@ public partial class GameController
         
         // Register Card Factories
         AddNewFactory("major_shapeshift", new SimpleCardFactory<ShapeshiftCard>());
-        AddNewFactory("single_piece_army", new SimpleCardFactory<SinglePieceArmyCard>());
-        AddNewFactory("shuffle", new SimpleCardFactory<ShuffleCard>());
+        AddNewFactory("major_single_piece_army", new SimpleCardFactory<SinglePieceArmyCard>());
+        AddNewFactory("major_shuffle", new SimpleCardFactory<ShuffleCard>());
+    }
+
+    internal void InitCardDecks(bool isServer)
+    {
+        // Dispose
+        if (MajorCardDeck != null)
+        {
+            MajorCardDeck.Free();
+            MajorCardDeck = null;
+        }
+
+        if (MinorCardDeck != null)
+        {
+            MinorCardDeck.Free();
+            MinorCardDeck = null;
+        }
+        
+        // If not the server, no need to create the card decks
+        if (!isServer)
+        {
+            return;
+        }
+        
+        // Set up the cards
+        MajorCardDeck = new CardDeck();
+        AddChild(MajorCardDeck);
+        
+        MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_shapeshift"));
+        MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_single_piece_army"));
+        MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_shuffle"));
+        
+        // Set up the Decks
+        MinorCardDeck = new CardDeck();
+        AddChild(MinorCardDeck);
     }
 
     private void MakeNewValidationRule(string id, ValidationRuleBase newRule, bool makeInitialRule = false)

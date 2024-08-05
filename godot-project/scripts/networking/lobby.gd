@@ -79,8 +79,6 @@ class PlayerInfo:
 
 
 func _ready():
-	var test: MultiplayerAPI
-	
 	multiplayer.peer_connected.connect(_on_player_connected)
 	multiplayer.peer_disconnected.connect(_on_player_disconnected)
 	multiplayer.connected_to_server.connect(_on_connected_ok)
@@ -148,7 +146,6 @@ func _on_player_connected(id: int):
 
 
 func _on_connected_ok():
-	var peer_id = multiplayer.get_unique_id()
 	# Tell the server I connected
 	_register_player_server.rpc(player_info.to_dictionary())
 	connection_successful.emit()
@@ -256,7 +253,7 @@ func player_is_admin(player_id: int) -> bool:
 	var player_data: PlayerInfo = players[player_id]
 	return player_data.is_admin
 
-func verify_name(name) -> String:
+func verify_name(name: String) -> String:
 	if name.length() == 0:
 		return ""
 	if name.length() > NAME_LENGTH_LIMIT:
@@ -298,6 +295,12 @@ func get_player_num(id: int) -> int:
 		if player_nums[i] == id:
 			return i
 	return -1
+
+func get_player_id_from_num(num: int) -> int:
+	if num < 0 or num >= player_nums.size():
+		push_error("Tried to get id of player number %s, but valid player numbers are 0 - %s." % [num, player_nums.size()-1])
+		return -1
+	return player_nums[num]
 
 @rpc("any_peer", "call_local", "reliable")
 func request_set_player(id: int, player_num: int) -> void:
@@ -341,8 +344,6 @@ func request_start_game():
 	# Multiplayer authority needs to check request
 	if not is_multiplayer_authority():
 		return
-	
-	var player_data: PlayerInfo = players[player_id]
 	
 	# If player isn't an admin, ignore
 	if not player_is_admin(player_id):
@@ -433,47 +434,6 @@ func player_loaded():
 		if players_loaded == players.size():
 			# Start game
 			players_loaded = 0
-
-
-
-
-
-
-### Game RPCs
-
-@rpc("call_local", "any_peer", "reliable")
-func request_action(piece, action_pos: Vector2i) -> void:
-	if not is_multiplayer_authority():
-		return
-	# Get the piece
-	
-	# Calculate the piece's actions
-	
-	# Verify the action
-	
-	# If valid, act
-	receive_action(piece, action_pos)
-	
-
-func send_action(piece, action_pos: Vector2i) -> void:
-	if not is_multiplayer_authority():
-		return
-	
-	# Send to all peers
-	receive_action.rpc(piece, action_pos)
-
-@rpc("call_local", "authority", "reliable")
-func receive_action(piece, action_pos: Vector2i) -> void:
-	pass
-	# Get the piece
-	
-	# Calculate the piece's actions
-	
-	# Get the actions at that location, and act on the piece.
-	
-
-
-
 
 
 ### Other RPCs

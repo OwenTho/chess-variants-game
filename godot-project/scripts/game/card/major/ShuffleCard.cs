@@ -87,7 +87,8 @@ public partial class ShuffleCard : CardBase
                 }
                 
                 // Swap them
-                game.MovePiece(piece, pos.X, pos.Y);
+                // game.PutPiece(randomTeammate, piece.cell.x, piece.cell.y);
+                game.PutPiece(piece, pos.X, pos.Y);
                 
             }
         }
@@ -96,5 +97,15 @@ public partial class ShuffleCard : CardBase
     public override CardBase Clone()
     {
         return new ShuffleCard();
+    }
+
+    public override string GetName()
+    {
+        return "Shuffle";
+    }
+
+    public override string GetDescription()
+    {
+        return "Once the game starts, all pieces initially on the board will be shuffled among their teams. Pieces swapped will be mirrored across teams, if they have a linked piece.";
     }
 }

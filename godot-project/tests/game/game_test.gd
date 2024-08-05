@@ -3,8 +3,8 @@ extends GutTest
 class_name GameTest
 
 var game_controller_script: CSharpScript = preload("res://scripts/game/GameController.cs")
-var game_controller: Object
-var game_state: Object
+var game_controller
+var game_state
 
 func before_all() -> void:
 	# Make a new GameController

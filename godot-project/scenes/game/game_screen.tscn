@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://cssq752gr7m3k"]
+[gd_scene load_steps=10 format=3 uid="uid://cssq752gr7m3k"]
 
 [ext_resource type="Script" path="res://scripts/menu/game_screen.gd" id="1_s3pe2"]
 [ext_resource type="PackedScene" uid="uid://isv1sog82mq8" path="res://scenes/game/highlight.tscn" id="2_c2xco"]
@@ -8,14 +8,16 @@
 [ext_resource type="PackedScene" uid="uid://cvs3hxaru45s1" path="res://scenes/debug/stray_nodes_btn.tscn" id="4_64yrk"]
 [ext_resource type="Script" path="res://scripts/game/visual/game_notices.gd" id="4_q6ob5"]
 [ext_resource type="PackedScene" uid="uid://dkoglthgg2tyq" path="res://scenes/game/cursor_highlight.tscn" id="5_w7pci"]
+[ext_resource type="PackedScene" uid="uid://bjpv55bvyut4l" path="res://scenes/game/card/card_selection.tscn" id="8_2rxrq"]
 
-[node name="GameScreen" type="Node2D" node_paths=PackedStringArray("board", "cursor", "action_highlights", "notices") groups=["game_screen"]]
+[node name="GameScreen" type="Node2D" node_paths=PackedStringArray("board", "cursor", "card_selection", "action_highlights", "notices") groups=["game_screen"]]
 script = ExtResource("1_s3pe2")
 board = NodePath("BoardHolder/Board2D")
 cursor = NodePath("BoardHolder/Board2D/CursorHighlight")
+card_selection = NodePath("GameUI/CardSelection")
 action_highlights = NodePath("BoardHolder/Board2D/CellHighlights")
 highlight_scene = ExtResource("2_c2xco")
-notices = NodePath("GameUI/VBoxContainer")
+notices = NodePath("GameUI/GameNotices")
 
 [node name="DebugOverlay" parent="." instance=ExtResource("2_o62sx")]
 offset_left = 47.0
@@ -30,6 +32,9 @@ anchors_preset = 0
 offset_right = 1154.0
 offset_bottom = 649.0
 
+[node name="CardSelection" parent="GameUI" instance=ExtResource("8_2rxrq")]
+layout_mode = 1
+
 [node name="BtnQuit" type="Button" parent="GameUI"]
 layout_mode = 0
 offset_left = 36.0
@@ -38,7 +43,7 @@ offset_right = 108.0
 offset_bottom = 72.0
 text = "Quit"
 
-[node name="VBoxContainer" type="VBoxContainer" parent="GameUI"]
+[node name="GameNotices" type="VBoxContainer" parent="GameUI"]
 layout_mode = 0
 offset_left = 368.0
 offset_top = -103.0

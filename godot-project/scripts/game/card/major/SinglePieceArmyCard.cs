@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using Godot.Collections;
 
 public partial class SinglePieceArmyCard : CardBase
 {
@@ -35,5 +36,30 @@ public partial class SinglePieceArmyCard : CardBase
         SinglePieceArmyCard newCard = new SinglePieceArmyCard();
         newCard.armyPiece = armyPiece;
         return newCard;
+    }
+
+    protected override Dictionary<string, string> ToDict(GameState game)
+    {
+        Dictionary<string, string> cardData = new Dictionary<string, string>();
+        cardData.Add("army_piece", armyPiece);
+        return cardData;
+    }
+
+    public override void FromDict(GameState game, Dictionary<string, string> dataDict)
+    {
+        if (!dataDict.TryGetValue("army_piece", out armyPiece))
+        {
+            GD.PushError("Data did not contain the value for the army piece.");
+        }
+    }
+
+    public override string GetName()
+    {
+        return "Single Piece Army";
+    }
+
+    public override string GetDescription()
+    {
+        return $"Once the game starts, all pieces on the board will be converted into a [color=aqua]{StringUtil.ToTitleCase(armyPiece)}[/color].";
     }
 }

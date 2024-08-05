@@ -70,4 +70,9 @@ internal partial class Registry<T> : Node where T : Node
     {
         return register.Keys.ToArray();
     }
+
+    public T[] GetValues()
+    {
+        return register.Values.ToArray();
+    }
 }

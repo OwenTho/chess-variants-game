@@ -12,12 +12,12 @@ public partial class GameController : Node
     public GameState gameStateCopy { get; private set; }
 
     private bool stillTasking = true;
-    public Semaphore threadSemaphore = new Semaphore();
-    public Mutex taskMutex = new Mutex();
-    public Mutex threadMutex = new Mutex();
-    public Mutex gameMutex = new Mutex();
+    public Semaphore threadSemaphore { get; private set; } = new Semaphore();
+    public Mutex taskMutex { get; private set; } = new Mutex();
+    public Mutex threadMutex { get; private set; } = new Mutex();
+    public Mutex gameMutex { get; private set; } = new Mutex();
     private List<Action> gameTasks = new List<Action>();
-    
+
     private GodotThread gameThread;
     public bool singleThread = false;
 
@@ -73,17 +73,101 @@ public partial class GameController : Node
 
 
 
+    public CardBase PullMajorCard()
+    {
+        if (MajorCardDeck == null)
+        {
+            return null;
+        }
+
+        return MajorCardDeck.PullCard(currentGameState);
+    }
+
+    public void ReturnMajorCard(CardBase card)
+    {
+        if (MajorCardDeck == null || card == null)
+        {
+            return;
+        }
+
+        MajorCardDeck.PutCard(card);
+    }
+
+    
+    public CardBase MakeCard(string cardId)
+    {
+        if (!cardFactoryRegistry.TryGetValue(cardId, out CardFactory cardFactory))
+        {
+            GD.PushError($"Tried to Make a card of id {cardId}, but no CardFactory is registered for it.");
+            return null;
+        }
+        
+        // Lock game mutex as it's using game data
+        gameMutex.Lock();
+        CardBase newCard = cardFactory.CreateNewCard(currentGameState);
+        gameMutex.Unlock();
+
+        return newCard;
+    }
+
+    public CardBase MakeCardFromDict(Godot.Collections.Dictionary<string, string> cardData)
+    {
+        if (cardData == null)
+        {
+            return null;
+        }
+        // If the cardData has no id, ignore
+        if (!cardData.TryGetValue("card_id", out string cardId))
+        {
+            GD.PushError("Tried to make a card from a dictionary, but no card_id was provided.");
+            return null;
+        }
+        // First, get the factory
+        if (!cardFactoryRegistry.TryGetValue(cardId, out CardFactory cardFactory))
+        {
+            GD.PushError($"Tried to Make a card of id {cardId}, but no CardFactory is registered for it.");
+            return null;
+        }
+        
+        // Lock game mutex as it's using game data
+        gameMutex.Lock();
+        CardBase newCard = cardFactory.CreateNewCardFromDict(currentGameState, cardData);
+        gameMutex.Unlock();
+
+        return newCard;
+    }
+
+    public Godot.Collections.Dictionary<string, string> ConvertCardToDict(CardBase card)
+    {
+        if (card == null)
+        {
+            return null;
+        }
+
+        // Lock game mutex as it's using game data
+        gameMutex.Lock();
+        Godot.Collections.Dictionary<string, string> cardData = card.ConvertToDict(currentGameState);
+        gameMutex.Unlock();
+        
+        return cardData;
+    }
+
+    public void AddCard(CardBase card)
+    {
+        // For now, simply add the card to the game
+        currentGameState.AddCard(card);
+    }
+
+
+
+
+
     private void StartGameTask(ulong seed)
     {
         gameMutex.Lock();
         
         currentGameState.gameRandom.Seed = seed;
         
-        // currentGameState.AddCard(cardFactoryRegistry.GetValue("shuffle").CreateNewCard(currentGameState));
-        //currentGameState.AddCard(cardFactoryRegistry.GetValue("major_shapeshift").CreateNewCard(currentGameState));
-        //SinglePieceArmyCard card = (SinglePieceArmyCard)cardFactoryRegistry.GetValue("single_piece_army").CreateNewCard(currentGameState);
-        //card.armyPiece = "rook";
-        //currentGameState.AddCard(card);
         currentGameState.StartGame();
         gameMutex.Unlock();
     }

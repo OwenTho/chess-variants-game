@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bjpv55bvyut4l"]
 
-[ext_resource type="Script" path="res://scenes/game/card/card_selection.gd" id="1_6vab3"]
+[ext_resource type="Script" path="res://scripts/menu/card/card_selection.gd" id="1_6vab3"]
 
 [node name="CardSelection" type="Control"]
 layout_mode = 3

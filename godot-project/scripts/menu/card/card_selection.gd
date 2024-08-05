@@ -12,9 +12,6 @@ var cards: Array[Control] = []
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	add_card({"name":"Card 1", "image_loc":"assets/texture/piece/invalid_piece.png", "card_id":0, "description":"Information about [color=salmon]this[/color] card."})
-	add_card({"name":"Card 2", "image_loc":"assets/texture/piece/king.png", "card_id":1, "description":"Information about [i]this[/i] card."})
-	add_card({"name":"Card 3", "image_loc":"invalid_loc", "card_id":2, "description":"Information about [b]this[/b] card."})
 	for child in %CardContainer.get_children():
 		child.hover.connect(_hovered)
 		child.unhover.connect(_unhovered)
@@ -40,6 +37,9 @@ func show_cards() -> void:
 	var child_num: int = 0
 	var last_tween: Tween
 	for child in %CardContainer.get_children():
+		# If card is already at y 0, ignore
+		if child.position.y == 0:
+			continue
 		var tween: Tween = create_tween()
 		tween.tween_callback(func(): child.position.y = 500)
 		tween.tween_interval(0.5 * (child_num+1))
