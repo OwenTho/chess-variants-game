@@ -470,7 +470,7 @@ public partial class GameState : Node
         // Find all the kings
         foreach (var piece in allPieces)
         {
-            if (piece.info.pieceId != KingId)
+            if (piece.info == null || piece.info.pieceId != KingId)
             {
                 continue;
             }
@@ -652,6 +652,8 @@ public partial class GameState : Node
             bool foundNoCheck = false;
             foreach (var piece in allPieces)
             {
+                // Only check for the current team being checked, and if the piece has info
+                if (piece.info == null || piece.teamId != teamNum)
                 {
                     continue;
                 }

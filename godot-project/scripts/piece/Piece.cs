@@ -70,6 +70,12 @@ public partial class Piece : GameItem
     
     public Array<ActionBase> UpdateActions(GameState game)
     {
+        // If info is null, clear actions and ignore
+        if (info == null)
+        {
+            actionsToTake.Clear();
+            return currentPossibleActions;
+        }
         // If the piece isn't on a cell, ignore
         if (cell == null)
         {

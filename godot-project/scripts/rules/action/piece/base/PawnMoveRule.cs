@@ -77,7 +77,7 @@ internal partial class PawnMoveRule : ActionRuleBase
         {
             foreach (Piece piece in pieces)
             {
-                if (piece.info.pieceId == "pawn")
+                if (piece.info is { pieceId: "pawn" })
                 {
                     return true;
                 }

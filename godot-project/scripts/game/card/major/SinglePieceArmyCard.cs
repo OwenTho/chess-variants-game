@@ -23,7 +23,7 @@ public partial class SinglePieceArmyCard : CardBase
         {
             // TODO: Change how Checkmate works so that the KingId can be changed without check if there are 2+ pieces of KingId.
             // Ignore the King
-            if (piece.info.pieceId == game.KingId)
+            if (piece.info != null && piece.info.pieceId == game.KingId)
             {
                 continue;
             }
