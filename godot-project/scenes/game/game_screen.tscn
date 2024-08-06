@@ -34,6 +34,7 @@ offset_right = 1154.0
 offset_bottom = 649.0
 
 [node name="CardSelection" parent="GameUI" instance=ExtResource("8_2rxrq")]
+visible = false
 layout_mode = 1
 
 [node name="CardSelectButtons" type="HBoxContainer" parent="GameUI/CardSelection"]

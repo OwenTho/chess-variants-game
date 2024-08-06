@@ -21,15 +21,10 @@ public partial class SinglePieceArmyCard : CardBase
         }
         foreach (var piece in game.allPieces)
         {
-            // TODO: Change how Checkmate works so that the KingId can be changed without check if there are 2+ pieces of KingId.
-            // Ignore the King
-            if (piece.info != null && piece.info.pieceId == game.KingId)
-            {
-                continue;
-            }
-
             piece.info = pieceInfo;
         }
+
+        game.KingId = armyPiece;
     }
     
     public override CardBase Clone()
