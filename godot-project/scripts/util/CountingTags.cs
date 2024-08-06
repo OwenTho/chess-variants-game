@@ -17,7 +17,7 @@ public class CountingTags : Tags
         return num;
     }
     
-    public new bool Add(string tag, int additions = 1)
+    public bool Add(string tag, int additions = 1)
     {
         if (AddCount(tag, additions) <= 0)
         {
@@ -27,7 +27,7 @@ public class CountingTags : Tags
         return base.Add(tag);
     }
 
-    public new bool Remove(string tag, int removals = 1)
+    public bool Remove(string tag, int removals = 1)
     {
         // If there is none left, ignore remove
         if (AddCount(tag, -removals) > 0)

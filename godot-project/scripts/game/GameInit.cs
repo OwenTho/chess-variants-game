@@ -66,6 +66,9 @@ public partial class GameController
         MakeNewValidationRule("line_move_stop", new LineMoveStopRule(), true);
         MakeNewValidationRule("inside_board", new InsideBoardRule(), true);
         MakeNewValidationRule("attack_needs_target", new AttackNeedsTargetRule(), true);
+        
+        // Register Major Card Rules
+        MakeNewValidationRule("lonely_piece_card", new LonelyPiecesStuckRule(), false);
     }
     
     internal void InitActionRules()
@@ -106,6 +109,7 @@ public partial class GameController
         AddNewFactory("major_shapeshift", new SimpleCardFactory<ShapeshiftCard>());
         AddNewFactory("major_single_piece_army", new SinglePieceArmyCardFactory());
         AddNewFactory("major_shuffle", new SimpleCardFactory<ShuffleCard>());
+        AddNewFactory("major_lonely_pieces_stuck", new SimpleCardFactory<LonelyPiecesStuckCard>());
     }
 
     internal void InitCardDecks(bool isServer)
@@ -136,6 +140,7 @@ public partial class GameController
         MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_shapeshift"));
         MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_single_piece_army"));
         MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_shuffle"));
+        MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_lonely_pieces_stuck"));
         
         // Set up the Decks
         MinorCardDeck = new CardDeck();

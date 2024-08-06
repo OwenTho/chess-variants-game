@@ -4,6 +4,7 @@ public partial class GameEvents
     public const string StartGame = "start_game"; // Before the game starts
     public const string GameStarted = "game_started"; // Game has started
     
+    public const string PreNewTurn = "pre_new_turn"; // Right before the new turn starts
     public const string NewTurn = "new_turn"; // New turn has started
     public const string EndTurn = "end_turn"; // Turn has ended
     

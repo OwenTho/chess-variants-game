@@ -8,6 +8,11 @@ public abstract partial class CardBase : Node
 
     public abstract void MakeListeners(GameEvents gameEvents);
 
+    public virtual void OnAddCard(GameState game)
+    {
+        
+    }
+
     public abstract CardBase Clone();
 
     internal Dictionary<string, string> ConvertToDict(GameState game)

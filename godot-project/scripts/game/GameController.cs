@@ -167,7 +167,7 @@ public partial class GameController : Node
     public void AddCard(CardBase card)
     {
         // For now, simply add the card to the game
-        currentGameState.AddCard(card);
+        currentGameState.AddCard(card, true);
     }
 
 

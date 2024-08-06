@@ -716,6 +716,8 @@ public partial class GameState : Node
         // First, end turn
         gameEvents.AnnounceEvent(GameEvents.EndTurn);
         CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.EndTurn);
+        // Announce that a new turn is about to start
+        gameEvents.AnnounceEvent(GameEvents.PreNewTurn);
         // Tell all pieces that it's the next turn
         foreach (Piece piece in allPieces)
         {
@@ -757,14 +759,43 @@ public partial class GameState : Node
     }
 
 
-    internal void AddCard(CardBase card)
+    internal void AddCard(CardBase card, bool callCardAdd)
     {
         cards.Add(card);
         card.MakeListeners(gameEvents);
+        if (callCardAdd)
+        {
+            card.OnAddCard(this);
+        }
         CallDeferred(Node.MethodName.AddChild, card);
     }
 
-
+    public void AddVerificationRule(string ruleId, string pieceId = null)
+    {
+        if (!gameController.validationRuleRegistry.TryGetValue(ruleId, out ValidationRuleBase rule))
+        {
+            GD.PushError($"Tried to add a verification rule {ruleId} when it has not been registered.");
+            return;
+        }
+        
+        // If target Piece is defined, add directly to the PieceInfo
+        if (pieceId != null)
+        {
+            if (gameController.pieceInfoRegistry.TryGetValue(pieceId, out PieceInfo info))
+            {
+                info.AddValidationRule(rule);
+            }
+            // If it didn't get the info, error
+            GD.PushError($"Couldn't get the PieceInfo for piece id {pieceId}.");
+            return;
+        }
+        
+        // If no pieceId is defined, add it to all pieceIds
+        foreach (var info in gameController.pieceInfoRegistry.GetValues())
+        {
+            info.AddValidationRule(rule);
+        }
+    }
 
 
 
@@ -787,7 +818,7 @@ public partial class GameState : Node
         // Copy the Cards
         foreach (var card in cards)
         {
-            newState.AddCard(card.Clone());
+            newState.AddCard(card.Clone(), false);
         }
 
         // Copy over the pieces
