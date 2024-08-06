@@ -7,12 +7,10 @@ public partial class ShuffleCard : CardBase
 {
     public override void MakeListeners(GameEvents gameEvents)
     {
-        // TODO: Implement server -> client shuffle
-        // Wait for the event to finish, as the server needs to tell all the clients what to shuffle
-        gameEvents.AddListener(new EventListener(GameEvents.StartGame, OnStartGame, (game) => (EventResult.Wait)));
+        // gameEvents.AddListener(new EventListener(GameEvents.StartGame, OnStartGame, (game) => (EventResult.Wait)));
     }
 
-    public void OnStartGame(GameState game)
+    public override void OnAddCard(GameState game)
     {
         // TODO: Disable Client shuffling
         // Shuffle the positions of all pieces by making two identical arrays of the pieceIds,

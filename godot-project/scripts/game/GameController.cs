@@ -173,6 +173,46 @@ public partial class GameController : Node
 
 
 
+    
+    private void SetGameSeedTask(ulong seed)
+    {
+        gameMutex.Lock();
+        currentGameState.gameRandom.Seed = seed;
+        gameMutex.Unlock();
+    }
+    
+    public void SetGameSeed(ulong seed)
+    {
+        DoTask(() => SetGameSeedTask(seed));
+    }
+
+    public ulong GetGameSeed()
+    {
+        gameMutex.Lock();
+        ulong returnVal = currentGameState.gameRandom.Seed;
+        gameMutex.Unlock();
+        return returnVal;
+    }
+
+    private void SetGameSeedStateTask(ulong state)
+    {
+        gameMutex.Lock();
+        currentGameState.gameRandom.State = state;
+        gameMutex.Unlock();
+    }
+
+    public void SetGameSeedState(ulong state)
+    {
+        DoTask(() => SetGameSeedStateTask(state));
+    }
+
+    public ulong GetGameSeedState()
+    {
+        gameMutex.Lock();
+        ulong returnVal = currentGameState.gameRandom.State;
+        gameMutex.Unlock();
+        return returnVal;
+    }
 
     private void StartGameTask(ulong seed)
     {

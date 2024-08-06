@@ -393,7 +393,7 @@ func setup_game():
 	
 	print("Starting game.")
 	# Once init is completely done, start the game
-	start_game.rpc(GameManager.game_controller.currentGameState.gameRandom.seed)
+	start_game.rpc(await GameManager.game_controller.GetGameSeed())
 	
 	# Not that setup is completely done, allow new connections
 	# TODO: Allow new connections to open the game while it's active from the lobby.

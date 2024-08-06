@@ -8,10 +8,10 @@ public partial class SinglePieceArmyCard : CardBase
     
     public override void MakeListeners(GameEvents gameEvents)
     {
-        gameEvents.AddListener(new EventListener(GameEvents.StartGame, OnStartGame));
+        // gameEvents.AddListener(new EventListener(GameEvents.StartGame, OnStartGame));
     }
 
-    private void OnStartGame(GameState game)
+    public override void OnAddCard(GameState game)
     {
         // Get all pieces, and change them into the selected piece
         if (!game.TryGetPieceInfo(armyPiece, out PieceInfo pieceInfo))

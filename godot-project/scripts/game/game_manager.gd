@@ -132,6 +132,9 @@ func start_game(game_seed: int) -> void:
 	if not is_multiplayer_authority():
 		return
 	
+	# Set the seed + state before starting
+	set_seed.rpc(game_seed)
+	
 	# Connect signals to the card selector
 	card_selector.before_new_selection.connect(_on_before_new_selection)
 	card_selector.card_option_added.connect(_on_card_option_added)
@@ -196,7 +199,7 @@ func _on_all_cards_selected(game_seed: int) -> void:
 	card_selector.all_selections_done.disconnect(_on_all_cards_selected)
 	
 	# RPC that game has started
-	start_chess_game.rpc(game_seed)
+	start_chess_game.rpc()
 
 
 @rpc("authority", "call_local", "reliable")
@@ -255,6 +258,8 @@ func select_card(card_number: int) -> void:
 	if Lobby.get_player_id_from_num(card_selector.currently_selecting) != player_id:
 		return
 	
+	# Make sure seed state matches BEFORE card is added
+	set_seed_state.rpc(game_controller.GetGameSeedState())
 	# Tell card selector
 	card_selector.select_card(card_number)
 
@@ -270,6 +275,8 @@ func add_card_from_data(card_data: Dictionary) -> void:
 	add_card(card)
 
 func add_card(card) -> void:
+	print("CURRENT SEED: %s" % [game_controller.GetGameSeed()])
+	print("CURRENT STATE: %s" % [game_controller.GetGameSeedState()])
 	game_controller.AddCard(card)
 
 @rpc("authority", "call_local", "reliable")
@@ -288,11 +295,11 @@ func invalid_card(card_num: int) -> void:
 
 
 @rpc("authority", "call_local", "reliable")
-func start_chess_game(game_seed: int) -> void:
+func start_chess_game() -> void:
 	if not in_game:
 		return
 	clear_cards.emit()
-	game_controller.StartGame(game_seed)
+	game_controller.StartGame()
 	game.game_active = true
 
 func init_board() -> void:
@@ -491,6 +498,14 @@ func send_notice(player_target: int, text: String) -> void:
 
 
 ### Chess Rpcs
+
+@rpc("authority", "call_local", "reliable")
+func set_seed(seed: int) -> void:
+	game_controller.SetGameSeed(seed)
+
+@rpc("authority", "call_local", "reliable")
+func set_seed_state(state: int) -> void:
+	game_controller.SetGameSeedState(state)
 
 @rpc("any_peer", "call_local", "reliable")
 func request_action(action_location: Vector2i, piece_id: int) -> void:
