@@ -12,7 +12,7 @@ public partial class GameState : Node
     private int lastId = 0;
     public int currentPlayerNum;
 
-    public string KingId { get; internal set; } = "king";
+    public string KingId { get; set; } = "king";
 
     public Vector2I gridSize;
 
@@ -459,11 +459,7 @@ public partial class GameState : Node
         }
 
         // Loop again, to disable certain check moves
-        bool[] hasKing = new bool[gameController.NUMBER_OF_PLAYERS];
-        for (int i = 0; i < gameController.NUMBER_OF_PLAYERS; i++)
-        {
-            hasKing[i] = false;
-        }
+        int[] kingCount = new int[gameController.NUMBER_OF_PLAYERS];
         
         List<Piece> kings = new List<Piece>();
         
@@ -475,19 +471,22 @@ public partial class GameState : Node
                 continue;
             }
             kings.Add(piece);
+            kingCount[piece.teamId] += 1;
         }
         
         // TODO: Ignore Kings' Check if there's more than 1
         
         // Loop through kings to check for Check
-        foreach (var piece in kings)
+        foreach (var king in kings)
         {
+            // If there are too many kings for its team, ignore
+            if (kingCount[king.teamId] > 1)
+            {
+                continue;
+            }
             // If it's the king, disable any attacks on it and stop it from moving into
             // a space with check
-            
-            hasKing[piece.teamId] = true;
-            
-            if (actionGrid.TryGetCellAt(piece.cell.x, piece.cell.y, out GridCell<ActionBase> cell))
+            if (actionGrid.TryGetCellAt(king.cell.x, king.cell.y, out GridCell<ActionBase> cell))
             {
                 foreach (GridItem<ActionBase> item in cell.items)
                 {
@@ -499,13 +498,13 @@ public partial class GameState : Node
                             continue;
                         }
                         // If attack is valid, and is able to check, then mark it down for the player
-                        if (playerCheck[piece.teamId] == CheckType.None)
+                        if (playerCheck[king.teamId] == CheckType.None)
                         {
-                            if (attackAction.owner.teamId != piece.teamId)
+                            if (attackAction.owner.teamId != king.teamId)
                             {
                                 if (!attackAction.verifyTags.Contains("no_check"))
                                 {
-                                    playerCheck[piece.teamId] = CheckType.InCheck;
+                                    playerCheck[king.teamId] = CheckType.InCheck;
                                 }
                             }
                         }
@@ -532,6 +531,11 @@ public partial class GameState : Node
         // check.
         foreach (var king in kings)
         {
+            // If there are too many kings for its team, ignore
+            if (kingCount[king.teamId] > 1)
+            {
+                continue;
+            }
             // TODO: Change Kings to check all possible actions to see if they're possible (with DoesActionCheck)
             // This will only check the possible actions for a single piece, so it shouldn't take
             // too much time to do, while also improving the functionality.
@@ -606,7 +610,7 @@ public partial class GameState : Node
         // isn't possible
         for (int teamNum = 0; teamNum < gameController.NUMBER_OF_PLAYERS; teamNum++)
         {
-            if (!hasKing[teamNum])
+            if (kingCount[teamNum] == 0)
             {
                 // Signal that the player has lost.
                 playerCheck[teamNum] = CheckType.NoKing; // Put player as having No King, so that checkmate isn't checked for
@@ -625,8 +629,8 @@ public partial class GameState : Node
                 continue;
             }
 
-            // No need to check for King in Checkmate if there's no King
-            if (!hasKing[teamNum])
+            // No need to check for King in Checkmate if there is no King
+            if (kingCount[teamNum] == 0)
             {
                 continue;
             }
