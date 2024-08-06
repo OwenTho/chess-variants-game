@@ -43,7 +43,6 @@ public partial class LonelyPiecesStuckCard : CardBase
             // If no pieces were found, add the tag
             if (!foundPiece)
             {
-                GD.Print("Didn't find adjacent piece.");
                 piece.tags.Add("lonely_piece");
             }
         }

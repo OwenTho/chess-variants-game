@@ -71,11 +71,17 @@ func hold(up: bool) -> void:
 		move_down()
 	_hold_up = up
 
+func _stop_tween() -> void:
+	if cur_tween != null:
+		cur_tween.stop()
+		cur_tween = null
+
 func move_up() -> void:
 	# If already help up, don't hold up
 	if currently_up:
 		currently_up = true
 		return
+	_stop_tween()
 	cur_tween = create_tween()
 	cur_tween.tween_property(card_panel, "position:y", hover_offset, hover_time)
 	cur_tween.tween_callback(_tween_end)
@@ -88,6 +94,7 @@ func move_down() -> void:
 	if not currently_up:
 		currently_up = false
 		return
+	_stop_tween()
 	cur_tween = create_tween()
 	cur_tween.tween_property(card_panel, "position:y", 0.0, hover_time)
 	cur_tween.tween_callback(_tween_end)
@@ -95,20 +102,12 @@ func move_down() -> void:
 
 func _on_panel_container_mouse_entered() -> void:
 	hover.emit(card_id)
-	
-	# Move card to be visually higher
-	if cur_tween != null:
-		cur_tween.stop()
 
 	move_up()
 	_hover = true
 
 func _on_panel_container_mouse_exited() -> void:
 	unhover.emit(card_id)
-	
-	# Move card back down
-	if cur_tween != null:
-		cur_tween.stop()
 	
 	move_down()
 	_hover = false
