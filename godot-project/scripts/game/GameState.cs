@@ -99,7 +99,7 @@ public partial class GameState : Node
         if (info == null)
         {
             GD.PushWarning("Tried to place a piece with {pieceId}, even though it hasn't been registered!");
-            return null;
+            // return null;
         }
 
         
@@ -467,16 +467,23 @@ public partial class GameState : Node
         
         List<Piece> kings = new List<Piece>();
         
-        foreach (Piece piece in allPieces)
+        // Find all the kings
+        foreach (var piece in allPieces)
         {
-            // If it's the king, disable any attacks on it and stop it from moving into
-            // a space with check
             if (piece.info.pieceId != KingId)
             {
                 continue;
             }
-            
             kings.Add(piece);
+        }
+        
+        // TODO: Ignore Kings' Check if there's more than 1
+        
+        // Loop through kings to check for Check
+        foreach (var piece in kings)
+        {
+            // If it's the king, disable any attacks on it and stop it from moving into
+            // a space with check
             
             hasKing[piece.teamId] = true;
             
@@ -617,6 +624,12 @@ public partial class GameState : Node
             {
                 continue;
             }
+
+            // No need to check for King in Checkmate if there's no King
+            if (!hasKing[teamNum])
+            {
+                continue;
+            }
             
             // If they are playing, then check if they're in check or checkmate
             if (playerCheck[teamNum] == CheckType.None)
@@ -639,8 +652,6 @@ public partial class GameState : Node
             bool foundNoCheck = false;
             foreach (var piece in allPieces)
             {
-                // Only check for the current team being checked
-                if (piece.teamId != teamNum)
                 {
                     continue;
                 }

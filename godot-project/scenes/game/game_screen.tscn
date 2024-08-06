@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://cssq752gr7m3k"]
+[gd_scene load_steps=11 format=3 uid="uid://cssq752gr7m3k"]
 
 [ext_resource type="Script" path="res://scripts/menu/game_screen.gd" id="1_s3pe2"]
 [ext_resource type="PackedScene" uid="uid://isv1sog82mq8" path="res://scenes/game/highlight.tscn" id="2_c2xco"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://cvs3hxaru45s1" path="res://scenes/debug/stray_nodes_btn.tscn" id="4_64yrk"]
 [ext_resource type="Script" path="res://scripts/game/visual/game_notices.gd" id="4_q6ob5"]
 [ext_resource type="PackedScene" uid="uid://dkoglthgg2tyq" path="res://scenes/game/cursor_highlight.tscn" id="5_w7pci"]
+[ext_resource type="Theme" uid="uid://cg4q1rutkhkn7" path="res://assets/themes/card/select_button.tres" id="5_wnk5t"]
 [ext_resource type="PackedScene" uid="uid://bjpv55bvyut4l" path="res://scenes/game/card/card_selection.tscn" id="8_2rxrq"]
 
 [node name="GameScreen" type="Node2D" node_paths=PackedStringArray("board", "cursor", "card_selection", "action_highlights", "notices") groups=["game_screen"]]
@@ -34,6 +35,27 @@ offset_bottom = 649.0
 
 [node name="CardSelection" parent="GameUI" instance=ExtResource("8_2rxrq")]
 layout_mode = 1
+
+[node name="CardSelectButtons" type="HBoxContainer" parent="GameUI/CardSelection"]
+layout_mode = 0
+offset_left = 283.0
+offset_top = 564.0
+offset_right = 887.0
+offset_bottom = 620.0
+alignment = 1
+
+[node name="BtnHold" type="Button" parent="GameUI/CardSelection/CardSelectButtons"]
+visible = false
+custom_minimum_size = Vector2(165, 0)
+layout_mode = 2
+theme = ExtResource("5_wnk5t")
+text = "Hold Card"
+
+[node name="BtnUse" type="Button" parent="GameUI/CardSelection/CardSelectButtons"]
+custom_minimum_size = Vector2(165, 0)
+layout_mode = 2
+theme = ExtResource("5_wnk5t")
+text = "Use Card"
 
 [node name="BtnQuit" type="Button" parent="GameUI"]
 layout_mode = 0
@@ -84,6 +106,8 @@ z_index = 2
 offset_right = 40.0
 offset_bottom = 23.0
 
+[connection signal="card_selected" from="GameUI/CardSelection" to="." method="_on_card_selected"]
+[connection signal="pressed" from="GameUI/CardSelection/CardSelectButtons/BtnUse" to="." method="_on_btn_use_pressed"]
 [connection signal="pressed" from="GameUI/BtnQuit" to="." method="_on_btn_quit_pressed"]
 [connection signal="cell_updated" from="BoardHolder/Board2D/CursorHighlight" to="." method="_on_cursor_highlight_cell_updated"]
 

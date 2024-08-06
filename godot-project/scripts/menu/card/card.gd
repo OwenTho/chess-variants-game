@@ -8,8 +8,9 @@ var cur_tween: Tween
 
 var card_id: int = -1
 
-var hold_up: bool = false
+var _hold_up: bool = false
 var _hover: bool = false
+var currently_up: bool = false
 @onready var card_panel: PanelContainer = $CardOffset/CardPanel
 
 signal hover(card_id: int)
@@ -26,6 +27,8 @@ func reset_offset() -> void:
 	if cur_tween != null:
 		cur_tween.stop()
 	_hover = false
+	_hold_up = false
+	currently_up = false
 	$CardOffset/CardPanel.position.y = 0
 
 
@@ -58,18 +61,47 @@ func set_card_description(description: String) -> void:
 func _tween_end() -> void:
 	cur_tween = null
 
+func hold(up: bool) -> void:
+	# If not help up yet, hold up
+	if not currently_up and up:
+		move_up()
+	# If held up, but it shouldn't be, put down
+	elif currently_up and not up:
+		_hold_up = false
+		move_down()
+	_hold_up = up
+
+func move_up() -> void:
+	# If already help up, don't hold up
+	if currently_up:
+		currently_up = true
+		return
+	cur_tween = create_tween()
+	cur_tween.tween_property(card_panel, "position:y", hover_offset, hover_time)
+	cur_tween.tween_callback(_tween_end)
+	currently_up = true
+
+func move_down() -> void:
+	# If already down, don't put down
+	if _hold_up:
+		return
+	if not currently_up:
+		currently_up = false
+		return
+	cur_tween = create_tween()
+	cur_tween.tween_property(card_panel, "position:y", 0.0, hover_time)
+	cur_tween.tween_callback(_tween_end)
+	currently_up = false
+
 func _on_panel_container_mouse_entered() -> void:
 	hover.emit(card_id)
 	
 	# Move card to be visually higher
 	if cur_tween != null:
 		cur_tween.stop()
-	if not _hover:
-		cur_tween = create_tween()
-		cur_tween.tween_property(card_panel, "position:y", hover_offset, hover_time)
-		cur_tween.tween_callback(_tween_end)
-		_hover = true
 
+	move_up()
+	_hover = true
 
 func _on_panel_container_mouse_exited() -> void:
 	unhover.emit(card_id)
@@ -77,8 +109,6 @@ func _on_panel_container_mouse_exited() -> void:
 	# Move card back down
 	if cur_tween != null:
 		cur_tween.stop()
-	if _hover and not hold_up:
-		cur_tween = create_tween()
-		cur_tween.tween_property(card_panel, "position:y", 0.0, hover_time)
-		cur_tween.tween_callback(_tween_end)
-		_hover = false
+	
+	move_down()
+	_hover = false

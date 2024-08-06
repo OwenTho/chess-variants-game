@@ -46,7 +46,7 @@ func update_sprite() -> void:
 	if piece_data.info != null:
 		image_loc = "assets/texture/piece/" + piece_data.info.textureLoc
 		team_id = piece_data.teamId
-	print("Using image %s" % [image_loc])
+	# print("Using image %s" % [image_loc])
 	var piece_sprite: Texture
 	if ResourceLoader.exists("res://" + image_loc):
 		piece_sprite = load("res://" + image_loc)

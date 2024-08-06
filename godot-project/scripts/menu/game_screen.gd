@@ -19,10 +19,12 @@ var disabled_selection: bool = false
 
 var allow_quit: bool = true
 
+var cur_selected_card: int = -1
+
 func _ready() -> void:
-	GameManager.clear_cards.connect(card_selection.clear_cards)
+	GameManager.clear_cards.connect(_on_clear_cards)
 	GameManager.display_card.connect(card_selection.add_card)
-	GameManager.show_cards.connect(card_selection.show_cards)
+	GameManager.show_cards.connect(_on_show_cards)
 	
 	GameManager.has_init.connect(_on_init)
 	GameManager.next_turn.connect(_on_next_turn)
@@ -148,6 +150,28 @@ func select_item(piece: Piece2D) -> void:
 
 
 
+
+
+func _on_clear_cards() -> void:
+	card_selection.visible = false
+	card_selection.clear_cards()
+
+func _on_show_cards() -> void:
+	card_selection.visible = true
+	cur_selected_card = -1
+	card_selection.show_cards()
+
+func _on_card_selected(card_num: int) -> void:
+	# If the same, ignore
+	if card_num == cur_selected_card:
+		return
+	# Tell the card selection to hold up the card, and put down the previous
+	card_selection.put_card(card_num, true)
+	card_selection.put_card(cur_selected_card, false)
+	cur_selected_card = card_num
+
+func _on_btn_use_pressed() -> void:
+	GameManager.select_card.rpc(cur_selected_card)
 
 
 

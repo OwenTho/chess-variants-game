@@ -10,8 +10,8 @@ public partial class GameController
     internal Registry<CardFactory> cardFactoryRegistry = new Registry<CardFactory>();
     private bool hasInitBefore = false;
 
-    public CardDeck MajorCardDeck;
-    public CardDeck MinorCardDeck;
+    public CardDeck MajorCardDeck { get; private set; }
+    public CardDeck MinorCardDeck { get; private set; }
     
     public void FullInit(bool isServer)
     {

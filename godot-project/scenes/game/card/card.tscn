@@ -1,5 +1,6 @@
-[gd_scene load_steps=4 format=3 uid="uid://bh4j6mauhkkkr"]
+[gd_scene load_steps=5 format=3 uid="uid://bh4j6mauhkkkr"]
 
+[ext_resource type="Theme" uid="uid://b5yrg7jpk4t0b" path="res://assets/themes/card/major_card.tres" id="1_p5pv8"]
 [ext_resource type="Script" path="res://scripts/menu/card/card.gd" id="1_qgcjn"]
 [ext_resource type="Texture2D" uid="uid://defthmt63w7wu" path="res://assets/texture/card/missing.png" id="2_ykinm"]
 
@@ -12,6 +13,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 220.0
 offset_bottom = 362.0
+theme = ExtResource("1_p5pv8")
 script = ExtResource("1_qgcjn")
 
 [node name="CardOffset" type="Control" parent="."]
@@ -79,13 +81,8 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 110)
 layout_mode = 2
 mouse_filter = 2
-theme_override_font_sizes/normal_font_size = 12
-theme_override_font_sizes/bold_font_size = 13
-theme_override_font_sizes/italics_font_size = 13
-theme_override_font_sizes/bold_italics_font_size = 13
-theme_override_font_sizes/mono_font_size = 12
 bbcode_enabled = true
-text = "No description."
+text = "No description. [i]Test[/i]"
 
 [connection signal="mouse_entered" from="CardOffset/CardPanel" to="." method="_on_panel_container_mouse_entered"]
 [connection signal="mouse_exited" from="CardOffset/CardPanel" to="." method="_on_panel_container_mouse_exited"]

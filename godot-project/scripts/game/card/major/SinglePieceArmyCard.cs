@@ -31,6 +31,7 @@ public partial class SinglePieceArmyCard : CardBase
             piece.info = pieceInfo;
         }
     }
+    
     public override CardBase Clone()
     {
         SinglePieceArmyCard newCard = new SinglePieceArmyCard();

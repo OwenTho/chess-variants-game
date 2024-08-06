@@ -71,6 +71,18 @@ public partial class GameController : Node
 
 
 
+    public CardBase PullCardFromDeck(CardDeck deck)
+    {
+        gameMutex.Lock();
+        CardBase newCard = deck.PullCard(currentGameState);
+        gameMutex.Unlock();
+        return newCard;
+    }
+    
+    public bool ReturnCardToDeck(CardBase card, CardDeck deck)
+    {
+        return deck.PutCard(card);
+    }
 
 
     public CardBase PullMajorCard()

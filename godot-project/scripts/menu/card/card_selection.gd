@@ -10,6 +10,8 @@ signal cards_showing()
 
 var cards: Array[Control] = []
 
+var active_tweens: Array = []
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	for child in %CardContainer.get_children():
@@ -32,20 +34,25 @@ func hide_cards() -> void:
 func show_cards() -> void:
 	if showing_cards:
 		return
+	
 	showing_cards = true
 	last_hovered = -1
+	
 	var child_num: int = 0
 	var last_tween: Tween
-	for child in %CardContainer.get_children():
+	
+	for card in cards:
 		# If card is already at y 0, ignore
-		if child.position.y == 0:
-			continue
+		card._hold_up = false
+		
 		var tween: Tween = create_tween()
-		tween.tween_callback(func(): child.position.y = 500)
+		active_tweens.append(tween)
+		tween.tween_callback(func(): card.position.y = 500)
 		tween.tween_interval(0.5 * (child_num+1))
 		tween.set_ease(Tween.EASE_OUT)
 		tween.set_trans(Tween.TRANS_CUBIC)
-		tween.tween_property(child, "position:y", 0.0, 0.8)
+		tween.tween_property(card, "position:y", 0.0, 0.8)
+		tween.tween_callback(func(): active_tweens.erase(tween))
 		last_tween = tween
 		child_num += 1
 	
@@ -55,8 +62,14 @@ func show_cards() -> void:
 		showing_cards = false
 
 func clear_cards() -> void:
-	for child in %CardContainer.get_children():
-		child.queue_free()
+	# Stop all tweens
+	for tween in active_tweens:
+		tween.stop()
+	active_tweens.clear()
+	# Free all children
+	for card in cards:
+		card.queue_free()
+	cards.clear()
 
 func add_card(card_data: Dictionary) -> void:
 	var card = card_scene.instantiate()
@@ -69,7 +82,24 @@ func add_card(card_data: Dictionary) -> void:
 	if card_data.has("card_id"):
 		card.card_id = card_data["card_id"]
 	%CardContainer.add_child(card)
+	card.hover.connect(_hovered)
+	card.unhover.connect(_unhovered)
 	cards.append(card)
+
+func get_card(card_id: int) -> Node:
+	for card in cards:
+		if card.card_id == card_id:
+			return card
+	return null
+
+func put_card(card_id: int, up: bool) -> void:
+	var card = get_card(card_id)
+	# Ignore if no matching card
+	if card == null:
+		return
+	
+	card.hold(up)
+
 
 func _cards_showing() -> void:
 	cards_showing.emit()
@@ -77,18 +107,14 @@ func _cards_showing() -> void:
 
 func enable_cards() -> void:
 	showing_cards = false
-	for child in %CardContainer.get_children():
-		child.set_enabled(true)
+	for card in cards:
+		card.set_enabled(true)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("mouse_left"):
 		if last_hovered != -1:
 			card_selected.emit(last_hovered)
-			print("Selected: %s" % last_hovered)
-	if Input.is_action_just_pressed("mouse_right"):
-		hide_cards()
-		show_cards()
 
 func _hovered(card_id: int) -> void:
 	last_hovered = card_id
@@ -96,3 +122,7 @@ func _hovered(card_id: int) -> void:
 func _unhovered(card_id: int) -> void:
 	if last_hovered == card_id:
 		last_hovered = -1
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		clear_cards()

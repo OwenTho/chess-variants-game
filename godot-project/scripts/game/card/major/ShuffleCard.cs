@@ -106,6 +106,6 @@ public partial class ShuffleCard : CardBase
 
     public override string GetDescription()
     {
-        return "Once the game starts, all pieces initially on the board will be shuffled among their teams. Pieces swapped will be mirrored across teams, if they have a linked piece.";
+        return "Each team has their pieces shuffled once the game starts. [i]This is mirrored between teams.[/i]";
     }
 }

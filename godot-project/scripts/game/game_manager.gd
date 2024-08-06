@@ -8,15 +8,23 @@ var game_controller: Object
 var game_scene: PackedScene = preload("res://scenes/game/game_screen.tscn")
 var piece_scene: PackedScene = preload("res://scenes/game/piece/piece.tscn")
 
+# Game
 var in_game: bool
 var game: Game
 var grid
 var grid_size: Vector2i
 var board: Board2D
 
+# Mutex
 var task_mutex: Mutex
 var game_mutex: Mutex
 var thread_mutex: Mutex
+
+# Card Selection
+var card_selector: CardSelector
+var currently_selecting: int = -1
+
+var current_given_cards: Array = []
 
 signal has_init()
 
@@ -54,6 +62,8 @@ func reset_game() -> void:
 	# Before continuing, make sure none of the mutex are locked
 	if game != null:
 		game_controller.queue_free()
+	if card_selector != null:
+		card_selector.free()
 	in_game = false
 	board = null
 	game = null
@@ -78,6 +88,13 @@ func init() -> void:
 	# Initialise the game controller
 	game_controller = game_controller_script.new()
 	add_child(game_controller)
+	
+	# Initialise the card selector
+	# Only the server has to initialise this
+	if is_multiplayer_authority():
+		card_selector = CardSelector.new()
+		card_selector.game_controller = game_controller
+		add_child(card_selector)
 	
 	
 	# Initialise the game
@@ -104,7 +121,9 @@ func setup_signals() -> void:
 	game_controller.PieceRemoved.connect(_on_piece_taken)
 	game_controller.SendNotice.connect(send_notice)
 
-var currently_selecting: int = -1
+
+
+
 
 func start_game(game_seed: int) -> void:
 	in_game = true
@@ -113,59 +132,76 @@ func start_game(game_seed: int) -> void:
 	if not is_multiplayer_authority():
 		return
 	
-	# Start the game by generating 3 Major Cards that the players have to select
-	var selected_cards: Array = []
-	for i in range(Lobby.player_nums.size()):
-		var player_id: int = Lobby.get_player_id_from_num(i)
-		if player_id == -1:
-			continue
-		var player_cards: Array[Node] = []
-		for j in range(MAJOR_SELECT_COUNT):
-			# Pull a new card
-			var new_card = game_controller.PullMajorCard()
-			# If new card is null, break as there is no more cards available
-			if new_card == null:
-				break
-			# Temporarily add as a child to avoid possible memory leak
-			game.add_child(new_card)
-			player_cards.append(new_card)
-			# Send the card to the player
-			var card_data: Dictionary = game_controller.ConvertCardToDict(new_card)
-			# Add the card number
-			card_data.card_num = j
-			receive_card.rpc_id(player_id, card_data)
-		
-		# If there are no cards, break out of the loop
-		if player_cards.size() == 0:
-			break
-		
-		currently_selecting = i
-		# Tell the player to display the cards
-		display_cards.rpc_id(player_id)
-		# Wait for the player to select the card
-		var selected_card: int = -1
-		while selected_card < 0 or selected_card >= player_cards.size():
-			selected_card = await card_selected
-			if selected_card < 0 or selected_card >= player_cards.size():
-				invalid_card.rpc_id(player_id)
-		
-		# Free the unused cards
-		for j in range(player_cards.size()):
-			if j != selected_card:
-				game_controller.ReturnMajorCard(player_cards[j])
-				player_cards[j].queue_free()
-		# Remove the child now that we can add it to the game
-		game.remove_child(player_cards[selected_card])
-		var card_data = game_controller.ConvertCardToDict(player_cards[selected_card])
-		if card_data == null:
-			continue
-		# Add the card to the server
-		add_card(player_cards[selected_card])
-		# Tell all players to add the card, if it's a valid selection
-		add_card_from_data.rpc(card_data)
-	currently_selecting = -1
-	# Now that the cards are initialised, finally start the chess game
+	# Connect signals to the card selector
+	card_selector.before_new_selection.connect(_on_before_new_selection)
+	card_selector.card_option_added.connect(_on_card_option_added)
+	card_selector.selection_started.connect(_on_selection_started)
+	card_selector.invalid_selection.connect(_on_invalid_selection)
+	card_selector.card_selected.connect(_on_card_selected)
+	card_selector.selection_done.connect(_on_selection_done)
+	card_selector.all_selections_done.connect(_on_all_cards_selected.bind(game_seed))
+	
+	# Start the game by generating Major Cards that the players have to select
+	for player_num in range(Lobby.player_nums.size()):
+		card_selector.add_card_selection(player_num, game_controller.MajorCardDeck, MAJOR_SELECT_COUNT)
+	card_selector.select()
+
+func _on_before_new_selection() -> void:
+	var send_id: int = Lobby.get_player_id_from_num(card_selector.currently_selecting)
+	if send_id == -1:
+		push_error("Can't send card data as no player is currently selecting a card.")
+		return
+	new_card_selection.rpc_id(send_id)
+
+func _on_card_option_added(card_data) -> void:
+	var send_id: int = Lobby.get_player_id_from_num(card_selector.currently_selecting)
+	if send_id == -1:
+		push_error("Can't send card data as no player is currently selecting a card.")
+		return
+	receive_card.rpc_id(send_id, card_data)
+
+func _on_selection_started() -> void:
+	var send_id: int = Lobby.get_player_id_from_num(card_selector.currently_selecting)
+	if send_id == -1:
+		push_error("Can't send card data as no player is currently selecting a card.")
+		return
+	display_cards.rpc_id(send_id)
+
+func _on_selection_done() -> void:
+	var send_id: int = Lobby.get_player_id_from_num(card_selector.currently_selecting)
+	if send_id == -1:
+		push_error("Can't send selection completion as no player is currently selecting a card.")
+		return
+	card_selection_done.rpc_id(send_id)
+
+func _on_invalid_selection(card_num: int) -> void:
+	var send_id: int = Lobby.get_player_id_from_num(card_selector.currently_selecting)
+	if send_id == -1:
+		push_error("Can't send invalid card rpc as no player is currently selecting a card.")
+		return
+	invalid_card.rpc_id(send_id, card_num)
+
+func _on_card_selected(card) -> void:
+	add_card(card)
+	add_card_from_data.rpc(game_controller.ConvertCardToDict(card))
+
+func _on_all_cards_selected(game_seed: int) -> void:
+	# Disconnect the signals
+	card_selector.before_new_selection.disconnect(_on_before_new_selection)
+	card_selector.card_option_added.disconnect(_on_card_option_added)
+	card_selector.selection_started.disconnect(_on_selection_started)
+	card_selector.invalid_selection.disconnect(_on_invalid_selection)
+	card_selector.card_selected.disconnect(_on_card_selected)
+	card_selector.selection_done.disconnect(_on_selection_done)
+	card_selector.all_selections_done.disconnect(_on_all_cards_selected)
+	
+	# RPC that game has started
 	start_chess_game.rpc(game_seed)
+
+
+@rpc("authority", "call_local", "reliable")
+func new_card_selection() -> void:
+	clear_cards.emit()
 
 @rpc("authority", "call_local", "reliable")
 func receive_card(card_data: Dictionary) -> void:
@@ -199,14 +235,7 @@ func display_cards() -> void:
 		return
 	await get_tree().process_frame
 	
-	game.card_selection.show_cards()
-	
-	# TEMP: Wait 5 seconds and then select first card
-	await get_tree().create_timer(3.0).timeout
-	
-	clear_cards.emit()
-	await get_tree().process_frame
-	select_card.rpc(0)
+	show_cards.emit()
 
 @rpc("any_peer", "call_local", "reliable")
 func select_card(card_number: int) -> void:
@@ -223,10 +252,11 @@ func select_card(card_number: int) -> void:
 		return
 	
 	# Ignore if it's not the right player
-	if Lobby.player_nums[currently_selecting] != player_id:
+	if Lobby.get_player_id_from_num(card_selector.currently_selecting) != player_id:
 		return
-	# Signal that card was selected
-	card_selected.emit(card_number)
+	
+	# Tell card selector
+	card_selector.select_card(card_number)
 
 
 @rpc("authority", "call_remote", "reliable")
@@ -243,7 +273,11 @@ func add_card(card) -> void:
 	game_controller.AddCard(card)
 
 @rpc("authority", "call_local", "reliable")
-func invalid_card() -> void:
+func card_selection_done() -> void:
+	clear_cards.emit()
+
+@rpc("authority", "call_local", "reliable")
+func invalid_card(card_num: int) -> void:
 	if not in_game:
 		return
 
@@ -255,7 +289,6 @@ func invalid_card() -> void:
 
 @rpc("authority", "call_local", "reliable")
 func start_chess_game(game_seed: int) -> void:
-	print("Start game")
 	if not in_game:
 		return
 	clear_cards.emit()
@@ -293,7 +326,10 @@ func board_to_array() -> Array:
 			# for custom spaces.
 			# This works for now, however, as there are only pieces.
 			# Add the ID first
-			this_item.append(item.info.pieceId)
+			if item.info != null:
+				this_item.append(item.info.pieceId)
+			else:
+				this_item.append("invalid_id")
 			# Then add the link ID
 			this_item.append(item.linkId)
 			# The team of the piece

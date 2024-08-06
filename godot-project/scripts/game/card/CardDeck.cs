@@ -63,14 +63,14 @@ public partial class CardDeck : Node
 
 
     // Put card back into the pile, claiming it unused.
-    public void PutCard(CardBase card)
+    public bool PutCard(CardBase card)
     {
         // Check if the card id exists
         if (!_cards.TryGetValue(card.cardId, out CardInfo cardInfo))
         {
             // If it doesn't, error
             GD.PushError($"Tried to put card {card.cardId} in the deck, but its factory isn't present.");
-            return;
+            return false;
         }
         
         // Tell the factory to remove the card
@@ -78,10 +78,11 @@ public partial class CardDeck : Node
         {
             // If it's not made by this factory, error
             GD.PushError($"Tried to return a card of id {card.cardId} to a deck, but the CardFactory didn't create it.");
-            return;
+            return false;
         }
         // If it succeeded in putting the card away, add one card to the deck
         cardInfo.CardsLeft += 1;
+        return true;
     }
 
     public CardBase PullCard(GameState game)
@@ -128,7 +129,6 @@ public partial class CardDeck : Node
         // Remove 1 instance of the card, and 
         CardInfo cardInfo = validCards[selectedCard];
         cardInfo.CardsLeft -= 1;
-        GD.Print($"{cardInfo.Factory.cardId} selected. Cards left: {cardInfo.CardsLeft}");
         return cardInfo.Factory.CreateNewCard(game);
     }
 }
