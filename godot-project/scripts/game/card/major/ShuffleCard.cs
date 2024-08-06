@@ -104,6 +104,6 @@ public partial class ShuffleCard : CardBase
 
     public override string GetDescription()
     {
-        return "Each team has their pieces shuffled once the game starts. [i]This is mirrored between teams.[/i]";
+        return "Each team has their pieces shuffled. [i]This is mirrored between teams.[/i]";
     }
 }

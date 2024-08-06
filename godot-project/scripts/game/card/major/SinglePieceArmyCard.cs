@@ -56,6 +56,6 @@ public partial class SinglePieceArmyCard : CardBase
 
     public override string GetDescription()
     {
-        return $"Once the game starts, all pieces on the board will be converted into a [color=aqua]{StringUtil.ToTitleCase(armyPiece)}[/color].";
+        return $"All pieces on the board will become a [color=aqua]{StringUtil.ToTitleCase(armyPiece)}[/color].";
     }
 }
