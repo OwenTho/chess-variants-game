@@ -53,12 +53,12 @@ public partial class LonelyPiecesStuckCard : CardBase
         return new LonelyPiecesStuckCard();
     }
 
-    public override string GetName()
+    public override string GetCardName()
     {
         return "Lonely Pieces";
     }
 
-    public override string GetDescription()
+    public override string GetCardDescription()
     {
         return "Pieces not adjacent to other pieces are unable to take any actions.";
     }

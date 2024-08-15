@@ -83,4 +83,3 @@ func _on_advanced_label_meta_clicked(meta):
 	# Clear the entries
 	ip_entry.text = ""
 	server_port_entry.text = ""
-

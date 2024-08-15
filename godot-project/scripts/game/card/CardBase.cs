@@ -39,17 +39,17 @@ public abstract partial class CardBase : Node
         
     }
 
-    public virtual String GetName()
+    public virtual String GetCardName()
     {
         return StringUtil.ToTitleCase(cardId);
     }
 
-    public virtual String GetImageLoc()
+    public virtual String GetCardImageLoc()
     {
         return "";
     }
 
-    public virtual String GetDescription()
+    public virtual String GetCardDescription()
     {
         return "No description provided.";
     }

@@ -225,9 +225,9 @@ func receive_card(card_data: Dictionary) -> void:
 	# If it's not, get the data to display
 	display_card.emit({
 		"card_id": card_data.card_num,
-		"name": card.GetName(),
-		"image_loc": card.GetImageLoc(),
-		"description": card.GetDescription()
+		"name": card.GetCardName(),
+		"image_loc": card.GetCardImageLoc(),
+		"description": card.GetCardDescription()
 	})
 	# Free the card from memory now that it's used
 	card.queue_free()
@@ -275,8 +275,6 @@ func add_card_from_data(card_data: Dictionary) -> void:
 	add_card(card)
 
 func add_card(card) -> void:
-	print("CURRENT SEED: %s" % [game_controller.GetGameSeed()])
-	print("CURRENT STATE: %s" % [game_controller.GetGameSeedState()])
 	game_controller.AddCard(card)
 
 @rpc("authority", "call_local", "reliable")

@@ -49,12 +49,12 @@ public partial class SinglePieceArmyCard : CardBase
         }
     }
 
-    public override string GetName()
+    public override string GetCardName()
     {
         return "Single Piece Army";
     }
 
-    public override string GetDescription()
+    public override string GetCardDescription()
     {
         return $"All pieces on the board will become a [color=aqua]{StringUtil.ToTitleCase(armyPiece)}[/color].";
     }

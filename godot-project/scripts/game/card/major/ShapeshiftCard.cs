@@ -21,12 +21,12 @@ public partial class ShapeshiftCard : CardBase
         return new ShapeshiftCard();
     }
 
-    public override string GetName()
+    public override string GetCardName()
     {
         return "Shapeshift";
     }
 
-    public override string GetDescription()
+    public override string GetCardDescription()
     {
         return "Upon taking a piece, changes the [color=red]Attacking piece[/color] into the piece that was taken.";
     }

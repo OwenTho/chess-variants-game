@@ -97,12 +97,12 @@ public partial class ShuffleCard : CardBase
         return new ShuffleCard();
     }
 
-    public override string GetName()
+    public override string GetCardName()
     {
         return "Shuffle";
     }
 
-    public override string GetDescription()
+    public override string GetCardDescription()
     {
         return "Each team has their pieces shuffled. [i]This is mirrored between teams.[/i]";
     }

@@ -28,5 +28,3 @@ func _on_btn_player_1_pressed():
 
 func _on_btn_player_2_pressed():
 	player_button_pressed.emit(player_id, 1)
-
-
