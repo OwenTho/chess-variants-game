@@ -158,6 +158,6 @@ func get_piece_string(piece_id: String):
 		"bishop":
 			return "✝️"
 		"pawn":
-			return "♟️"
+			return " ♟️ "
 		_:
 			return "❓"
