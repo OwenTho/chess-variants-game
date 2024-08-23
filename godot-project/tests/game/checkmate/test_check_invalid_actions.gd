@@ -9,7 +9,7 @@ func test_move_to_check() -> void:
 	var king = game_state.PlacePiece("king", 0, 0, 0, 1, -1)
 	var rook = game_state.PlacePiece("rook", 1, 1, 1, 0, -1)
 	
-	game_controller.StartGame()
+	start_game()
 	
 	# King should not be in check
 	assert_false(game_state.PlayerInCheck(0))
@@ -28,7 +28,7 @@ func test_attack_defended_piece() -> void:
 	var e_rook1 = game_state.PlacePiece("rook", 1, 1, 1, 0, -1)
 	var e_rook2 = game_state.PlacePiece("rook", 2, 1, 2, 0, -1)
 	
-	game_controller.StartGame()
+	start_game()
 	
 	# King should not be in check
 	assert_false(game_state.PlayerInCheck(0))
@@ -48,7 +48,7 @@ func test_move_defending_piece() -> void:
 	var pawn = game_state.PlacePiece("pawn", 1, 0, 1, 0, -1)
 	var e_rook = game_state.PlacePiece("rook", 2, 1, 3, 0, -1)
 	
-	game_controller.StartGame()
+	start_game()
 	
 	# King should not be in check
 	assert_false(game_state.PlayerInCheck(0))
@@ -70,7 +70,7 @@ func test_move_non_save() -> void:
 	var pawn = game_state.PlacePiece("pawn", 1, 0, 1, 1, -1)
 	var e_rook = game_state.PlacePiece("rook", 2, 1, 3, 0, -1)
 	
-	game_controller.StartGame()
+	start_game()
 	
 	# King should be in check
 	assert_true(game_state.PlayerInCheck(0))

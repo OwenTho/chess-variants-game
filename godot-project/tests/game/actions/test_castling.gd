@@ -12,8 +12,8 @@ func castle_test(king, dir: Vector2i, act_pos: Vector2i) -> void:
 		var rook = game_state.PlacePiece("rook", 0, 0, king.cell.x + i * dir.x, king.cell.y + i * dir.y, -1)
 		# Swap turns twice so it's player 0's turn again (and actions are updated)
 		king.EnableActionsUpdate()
-		game_state.NextTurn()
-		game_state.NextTurn()
+		next_turn()
+		next_turn()
 		
 		var should_fail := true
 		if i <= max_dist and i >= min_dist:
@@ -42,7 +42,7 @@ func castle_test(king, dir: Vector2i, act_pos: Vector2i) -> void:
 
 func test_distance_right() -> void:
 	
-	game_controller.StartGame()
+	start_game()
 	# Place King
 	# 👑. . . . . . .
 	var king = game_state.PlacePiece("king", 0, 0, 0, 0, -1)
@@ -52,7 +52,7 @@ func test_distance_right() -> void:
 
 func test_distance_left() -> void:
 	
-	game_controller.StartGame()
+	start_game()
 	# Place King
 	# 👑. . . . . . .
 	var king = game_state.PlacePiece("king", 0, 0, 7, 0, -1)
@@ -70,7 +70,7 @@ func test_castle_blocked() -> void:
 	var pawn = game_state.PlacePiece("pawn", 0, 0, 1, 0, -1)
 	var rook = game_state.PlacePiece("rook", 0, 0, 3, 0, -1)
 	
-	game_controller.StartGame()
+	start_game()
 	
 	# King should have the action to castle
 	if not piece_has_actions_at(king, Vector2i(2,0)):
@@ -83,8 +83,8 @@ func test_castle_blocked() -> void:
 	assert_true(game_state.TakeActionAt(Vector2i(1,1), pawn), "Pawn should be able to move forwards.")
 	
 	# Skip to next turn
-	game_state.NextTurn()
-	game_state.NextTurn()
+	next_turn()
+	next_turn()
 	
 	# King should still have the action to castle
 	if not piece_has_actions_at(king, Vector2i(2,0)):
@@ -105,7 +105,7 @@ func test_cant_castle_after_move() -> void:
 	var king = game_state.PlacePiece("king", 0, 0, 0, 0, -1)
 	var rook = game_state.PlacePiece("rook", 0, 0, 4, 0, -1)
 	
-	game_controller.StartGame()
+	start_game()
 	
 	# King should have the action to castle
 	if not piece_has_actions_at(king, Vector2i(2,0)):
@@ -117,8 +117,8 @@ func test_cant_castle_after_move() -> void:
 	assert_eq(rook.cell.pos, Vector2i(4,0), "Rook should not have moved.")
 	
 	# Skip to next turn
-	game_state.NextTurn()
-	game_state.NextTurn()
+	next_turn()
+	next_turn()
 	
 	# King should not have the action to castle
 	if piece_has_actions_at(king, Vector2i(3,0)):
@@ -139,7 +139,7 @@ func test_enemy_rook() -> void:
 	var king = game_state.PlacePiece("king", 0, 0, 0, 0, -1)
 	var rook = game_state.PlacePiece("rook", 0, 1, 3, 0, -1)
 	
-	game_controller.StartGame()
+	start_game()
 	
 	# Check if the King can castle
 	if piece_has_actions_at(king, Vector2i(2,0)):

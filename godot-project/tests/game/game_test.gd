@@ -2,6 +2,13 @@ extends GutTest
 
 class_name GameTest
 
+
+# Due to how the game has been programmed, GUT will report that there are
+# orphan nodes present in the game after the tests have been done.
+# Therefore, the count GUT gives shouldn't be trusted for the number of orphans,
+# and orphan counts should be checked during gameplay.
+
+
 var game_controller_script: CSharpScript = preload("res://scripts/game/GameController.cs")
 var game_controller
 var game_state
@@ -33,6 +40,19 @@ func after_each() -> void:
 func after_all() -> void:
 	# Free the game controller
 	game_controller.free()
+
+
+
+
+func start_game() -> void:
+	game_state.StartGame()
+
+func start_game_with_seed(seed: int) -> void:
+	game_state.gameRandom.seed = seed
+	start_game()
+
+func next_turn(team_num: int = -1) -> void:
+	game_state.NextTurn(team_num)
 
 
 

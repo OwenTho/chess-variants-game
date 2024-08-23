@@ -8,7 +8,7 @@ func test_move() -> void:
 	# ♟️
 	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
 	
-	game_controller.StartGame()
+	start_game()
 	
 	# Piece should be able to move forwards one space
 	if not piece_has_actions_at(pawn, Vector2i(0,1)):
@@ -27,8 +27,8 @@ func test_move() -> void:
 	assert_false(pawn.HasTag("pawn_initial"), "Pawn should not have initial move tag.")
 	
 	# Skip to next turn
-	game_state.NextTurn()
-	game_state.NextTurn()
+	next_turn()
+	next_turn()
 	
 	# Piece should be able to move forwards one space
 	if not piece_has_actions_at(pawn, Vector2i(0,2)):
@@ -56,7 +56,7 @@ func test_move_blocked_team() -> void:
 	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
 	var bishop = game_state.PlacePiece("bishop", 0, 0, 0, 1, -1)
 	
-	game_controller.StartGame()
+	start_game()
 	
 	# Piece should be able to move forwards one space
 	if not piece_has_actions_at(pawn, Vector2i(0,1)):
@@ -76,8 +76,8 @@ func test_move_blocked_team() -> void:
 	game_state.MovePiece(bishop, 1, 1)
 	
 	# Skip to next turn to update verification
-	game_state.NextTurn()
-	game_state.NextTurn()
+	next_turn()
+	next_turn()
 	
 	# Try to move forward
 	# ♟ ♗
@@ -97,7 +97,7 @@ func test_move_initial_far_blocked_team() -> void:
 	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
 	var bishop = game_state.PlacePiece("bishop", 0, 0, 0, 2, -1)
 	
-	game_controller.StartGame()
+	start_game()
 	
 	# Piece should be able to move forwards one space
 	if not piece_has_actions_at(pawn, Vector2i(0,1)):
@@ -125,7 +125,7 @@ func test_move_blocked_enemy() -> void:
 	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
 	var bishop = game_state.PlacePiece("bishop", 0, 1, 0, 1, -1)
 	
-	game_controller.StartGame()
+	start_game()
 	
 	# Piece should be able to move forwards one space
 	if not piece_has_actions_at(pawn, Vector2i(0,1)):
@@ -145,8 +145,8 @@ func test_move_blocked_enemy() -> void:
 	game_state.MovePiece(bishop, 1, 1)
 	
 	# Skip to next turn to update verification
-	game_state.NextTurn()
-	game_state.NextTurn()
+	next_turn()
+	next_turn()
 	
 	# Try to move forward
 	# ♟ ♗
@@ -166,7 +166,7 @@ func test_move_initial_far_blocked_enemy() -> void:
 	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
 	var bishop = game_state.PlacePiece("bishop", 0, 1, 0, 2, -1)
 	
-	game_controller.StartGame()
+	start_game()
 	
 	# Piece should be able to move forwards one space
 	if not piece_has_actions_at(pawn, Vector2i(0,1)):
@@ -196,7 +196,8 @@ func test_initial_move() -> void:
 	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
 	
 	# Start the game
-	game_controller.StartGame()
+	start_game()
+	
 	# Piece should be able to move forwards two spaces
 	if not piece_has_actions_at(pawn, Vector2i(0,2)):
 		fail_test("Pawn should have the action to move forward two spaces.")
@@ -211,12 +212,12 @@ func test_initial_move() -> void:
 	
 	# Pawn should have "pawn_initial"
 	assert_true(pawn.HasTag("pawn_initial"), "Pawn should have pawn_initial tag (Own turn after move).")
-	game_state.NextTurn()
+	next_turn()
 	
 	# Pawn should still have "pawn_initial" as it's not that player's turn
 	assert_true(pawn.HasTag("pawn_initial"), "Pawn should have pawn_initial tag (Enemy turn).")
 	
-	game_state.NextTurn()
+	next_turn()
 	
 	# Pawn should no longer have the "pawn_initial" tag
 	
@@ -239,7 +240,7 @@ func test_initial_move_blocked_close_team() -> void:
 	var bishop = game_state.PlacePiece("bishop", 0, 0, 0, 1, -1)
 	
 	# Start the game
-	game_controller.StartGame()
+	start_game()
 	
 	# Piece should be able to move forwards two spaces
 	if not piece_has_actions_at(pawn, Vector2i(0,2)):
@@ -262,12 +263,12 @@ func test_initial_move_blocked_close_team() -> void:
 	# ♟️ .
 	game_state.MovePiece(bishop, 1, 1)
 	
-	game_state.NextTurn()
+	next_turn()
 	
 	# Pawn should still have "pawn_initial" as it's not that player's turn
 	assert_false(pawn.HasTag("pawn_initial"), "Pawn should not have pawn_initial tag (Enemy turn after failed move).")
 	
-	game_state.NextTurn()
+	next_turn()
 	
 	# Pawn should be able to move now
 	# ♟️ .
@@ -288,7 +289,7 @@ func test_initial_move_blocked_far_team() -> void:
 	var bishop = game_state.PlacePiece("bishop", 0, 0, 0, 2, -1)
 	
 	# Start the game
-	game_controller.StartGame()
+	start_game()
 	
 	# Piece should be able to move forwards two spaces
 	if not piece_has_actions_at(pawn, Vector2i(0,2)):
@@ -311,12 +312,12 @@ func test_initial_move_blocked_far_team() -> void:
 	# ♟️ .
 	game_state.MovePiece(bishop, 1, 2)
 	
-	game_state.NextTurn()
+	next_turn()
 	
 	# Pawn should still have "pawn_initial" as it's not that player's turn
 	assert_false(pawn.HasTag("pawn_initial"), "Pawn should not have pawn_initial tag (Enemy turn after failed move).")
 	
-	game_state.NextTurn()
+	next_turn()
 	
 	# Pawn should be able to move now
 	# ♟️ ♗
@@ -339,7 +340,8 @@ func test_initial_move_blocked_close_enemy() -> void:
 	var bishop = game_state.PlacePiece("bishop", 0, 1, 0, 1, -1)
 	
 	# Start the game
-	game_controller.StartGame()
+	start_game()
+	
 	# Piece should be able to move forwards two spaces
 	if not piece_has_actions_at(pawn, Vector2i(0,2)):
 		fail_test("Pawn should have the action to move forward two spaces.")
@@ -361,12 +363,12 @@ func test_initial_move_blocked_close_enemy() -> void:
 	# ♟️ .
 	game_state.MovePiece(bishop, 1, 1)
 	
-	game_state.NextTurn()
+	next_turn()
 	
 	# Pawn should still have "pawn_initial" as it's not that player's turn
 	assert_false(pawn.HasTag("pawn_initial"), "Pawn should not have pawn_initial tag (Enemy turn after failed move).")
 	
-	game_state.NextTurn()
+	next_turn()
 	
 	# Pawn should be able to move now
 	# ♟️ .
@@ -387,7 +389,8 @@ func test_initial_move_blocked_far_enemy() -> void:
 	var bishop = game_state.PlacePiece("bishop", 0, 1, 0, 2, -1)
 	
 	# Start the game
-	game_controller.StartGame()
+	start_game()
+	
 	# Piece should be able to move forwards two spaces
 	if not piece_has_actions_at(pawn, Vector2i(0,2)):
 		fail_test("Pawn should have the action to move forward two spaces.")
@@ -409,12 +412,12 @@ func test_initial_move_blocked_far_enemy() -> void:
 	# ♟️ .
 	game_state.MovePiece(bishop, 1, 2)
 	
-	game_state.NextTurn()
+	next_turn()
 	
 	# Pawn should still have "pawn_initial" as it's not that player's turn
 	assert_false(pawn.HasTag("pawn_initial"), "Pawn should not have pawn_initial tag (Enemy turn after failed move).")
 	
-	game_state.NextTurn()
+	next_turn()
 	
 	# Pawn should be able to move now
 	# ♟️ ♗
@@ -440,7 +443,7 @@ func test_initial_not_first_move() -> void:
 	pawn.timesMoved = 1
 	
 	# Start the game
-	game_controller.StartGame()
+	start_game()
 	# Piece should not have the actions to move forwards 2 spaces
 	if piece_has_actions_at(pawn, Vector2i(0,2)):
 		fail_test("Pawn should have the action to move forward two spaces.")
@@ -465,7 +468,7 @@ func test_attack_team_right() -> void:
 	var bishop = game_state.PlacePiece("bishop", 0, 0, 1 , 1, -1)
 	
 	# Start the game
-	game_controller.StartGame()
+	start_game()
 	
 	# Piece should have the action to attack
 	if not piece_has_actions_at(pawn, Vector2i(1,1)):
@@ -488,7 +491,7 @@ func test_attack_team_left() -> void:
 	var bishop = game_state.PlacePiece("bishop", 0, 0, 0, 1, -1)
 	
 	# Start the game
-	game_controller.StartGame()
+	start_game()
 	
 	# Piece should have the action to attack
 	if not piece_has_actions_at(pawn, Vector2i(0,1)):
@@ -512,7 +515,7 @@ func test_attack_enemy_right() -> void:
 	var e_bishop = game_state.PlacePiece("bishop", 0, 1, 1 , 1, -1)
 	
 	# Start the game
-	game_controller.StartGame()
+	start_game()
 	
 	# Piece should have the action to attack
 	if not piece_has_actions_at(pawn, Vector2i(1,1)):
@@ -536,7 +539,7 @@ func test_attack_enemy_left() -> void:
 	var e_bishop = game_state.PlacePiece("bishop", 0, 1, 0, 1, -1)
 	
 	# Start the game
-	game_controller.StartGame()
+	start_game()
 	
 	# Piece should have the action to attack
 	if not piece_has_actions_at(pawn, Vector2i(0,1)):

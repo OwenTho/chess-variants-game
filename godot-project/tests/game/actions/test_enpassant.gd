@@ -13,7 +13,7 @@ func test_teammate() -> void:
 	var e_pawn = game_state.PlacePiece("pawn", 1, 0, 1, 0, -1)
 	
 	# Start the game
-	game_controller.StartGame()
+	start_game()
 	
 	# Do 2 space move on second pawn
 	# .  ♟️
@@ -24,12 +24,12 @@ func test_teammate() -> void:
 	# Only Pawn 2 should have "pawn_initial"
 	assert_false(pawn.HasTag("pawn_initial"))
 	assert_true(e_pawn.HasTag("pawn_initial"))
-	game_state.NextTurn()
+	next_turn()
 	
 	# Make sure tag is still there on next turn
 	assert_true(e_pawn.HasTag("pawn_initial"))
 
-	game_state.NextTurn()
+	next_turn()
 	# Tag should be gone
 	assert_false(e_pawn.HasTag("pawn_initial"))
 	
@@ -44,7 +44,7 @@ func test_teammate() -> void:
 	assert_false(e_pawn.HasTag("pawn_initial"))
 	
 	# Move to next turn
-	game_state.NextTurn()
+	next_turn()
 	
 	# Pawn 1 should not be able to use En Passant, (but can also move + attack)
 	if piece_has_actions_at(e_pawn, Vector2i(0,1), 2):
@@ -63,7 +63,7 @@ func test_enemy() -> void:
 	var e_pawn = game_state.PlacePiece("pawn", 0, 1, 1, 2, -1)
 	
 	# Start the game
-	game_controller.StartGame()
+	start_game()
 	
 	# Do 2 space move on first pawn
 	# ♟️ ♟️
@@ -74,7 +74,7 @@ func test_enemy() -> void:
 	# Only Pawn 1 should have "pawn_initial"
 	assert_true(pawn.HasTag("pawn_initial"))
 	assert_false(e_pawn.HasTag("pawn_initial"))
-	game_state.NextTurn()
+	next_turn()
 	# Make sure tag is still there on next turn
 	assert_true(pawn.HasTag("pawn_initial"))
 	
@@ -90,7 +90,7 @@ func test_enemy() -> void:
 	# Pawn 1 should be gone, and Pawn 2 still there
 	assert_false(game_state.allPieces.has(pawn))
 	assert_true(game_state.allPieces.has(e_pawn))
-	game_state.NextTurn()
+	next_turn()
 	# Tag should still be there, as pawn1 is no longer processed
 	assert_true(pawn.HasTag("pawn_initial"))
 	
@@ -114,7 +114,7 @@ func test_pawn_taken() -> void:
 	var e_bishop = game_state.PlacePiece("bishop", 1, 1, 1, 1, -1)
 	
 	# Start the game
-	game_controller.StartGame()
+	start_game()
 	
 	# Do 2 space move on first pawn
 	# ♟️ ♟️
@@ -122,7 +122,7 @@ func test_pawn_taken() -> void:
 	# .  .
 	assert_true(game_state.TakeActionAt(Vector2i(0,2), pawn))
 	
-	game_state.NextTurn()
+	next_turn()
 	
 	# Enemy should be able to use En Passant
 	if not piece_has_actions_at(e_pawn, Vector2i(0,1)):
@@ -138,7 +138,7 @@ func test_pawn_taken() -> void:
 	assert_true(game_state.allPieces.has(e_pawn))
 	assert_true(game_state.allPieces.has(e_bishop))
 	
-	game_state.NextTurn()
+	next_turn()
 	
 	# Enemy should not be able to use En Passant, and only be able to Move + Attack
 	if piece_has_actions_at(e_pawn, Vector2i(0,1), 2):
