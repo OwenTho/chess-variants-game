@@ -21,7 +21,9 @@ public partial class SinglePieceArmyCard : CardBase
         }
         foreach (var piece in game.allPieces)
         {
+            // Update the piece's info, and then mark it as needing an update.
             piece.info = pieceInfo;
+            piece.EnableActionsUpdate();
         }
 
         game.KingId = armyPiece;
