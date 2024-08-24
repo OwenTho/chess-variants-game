@@ -105,7 +105,7 @@ public partial class GameState : Node
         
         Piece newPiece = new Piece();
         allPieces.Add(newPiece);
-        newPiece.info = info;
+        newPiece.SetInfoWithoutSignal(info);
         if (id != -1)
         {
             newPiece.id = id;

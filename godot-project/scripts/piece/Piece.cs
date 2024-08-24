@@ -16,8 +16,12 @@ public partial class Piece : GameItem
         }
         internal set
         {
+            // Only send out a signal if the value is different
+            if (_info != value)
+            {
+                CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.InfoChanged, value);
+            }
             _info = value;
-            CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.InfoChanged, value);
         }
     }
     public int id { get; internal set; }
@@ -61,6 +65,11 @@ public partial class Piece : GameItem
     private ActionsToTake actionsToTake = new ActionsToTake();
 
     public Array<ActionBase> currentPossibleActions { get { return actionsToTake.possibleActions; } }
+
+    internal void SetInfoWithoutSignal(PieceInfo newInfo)
+    {
+        _info = newInfo;
+    }
 
     // Called to tell Piece to update actions again
     public void EnableActionsUpdate()

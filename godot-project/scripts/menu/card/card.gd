@@ -25,7 +25,8 @@ func set_enabled(enable: bool) -> void:
 
 func reset_offset() -> void:
 	if cur_tween != null:
-		cur_tween.stop()
+		cur_tween.kill()
+		cur_tween = null
 	_hover = false
 	_hold_up = false
 	currently_up = false
@@ -50,7 +51,7 @@ func set_card_image(image_loc: String) -> void:
 	if ResourceLoader.exists("res://" + image_loc):
 		card_texture = load("res://" + image_loc)
 	else:
-		push_warning("Could not find sprite at path '%s', so defalt is being used." % [image_loc])
+		push_warning("Could not find sprite at path '%s', so default is being used." % [image_loc])
 		card_texture = load("res://assets/texture/card/missing.png")
 	
 	(%CardImage as TextureRect).texture = card_texture
@@ -73,7 +74,7 @@ func hold(up: bool) -> void:
 
 func _stop_tween() -> void:
 	if cur_tween != null:
-		cur_tween.stop()
+		cur_tween.kill()
 		cur_tween = null
 
 func move_up() -> void:

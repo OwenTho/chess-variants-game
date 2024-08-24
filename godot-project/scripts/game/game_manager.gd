@@ -367,10 +367,9 @@ func place_piece(piece_id: String, link_id: int, team: int, x: int, y: int, id: 
 	new_piece.piece_data = new_piece_data
 	new_piece.board = board
 	
-	# new_piece.add_child(new_piece_data)
-	
 	# Update the position and sprite
 	new_piece.update_pos()
+	new_piece.update_sprite()
 	
 	# Add node to tree
 	get_tree().get_first_node_in_group("piece_holder").add_child(new_piece)

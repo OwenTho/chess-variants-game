@@ -62,9 +62,9 @@ func show_cards() -> void:
 		showing_cards = false
 
 func clear_cards() -> void:
-	# Stop all tweens
+	# Kill all tweens
 	for tween in active_tweens:
-		tween.stop()
+		tween.kill()
 	active_tweens.clear()
 	# Free all children
 	for card in cards:
