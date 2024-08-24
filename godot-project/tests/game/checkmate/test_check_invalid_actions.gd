@@ -6,8 +6,8 @@ func test_move_to_check() -> void:
 	# Place pieces
 	# 👑.  
 	# . 🏰
-	var king = game_state.PlacePiece("king", 0, 0, 0, 1, -1)
-	var rook = game_state.PlacePiece("rook", 1, 1, 1, 0, -1)
+	var king = place_piece("king", 0, 0, 0, 1)
+	var rook = place_piece("rook", 1, 1, 1, 0)
 	
 	start_game()
 	
@@ -24,9 +24,9 @@ func test_attack_defended_piece() -> void:
 	# Place pieces
 	# 👑. . 
 	# . 🏰🏰
-	var king = game_state.PlacePiece("king", 0, 0, 0, 1, -1)
-	var e_rook1 = game_state.PlacePiece("rook", 1, 1, 1, 0, -1)
-	var e_rook2 = game_state.PlacePiece("rook", 2, 1, 2, 0, -1)
+	var king = place_piece("king", 0, 0, 0, 1)
+	var e_rook1 = place_piece("rook", 1, 1, 1, 0)
+	var e_rook2 = place_piece("rook", 2, 1, 2, 0)
 	
 	start_game()
 	
@@ -44,9 +44,9 @@ func test_move_defending_piece() -> void:
 	# Place pieces
 	# . . .
 	# 👑♟️🏰 
-	var king = game_state.PlacePiece("king", 0, 0, 0, 0, -1)
-	var pawn = game_state.PlacePiece("pawn", 1, 0, 1, 0, -1)
-	var e_rook = game_state.PlacePiece("rook", 2, 1, 3, 0, -1)
+	var king = place_piece("king", 0, 0, 0, 0)
+	var pawn = place_piece("pawn", 1, 0, 1, 0)
+	var e_rook = place_piece("rook", 2, 1, 3, 0)
 	
 	start_game()
 	
@@ -66,9 +66,9 @@ func test_move_non_save() -> void:
 	# Place pieces
 	# . ♟️ . .
 	# 👑. . 🏰 
-	var king = game_state.PlacePiece("king", 0, 0, 0, 0, -1)
-	var pawn = game_state.PlacePiece("pawn", 1, 0, 1, 1, -1)
-	var e_rook = game_state.PlacePiece("rook", 2, 1, 3, 0, -1)
+	var king = place_piece("king", 0, 0, 0, 0)
+	var pawn = place_piece("pawn", 1, 0, 1, 1)
+	var e_rook = place_piece("rook", 2, 1, 3, 0)
 	
 	start_game()
 	

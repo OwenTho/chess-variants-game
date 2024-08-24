@@ -4,8 +4,8 @@ func test_teammates_dont_check() -> void:
 	
 	# Place pieces
 	# 👑. 🏰.
-	var king = game_state.PlacePiece("king", 0, 0, 0, 0, -1)
-	var rook = game_state.PlacePiece("rook", 0, 0, 2, 0, -1)
+	var king = place_piece("king", 0, 0, 0, 0)
+	var rook = place_piece("rook", 0, 0, 2, 0)
 	
 	start_game()
 	
@@ -40,9 +40,9 @@ func test_move_when_protected() -> void:
 	
 	# Place Pieces
 	# 👑. ♟️🏰
-	var king = game_state.PlacePiece("king", 0, 0, 0, 0, -1)
-	game_state.PlacePiece("pawn", 0, 0, 2, 0, -1)
-	game_state.PlacePiece("rook", 0, 1, 3, 0, -1)
+	var king = place_piece("king", 0, 0, 0, 0)
+	place_piece("pawn", 0, 0, 2, 0)
+	place_piece("rook", 0, 1, 3, 0)
 	
 	start_game()
 	
@@ -65,9 +65,9 @@ func test_move_when_protected_by_enemy() -> void:
 	
 	# Place Pieces
 	# 👑. ♟️🏰
-	var king = game_state.PlacePiece("king", 0, 0, 0, 0, -1)
-	game_state.PlacePiece("pawn", 0, 1, 2, 0, -1)
-	game_state.PlacePiece("rook", 0, 1, 3, 0, -1)
+	var king = place_piece("king", 0, 0, 0, 0)
+	place_piece("pawn", 0, 1, 2, 0)
+	place_piece("rook", 0, 1, 3, 0)
 	
 	start_game()
 	
@@ -91,8 +91,8 @@ func test_move_from_check() -> void:
 	# Place pieces
 	# . .
 	# 👑🏰
-	var king = game_state.PlacePiece("king", 0, 0, 0, 0, -1)
-	var rook = game_state.PlacePiece("rook", 0, 1, 1, 0, -1)
+	var king = place_piece("king", 0, 0, 0, 0)
+	var rook = place_piece("rook", 0, 1, 1, 0)
 	
 	start_game()
 	
@@ -116,8 +116,8 @@ func test_can_take_attacker() -> void:
 	
 	# Place Pieces
 	# . 👑🏰
-	var king = game_state.PlacePiece("king", 0, 0, 1, 0, -1)
-	var rook = game_state.PlacePiece("rook", 0, 1, 2, 0, -1)
+	var king = place_piece("king", 0, 0, 1, 0)
+	var rook = place_piece("rook", 0, 1, 2, 0)
 	
 	start_game()
 	
@@ -146,8 +146,8 @@ func test_enemy_can_check() -> void:
 	# Place Pieces
 	# 👑. . . 
 	# . . . 🏰
-	game_state.PlacePiece("king", 0, 0, 0, 1, -1)
-	var rook = game_state.PlacePiece("rook", 0, 1, 3, 0, -1)
+	place_piece("king", 0, 0, 0, 1)
+	var rook = place_piece("rook", 0, 1, 3, 0)
 	
 	start_game()
 	
@@ -172,9 +172,9 @@ func test_enemy_can_check_indirect() -> void:
 	# Place Pieces
 	# . . . .
 	# 👑. 🐴🏰
-	game_state.PlacePiece("king", 0, 0, 0, 0, -1)
-	var knight = game_state.PlacePiece("knight", 0, 1, 2, 0, -1)
-	game_state.PlacePiece("rook", 0, 1, 3, 0, -1)
+	place_piece("king", 0, 0, 0, 0)
+	var knight = place_piece("knight", 0, 1, 2, 0)
+	place_piece("rook", 0, 1, 3, 0)
 	
 	start_game()
 	

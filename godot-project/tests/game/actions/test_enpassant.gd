@@ -9,8 +9,8 @@ func test_teammate() -> void:
 	# .  .
 	# .  .
 	# ♟️ ♟️
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
-	var e_pawn = game_state.PlacePiece("pawn", 1, 0, 1, 0, -1)
+	var pawn = place_piece("pawn", 0, 0, 0, 0)
+	var e_pawn = place_piece("pawn", 1, 0, 1, 0)
 	
 	# Start the game
 	start_game()
@@ -59,8 +59,8 @@ func test_enemy() -> void:
 	# .  ♟️
 	# .  .
 	# ♟️ .
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
-	var e_pawn = game_state.PlacePiece("pawn", 0, 1, 1, 2, -1)
+	var pawn = place_piece("pawn", 0, 0, 0, 0)
+	var e_pawn = place_piece("pawn", 0, 1, 1, 2)
 	
 	# Start the game
 	start_game()
@@ -109,9 +109,9 @@ func test_pawn_taken() -> void:
 	# .  ♟️
 	# .  ♗
 	# ♟️ .
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
-	var e_pawn = game_state.PlacePiece("pawn", 1, 1, 1, 2, -1)
-	var e_bishop = game_state.PlacePiece("bishop", 1, 1, 1, 1, -1)
+	var pawn = place_piece("pawn", 0, 0, 0, 0)
+	var e_pawn = place_piece("pawn", 1, 1, 1, 2)
+	var e_bishop = place_piece("bishop", 1, 1, 1, 1)
 	
 	# Start the game
 	start_game()

@@ -51,6 +51,9 @@ func start_game_with_seed(seed: int) -> void:
 	game_state.gameRandom.seed = seed
 	start_game()
 
+func place_piece(piece_id: String, link_id: int, team_id: int, x: int, y: int, id: int = -1) -> Node:
+	return game_state.PlacePiece(piece_id, link_id, team_id, x, y, id)
+
 func next_turn(team_num: int = -1) -> void:
 	game_state.NextTurn(team_num)
 

@@ -6,7 +6,7 @@ func test_move() -> void:
 	# .
 	# .
 	# ♟️
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
+	var pawn = place_piece("pawn", 0, 0, 0, 0)
 	
 	start_game()
 	
@@ -53,8 +53,8 @@ func test_move_blocked_team() -> void:
 	# Initialise board
 	# ♗
 	# ♟️
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
-	var bishop = game_state.PlacePiece("bishop", 0, 0, 0, 1, -1)
+	var pawn = place_piece("pawn", 0, 0, 0, 0)
+	var bishop = place_piece("bishop", 0, 0, 0, 1)
 	
 	start_game()
 	
@@ -94,8 +94,8 @@ func test_move_initial_far_blocked_team() -> void:
 	# ♗
 	# .
 	# ♟️
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
-	var bishop = game_state.PlacePiece("bishop", 0, 0, 0, 2, -1)
+	var pawn = place_piece("pawn", 0, 0, 0, 0)
+	var bishop = place_piece("bishop", 0, 0, 0, 2)
 	
 	start_game()
 	
@@ -122,8 +122,8 @@ func test_move_blocked_enemy() -> void:
 	# Initialise board
 	# ♗
 	# ♟️
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
-	var bishop = game_state.PlacePiece("bishop", 0, 1, 0, 1, -1)
+	var pawn = place_piece("pawn", 0, 0, 0, 0)
+	var bishop = place_piece("bishop", 0, 1, 0, 1)
 	
 	start_game()
 	
@@ -163,8 +163,8 @@ func test_move_initial_far_blocked_enemy() -> void:
 	# ♗
 	# .
 	# ♟️
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
-	var bishop = game_state.PlacePiece("bishop", 0, 1, 0, 2, -1)
+	var pawn = place_piece("pawn", 0, 0, 0, 0)
+	var bishop = place_piece("bishop", 0, 1, 0, 2)
 	
 	start_game()
 	
@@ -193,7 +193,7 @@ func test_initial_move() -> void:
 	# . 
 	# . 
 	# ♟️
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
+	var pawn = place_piece("pawn", 0, 0, 0, 0)
 	
 	# Start the game
 	start_game()
@@ -236,8 +236,8 @@ func test_initial_move_blocked_close_team() -> void:
 	# . 
 	# ♗
 	# ♟️
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
-	var bishop = game_state.PlacePiece("bishop", 0, 0, 0, 1, -1)
+	var pawn = place_piece("pawn", 0, 0, 0, 0)
+	var bishop = place_piece("bishop", 0, 0, 0, 1)
 	
 	# Start the game
 	start_game()
@@ -285,8 +285,8 @@ func test_initial_move_blocked_far_team() -> void:
 	# ♗
 	# .
 	# ♟️
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
-	var bishop = game_state.PlacePiece("bishop", 0, 0, 0, 2, -1)
+	var pawn = place_piece("pawn", 0, 0, 0, 0)
+	var bishop = place_piece("bishop", 0, 0, 0, 2)
 	
 	# Start the game
 	start_game()
@@ -336,8 +336,8 @@ func test_initial_move_blocked_close_enemy() -> void:
 	# . 
 	# ♗
 	# ♟️
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
-	var bishop = game_state.PlacePiece("bishop", 0, 1, 0, 1, -1)
+	var pawn = place_piece("pawn", 0, 0, 0, 0)
+	var bishop = place_piece("bishop", 0, 1, 0, 1)
 	
 	# Start the game
 	start_game()
@@ -385,8 +385,8 @@ func test_initial_move_blocked_far_enemy() -> void:
 	# ♗
 	# .
 	# ♟️
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
-	var bishop = game_state.PlacePiece("bishop", 0, 1, 0, 2, -1)
+	var pawn = place_piece("pawn", 0, 0, 0, 0)
+	var bishop = place_piece("bishop", 0, 1, 0, 2)
 	
 	# Start the game
 	start_game()
@@ -437,7 +437,7 @@ func test_initial_not_first_move() -> void:
 	# .
 	# .
 	# ♟️
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
+	var pawn = place_piece("pawn", 0, 0, 0, 0)
 	
 	# Set pawn to have moved at least once
 	pawn.timesMoved = 1
@@ -464,8 +464,8 @@ func test_attack_team_right() -> void:
 	# Place pieces
 	# . ♗
 	# ♟️ .
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 0 , 0, -1)
-	var bishop = game_state.PlacePiece("bishop", 0, 0, 1 , 1, -1)
+	var pawn = place_piece("pawn", 0, 0, 0 , 0)
+	var bishop = place_piece("bishop", 0, 0, 1 , 1)
 	
 	# Start the game
 	start_game()
@@ -487,8 +487,8 @@ func test_attack_team_left() -> void:
 	# Place pieces
 	# ♗  .
 	# . ♟️
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 1, 0, -1)
-	var bishop = game_state.PlacePiece("bishop", 0, 0, 0, 1, -1)
+	var pawn = place_piece("pawn", 0, 0, 1, 0)
+	var bishop = place_piece("bishop", 0, 0, 0, 1)
 	
 	# Start the game
 	start_game()
@@ -511,8 +511,8 @@ func test_attack_enemy_right() -> void:
 	# Place pieces
 	# . ♗
 	# ♟️ .
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 0 , 0, -1)
-	var e_bishop = game_state.PlacePiece("bishop", 0, 1, 1 , 1, -1)
+	var pawn = place_piece("pawn", 0, 0, 0 , 0)
+	var e_bishop = place_piece("bishop", 0, 1, 1 , 1)
 	
 	# Start the game
 	start_game()
@@ -535,8 +535,8 @@ func test_attack_enemy_left() -> void:
 	# Place pieces
 	# ♗  .
 	# . ♟️
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 1, 0, -1)
-	var e_bishop = game_state.PlacePiece("bishop", 0, 1, 0, 1, -1)
+	var pawn = place_piece("pawn", 0, 0, 1, 0)
+	var e_bishop = place_piece("bishop", 0, 1, 0, 1)
 	
 	# Start the game
 	start_game()

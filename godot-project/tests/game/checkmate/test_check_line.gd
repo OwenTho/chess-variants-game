@@ -5,9 +5,9 @@ func test_protected() -> void:
 	
 	# Place Pieces
 	# 👑. ♟️🏰
-	var king = game_state.PlacePiece("king", 0, 0, 0, 0, -1)
-	game_state.PlacePiece("pawn", 0, 0, 2, 0, -1)
-	game_state.PlacePiece("rook", 0, 1, 3, 0, -1)
+	var king = place_piece("king", 0, 0, 0, 0)
+	place_piece("pawn", 0, 0, 2, 0)
+	place_piece("rook", 0, 1, 3, 0)
 	
 	start_game()
 	
@@ -21,9 +21,9 @@ func test_protected_by_king() -> void:
 	
 	# Place Pieces
 	# . 👑. 👑🏰
-	var king = game_state.PlacePiece("king", 0, 0, 1, 0, -1)
-	game_state.PlacePiece("king", 0, 1, 3, 0, -1)
-	game_state.PlacePiece("rook", 0, 1, 4, 0, -1)
+	var king = place_piece("king", 0, 0, 1, 0)
+	place_piece("king", 0, 1, 3, 0)
+	place_piece("rook", 0, 1, 4, 0)
 	
 	start_game()
 	
@@ -49,8 +49,8 @@ func test_attack() -> void:
 	
 	# Place Pieces
 	# 👑. . 🏰
-	var king = game_state.PlacePiece("king", 0, 0, 0, 0, -1)
-	game_state.PlacePiece("rook", 0, 1, 3, 0, -1)
+	var king = place_piece("king", 0, 0, 0, 0)
+	place_piece("rook", 0, 1, 3, 0)
 	
 	start_game()
 	
@@ -68,8 +68,8 @@ func test_attack_miss() -> void:
 	# Place Pieces
 	# . . . 🏰
 	# 👑. . . 
-	var king = game_state.PlacePiece("king", 0, 0, 0, 0, -1)
-	game_state.PlacePiece("rook", 0, 1, 3, 1, -1)
+	var king = place_piece("king", 0, 0, 0, 0)
+	place_piece("rook", 0, 1, 3, 1)
 	
 	start_game()
 	

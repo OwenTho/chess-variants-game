@@ -9,7 +9,7 @@ const end_check: int = 7
 func castle_test(king, dir: Vector2i, act_pos: Vector2i) -> void:
 	var king_start: Vector2i = king.cell.pos
 	for i in range(start_check, end_check+1):
-		var rook = game_state.PlacePiece("rook", 0, 0, king.cell.x + i * dir.x, king.cell.y + i * dir.y, -1)
+		var rook = place_piece("rook", 0, 0, king.cell.x + i * dir.x, king.cell.y + i * dir.y)
 		# Swap turns twice so it's player 0's turn again (and actions are updated)
 		king.EnableActionsUpdate()
 		next_turn()
@@ -45,7 +45,7 @@ func test_distance_right() -> void:
 	start_game()
 	# Place King
 	# 👑. . . . . . .
-	var king = game_state.PlacePiece("king", 0, 0, 0, 0, -1)
+	var king = place_piece("king", 0, 0, 0, 0)
 	
 	castle_test(king, Vector2i(1,0), Vector2i(2,0))
 
@@ -55,7 +55,7 @@ func test_distance_left() -> void:
 	start_game()
 	# Place King
 	# 👑. . . . . . .
-	var king = game_state.PlacePiece("king", 0, 0, 7, 0, -1)
+	var king = place_piece("king", 0, 0, 7, 0)
 	
 	castle_test(king, Vector2i(-1,0), Vector2i(5,0))
 
@@ -66,9 +66,9 @@ func test_castle_blocked() -> void:
 	
 	# Place Pieces
 	# 👑♟️ . 🏰
-	var king = game_state.PlacePiece("king", 0, 0, 0, 0, -1)
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 1, 0, -1)
-	var rook = game_state.PlacePiece("rook", 0, 0, 3, 0, -1)
+	var king = place_piece("king", 0, 0, 0, 0)
+	var pawn = place_piece("pawn", 0, 0, 1, 0)
+	var rook = place_piece("rook", 0, 0, 3, 0)
 	
 	start_game()
 	
@@ -102,8 +102,8 @@ func test_cant_castle_after_move() -> void:
 	
 	# Place Pieces
 	# 👑. . . 🏰
-	var king = game_state.PlacePiece("king", 0, 0, 0, 0, -1)
-	var rook = game_state.PlacePiece("rook", 0, 0, 4, 0, -1)
+	var king = place_piece("king", 0, 0, 0, 0)
+	var rook = place_piece("rook", 0, 0, 4, 0)
 	
 	start_game()
 	
@@ -136,8 +136,8 @@ func test_enemy_rook() -> void:
 	
 	# Place Pieces
 	# 👑. . 🏰
-	var king = game_state.PlacePiece("king", 0, 0, 0, 0, -1)
-	var rook = game_state.PlacePiece("rook", 0, 1, 3, 0, -1)
+	var king = place_piece("king", 0, 0, 0, 0)
+	var rook = place_piece("rook", 0, 1, 3, 0)
 	
 	start_game()
 	

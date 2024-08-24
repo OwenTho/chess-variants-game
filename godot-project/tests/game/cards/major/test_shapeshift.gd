@@ -9,10 +9,10 @@ func test_card() -> void:
 	# Create a simple board of pieces
 	#  . 🐴🤴.
 	# ♟️  .   . ♗
-	var pawn = game_state.PlacePiece("pawn", 0, 0, 0, 0, -1)
-	var bishop = game_state.PlacePiece("bishop", 0, 0, 3, 0, -1)
-	var e_knight = game_state.PlacePiece("knight", 0, 1, 1, 1, -1)
-	var e_queen = game_state.PlacePiece("queen", 0, 1, 2, 1, -1)
+	var pawn = place_piece("pawn", 0, 0, 0, 0)
+	var bishop = place_piece("bishop", 0, 0, 3, 0)
+	var e_knight = place_piece("knight", 0, 1, 1, 1)
+	var e_queen = place_piece("queen", 0, 1, 2, 1)
 	
 	start_game()
 	

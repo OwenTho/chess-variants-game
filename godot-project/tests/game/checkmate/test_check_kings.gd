@@ -21,8 +21,8 @@ func test_kings() -> void:
 	# .  .  👑  
 	# .  .  .
 	# 👑 .  .
-	var king = game_state.PlacePiece("king", 0, 0, 0, 0, -1)
-	var e_king = game_state.PlacePiece("king", 0, 1, 2, 2, -1)
+	var king = place_piece("king", 0, 0, 0, 0)
+	var e_king = place_piece("king", 0, 1, 2, 2)
 	
 	start_game_with_seed(game_state.gameRandom.seed)
 	

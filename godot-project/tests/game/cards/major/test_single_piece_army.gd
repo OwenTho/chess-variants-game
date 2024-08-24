@@ -11,11 +11,11 @@ func test_card() -> void:
 	
 	# Add pieces to the board
 	# 👑🏰♟️🐴♗
-	game_state.PlacePiece("king", 0, 0, 0, 0, -1)
-	game_state.PlacePiece("rook", 0, 0, 1, 0, -1)
-	game_state.PlacePiece("pawn", 0, 0, 2, 0, -1)
-	game_state.PlacePiece("knight", 0, 0, 3, 0, -1)
-	game_state.PlacePiece("bishop", 0, 0, 4, 0, -1)
+	place_piece("king", 0, 0, 0, 0)
+	place_piece("rook", 0, 0, 1, 0)
+	place_piece("pawn", 0, 0, 2, 0)
+	place_piece("knight", 0, 0, 3, 0)
+	place_piece("bishop", 0, 0, 4, 0)
 	
 	# As none are queen, set the piece to be "queen"
 	card.armyPiece = "queen"
