@@ -69,6 +69,8 @@ public partial class GameController
         
         // Register Major Card Rules
         MakeNewValidationRule("lonely_piece_card", new LonelyPiecesStuckRule(), false);
+        MakeNewValidationRule("allow_team_attack", new AllowTeamAttackRule(), false);
+        MakeNewValidationRule("team_attack_allow_overlap", new TeamAttackAllowOverlapRule(), false);
     }
     
     internal void InitActionRules()
@@ -110,6 +112,7 @@ public partial class GameController
         AddNewFactory("major_single_piece_army", new SinglePieceArmyCardFactory());
         AddNewFactory("major_shuffle", new SimpleCardFactory<ShuffleCard>());
         AddNewFactory("major_lonely_pieces_stuck", new SimpleCardFactory<LonelyPiecesStuckCard>());
+        AddNewFactory("major_friendly_fire", new SimpleCardFactory<FriendlyFireCard>());
     }
 
     internal void InitCardDecks(bool isServer)
@@ -141,6 +144,7 @@ public partial class GameController
         MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_single_piece_army"));
         MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_shuffle"));
         MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_lonely_pieces_stuck"));
+        MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_friendly_fire"));
         
         // Set up the Decks
         MinorCardDeck = new CardDeck();
