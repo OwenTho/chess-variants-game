@@ -19,7 +19,7 @@ func _verify_piece_movement(piece: Node, piece_name: String, should_have_valid: 
 	else:
 		pass_test("%s should%s have valid actions %s" % [piece_name, not_text, additional])
 	
-	assert_ne(piece.HasTag("lonely_piece"), should_have_valid, "%s should%s have lonely_piece tag %s" % [piece_name, not_text, additional])
+	assert_ne(piece_has_tag(piece, "lonely_piece"), should_have_valid, "%s should%s have lonely_piece tag %s" % [piece_name, not_text, additional])
 
 func test_card_team() -> void:
 	var card = card_script.new()
@@ -33,7 +33,7 @@ func test_card_team() -> void:
 	var queen = place_piece("queen", 0, 0, 1, 0)
 	
 	# Start the game with the card
-	game_controller.AddCard(card)
+	add_card(card)
 	
 	start_game()
 	
@@ -50,8 +50,7 @@ func test_card_team() -> void:
 	move_piece(bishop, 0, 1)
 	
 	# Skip to the next turn
-	next_turn()
-	next_turn()
+	next_turn(0)
 	
 	# Now only the queen is separated
 	_verify_piece_movement(knight, "Knight", true, "(2)")
@@ -64,8 +63,7 @@ func test_card_team() -> void:
 	#  .     . 
 	move_piece(queen, 1, 1)
 	
-	# Skip to the next turn
-	next_turn()
+	# Turn doesn't matter
 	next_turn()
 	
 	# All pieces are next to another piece
@@ -79,8 +77,7 @@ func test_card_team() -> void:
 	#  ♗  . 
 	move_piece(bishop, 0, 0)
 	
-	# Skip to the next turn
-	next_turn()
+	# Turn doesn't matter
 	next_turn()
 	
 	# No piece should be able to move

@@ -31,13 +31,13 @@ func test_card() -> void:
 		if piece.info == null:
 			fail_test("Piece has null info (should be queen) (before card).")
 			continue
-		assert_ne(piece.info.pieceId, "queen", "Piece should not have 'queen' PieceInfo (before card).")
+		assert_false(piece_has_piece_id(piece, "queen"), "Piece should not have 'queen' PieceInfo (before card).")
 		# Pieces should not need action updates (as turn has not yet passed over)
 		assert_false(piece.needsActionUpdate, "Piece should not need an action update yet (before card).")
 	
 	# Upon adding the card, all pieces should now be queens
 	# 🤴🤴🤴🤴🤴
-	game_controller.AddCard(card)
+	add_card(card)
 	
 	for piece in game_state.allPieces:
 		if piece == null:
@@ -46,6 +46,6 @@ func test_card() -> void:
 		if piece.info == null:
 			fail_test("Piece has null info (should be queen).")
 			continue
-		assert_eq(piece.info.pieceId, "queen", "Piece should have 'queen' PieceInfo.")
+		assert_true(piece_has_piece_id(piece, "queen"), "Piece should have 'queen' PieceInfo.")
 		assert_true(piece.needsActionUpdate, "Piece should need an action update.")
 	

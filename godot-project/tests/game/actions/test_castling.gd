@@ -11,16 +11,14 @@ func castle_test(king, dir: Vector2i, act_pos: Vector2i) -> void:
 	for i in range(start_check, end_check+1):
 		var rook = place_piece("rook", 0, 0, king.cell.x + i * dir.x, king.cell.y + i * dir.y)
 		# Swap turns twice so it's player 0's turn again (and actions are updated)
-		king.EnableActionsUpdate()
-		next_turn()
-		next_turn()
+		next_turn(0)
 		
 		var should_fail := true
 		if i <= max_dist and i >= min_dist:
 			should_fail = false
 		
 		# There should be no action of the king's at the castling location
-		var result := piece_has_actions_at(king, act_pos)
+		var result := piece_has_actions_at_pos(king, act_pos)
 		if (result and should_fail) or ((not result) and (not should_fail)):
 			if should_fail:
 				fail_test("[Distance %s] King should not be able to castle." % [i])
@@ -28,15 +26,15 @@ func castle_test(king, dir: Vector2i, act_pos: Vector2i) -> void:
 				fail_test("[Distance %s] King should be able to castle." % [i])
 		
 		if should_fail:
-			assert_false(game_state.TakeActionAt(act_pos, king), "[Distance %s] King should not have been able to act." % i)
+			assert_false(piece_act_at_pos(king, act_pos), "[Distance %s] King should not have been able to act." % i)
 		else:
-			assert_true(game_state.TakeActionAt(act_pos, king), "[Distance %s] King should have castled." % i)
+			assert_true(piece_act_at_pos(king, act_pos), "[Distance %s] King should have castled." % i)
 			# Check that the Rook has moved
-			assert_eq(rook.cell.x, (act_pos.x - dir.x), "[Distance %s] Rook should not have moved." % i)
+			assert_true(piece_on_cell(rook, (act_pos.x - dir.x), act_pos.y), "[Distance %s] Rook should not have moved." % i)
 		# Remove the rook before continuing
-		game_state.TakePiece(rook.id)
+		take_piece(rook)
 		# Move the King back
-		game_state.MovePiece(king, king_start.x, king_start.y)
+		move_piece(king, king_start.x, king_start.y)
 		king.timesMoved = 0
 
 
@@ -73,27 +71,25 @@ func test_castle_blocked() -> void:
 	start_game()
 	
 	# King should have the action to castle
-	if not piece_has_actions_at(king, Vector2i(2,0)):
-		fail_test("King should have castling actions.")
+	assert_true(piece_has_actions_at(king, 2, 0), "King should have castling actions.")
 	
 	# King should not be able to castle, however
-	assert_false(game_state.TakeActionAt(Vector2i(2,0), king), "King should not have been able to castle with pawn in the way.")
+	assert_false(piece_act_at(king, 2, 0), "King should not have been able to castle with pawn in the way.")
 	
 	# Move pawn forwards
-	assert_true(game_state.TakeActionAt(Vector2i(1,1), pawn), "Pawn should be able to move forwards.")
+	move_piece(pawn, 1, 1)
 	
 	# Skip to next turn
 	next_turn()
 	next_turn()
 	
 	# King should still have the action to castle
-	if not piece_has_actions_at(king, Vector2i(2,0)):
-		fail_test("King should have castling actions.")
+	assert_true(piece_has_actions_at(king, 2, 0), "King should have castling actions.")
 	
 	# King should be able to castle
-	assert_true(game_state.TakeActionAt(Vector2i(2,0), king), "King should have been able to castle with the pawn out of the way.")
+	assert_true(piece_act_at(king, 2, 0), "King should have been able to castle with the pawn out of the way.")
 	# Rook should also have moved
-	assert_eq(rook.cell.pos, Vector2i(1,0), "Rook should have moved.")
+	assert_true(piece_on_cell(rook, 1, 0), "Rook should have moved.")
 
 
 
@@ -108,26 +104,24 @@ func test_cant_castle_after_move() -> void:
 	start_game()
 	
 	# King should have the action to castle
-	if not piece_has_actions_at(king, Vector2i(2,0)):
-		fail_test("King should have castling actions.")
+	assert_true(piece_has_actions_at(king, 2, 0), "King should have castling actions.")
 	
 	# Move King right one
 	# . 👑. . 🏰
-	assert_true(game_state.TakeActionAt(Vector2i(1,0), king), "King should be able to move right.")
-	assert_eq(rook.cell.pos, Vector2i(4,0), "Rook should not have moved.")
+	assert_true(piece_act_at(king, 1, 0), "King should be able to move right.")
+	assert_true(piece_on_cell(rook, 4, 0), "Rook should not have moved.")
 	
 	# Skip to next turn
 	next_turn()
 	next_turn()
 	
 	# King should not have the action to castle
-	if piece_has_actions_at(king, Vector2i(3,0)):
-		fail_test("King should not have castling actions.")
+	assert_false(piece_has_actions_at(king, 3, 0), "King should not have castling actions.")
 	
 	# King should not be able to castle
-	assert_false(game_state.TakeActionAt(Vector2i(3,0), king), "King should not be able to castle.")
+	assert_false(piece_act_at(king, 3, 0), "King should not be able to castle.")
 	# Rook should not have moved
-	assert_eq(rook.cell.pos, Vector2i(4,0), "Rook should not have moved.")
+	assert_true(piece_on_cell(rook, 4, 0), "Rook should not have moved.")
 
 
 
@@ -142,11 +136,10 @@ func test_enemy_rook() -> void:
 	start_game()
 	
 	# Check if the King can castle
-	if piece_has_actions_at(king, Vector2i(2,0)):
-		fail_test("King can castle with enemy rook.")
+	assert_false(piece_has_actions_at(king, 2, 0), "King can castle with enemy rook.")
 	
 	# Test castle
-	assert_false(game_state.TakeActionAt(Vector2i(2,0), king), "King was able to castle, when it shouldn't be able to.")
+	assert_false(piece_act_at(king, 2, 0), "King was able to castle, when it shouldn't be able to.")
 	
 	# Check that rook is in the same place
-	assert_eq(rook.cell.pos, Vector2i(3,0), "Rook moved, when it shouldn't have been moved.")
+	assert_true(piece_on_cell(rook, 3, 0), "Rook moved, when it shouldn't have been moved.")

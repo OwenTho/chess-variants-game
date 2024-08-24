@@ -15,7 +15,7 @@ func test_move_to_check() -> void:
 	assert_false(game_state.PlayerInCheck(0))
 	
 	# King shouldn't be able to move in to check
-	assert_false(game_state.TakeActionAt(Vector2i(0,0), king))
+	assert_false(piece_act_at(king, 0, 0))
 
 
 
@@ -34,7 +34,7 @@ func test_attack_defended_piece() -> void:
 	assert_false(game_state.PlayerInCheck(0))
 	
 	# King shouldn't be able to take the rook
-	assert_false(game_state.TakeActionAt(Vector2i(0,1), king))
+	assert_false(piece_act_at(king, 0, 1))
 
 
 
@@ -57,7 +57,7 @@ func test_move_defending_piece() -> void:
 	# . ♟️ . .
 	# 👑. . 🏰 
 
-	assert_false(game_state.TakeActionAt(Vector2i(1,1), pawn))
+	assert_false(piece_act_at(pawn, 1, 1))
 
 
 
@@ -80,4 +80,4 @@ func test_move_non_save() -> void:
 	# . . . .
 	# 👑. . 🏰 
 
-	assert_false(game_state.TakeActionAt(Vector2i(1,2), pawn))
+	assert_false(piece_act_at(pawn, 1, 2))

@@ -52,17 +52,46 @@ func start_game_with_seed(seed: int) -> void:
 	start_game()
 
 func next_turn(team_num: int = -1) -> void:
-	game_state.NextTurn(team_num)
+	game_controller.NextTurn(team_num)
 
+func add_card(card: Node) -> void:
+	game_controller.AddCard(card)
 
 
 func place_piece(piece_id: String, link_id: int, team_id: int, x: int, y: int, id: int = -1) -> Node:
 	return game_state.PlacePiece(piece_id, link_id, team_id, x, y, id)
 
+func take_piece(piece: Node, attacker: Node = null) -> bool:
+	return game_state.TakePiece(piece, attacker)
+
+func take_piece_by_id(piece_id: int) -> bool:
+	return game_state.TakePieceId(piece_id)
+
 func move_piece(piece: Node, x: int, y: int, enable_action_update: bool = true) -> void:
 	game_state.MovePiece(piece, x, y)
 	if enable_action_update:
 		piece.EnableActionsUpdate()
+
+func piece_on_board(piece: Node) -> bool:
+	return game_state.allPieces.has(piece)
+
+func piece_on_cell(piece: Node, x: int, y: int) -> bool:
+	if piece.cell == null:
+		return false
+	return piece.cell.x == x and piece.cell.y == y
+
+
+
+func piece_act_at_pos(piece: Node, pos: Vector2i) -> bool:
+	if piece == null:
+		return false
+	return game_state.TakeActionAt(pos, piece)
+
+func piece_act_at(piece, x: int, y: int) -> bool:
+	if piece == null:
+		return false
+	return piece_act_at_pos(piece, Vector2i(x, y))
+
 
 
 
@@ -84,13 +113,16 @@ func count_piece_actions(piece: Node, must_be_valid: bool = false) -> int:
 			count += 1
 	return count
 
+func piece_has_tag(piece: Node, tag: String) -> bool:
+	return piece.HasTag(tag)
+
 func piece_has_actions(piece: Node, must_be_valid: bool = false, num_ignored: int = 0) -> bool:
 	return count_piece_actions(piece, must_be_valid) > num_ignored
 
-func piece_has_actions_at(piece: Node, location: Vector2i, num_ignored: int = 0) -> bool:
+func piece_has_actions_at(piece: Node, x: int, y: int, num_ignored: int = 0) -> bool:
 	var actions_at_pos: int = 0
 	for cell in game_state.actionGrid.cells:
-		if cell.pos == location:
+		if cell.pos.x == x and cell.pos.y == y:
 			for action in cell.items:
 				if piece == null or piece.currentPossibleActions.has(action):
 					actions_at_pos += 1
@@ -99,6 +131,19 @@ func piece_has_actions_at(piece: Node, location: Vector2i, num_ignored: int = 0)
 	
 	return false
 
+func piece_has_actions_at_pos(piece: Node, pos: Vector2i, num_ignored: int = 0) -> bool:
+	return piece_has_actions_at(piece, pos.x, pos.y, num_ignored)
+
+
+func piece_has_id(piece: Node, id: int) -> bool:
+	if piece == null:
+		return false
+	return piece.id == id
+
+func piece_has_piece_id(piece: Node, piece_id: String) -> bool:
+	if piece == null or piece.info == null:
+		return false
+	return piece.info.pieceId == piece_id
 
 
 

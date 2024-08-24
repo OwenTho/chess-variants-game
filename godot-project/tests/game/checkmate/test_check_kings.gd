@@ -35,10 +35,9 @@ func test_kings() -> void:
 	# .  .  👑  
 	# .  👑 .
 	# .  .  .
-	game_state.MovePiece(king, 1, 1)
-	king.EnableActionsUpdate();
+	move_piece(king, 1, 1)
 	
-	game_state.NextTurn()
+	next_turn(1)
 	
 	# Both players should be in check
 	assert_true(game_state.PlayerInCheck(0))
@@ -49,9 +48,9 @@ func test_kings() -> void:
 	# .  .  .  
 	# .  👑 .
 	# .  .  .
-	game_state.TakePiece(e_king, king)
+	take_piece(e_king, king)
 	
-	game_state.NextTurn()
+	next_turn(0)
 	
 	# Neither should be in check, but player 2 should have no king
 	assert_false(game_state.PlayerInCheck(0))

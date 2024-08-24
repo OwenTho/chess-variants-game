@@ -17,36 +17,36 @@ func test_card() -> void:
 	start_game()
 	
 	# Add the card
-	game_controller.AddCard(card)
+	add_card(card)
 	
 	# Nothing should have changed
-	assert_eq(pawn.info.pieceId, "pawn", "Piece should still be a pawn.")
-	assert_eq(e_knight.info.pieceId, "knight", "Piece should still be a knight.")
-	assert_eq(e_queen.info.pieceId, "queen", "Piece should still be a queen.")
+	assert_true(piece_has_piece_id(pawn, "pawn"), "Pawn should still be a pawn.")
+	assert_true(piece_has_piece_id(bishop, "bishop"), "Bishop should still be a bishop.")
+	assert_true(piece_has_piece_id(e_knight, "knight"), "Enemy Knight should still be a knight.")
+	assert_true(piece_has_piece_id(e_queen, "queen"), "Enemy Queen should still be a queen.")
 	
 	# First, the pawn should take the knight
-	game_state.TakeActionAt(Vector2i(1,1), pawn)
+	assert_true(piece_act_at(pawn, 1, 1), "Pawn should be able to take actions at (1,1)")
 	
 	# The pawn should now be a knight
-	assert_eq(pawn.info.pieceId, "knight", "Pawn should have changed into a knight.")
+	assert_true(piece_has_piece_id(pawn, "knight"), "Pawn should have changed into a knight.")
 	
 	# On the queen's turn, take the pawn that just changed into a knight
-	next_turn()
+	next_turn(1)
 	
-	game_state.TakeActionAt(Vector2i(1,1), e_queen)
+	assert_true(piece_has_actions_at(e_queen, 3, 0), "Enemy Queen should have actions at (3,0) from (1,1), as it should be a knight.")
+	assert_true(piece_act_at(e_queen, 1, 1), "Enemy Queen should be able to take actions at (1,1)")
 	
 	# The queen should now be a knight
-	assert_eq(e_queen.info.pieceId, "knight", "Queen should have changed into a knight.")
+	assert_true(piece_has_piece_id(e_queen, "knight"), "Enemy Queen should have changed into a knight.")
 	
 	# Skip back to player 2's turn
-	next_turn()
-	next_turn()
+	next_turn(1)
 	
-	if not piece_has_actions_at(e_queen, Vector2i(3,0)):
-		fail_test("Queen should have actions at (3,0) from (1,1), as it should be a knight.")
+	assert_true(piece_has_actions_at(e_queen, 3, 0), "Enemy Queen->Knight should have actions at (3,0) from (1,1), as it should be a knight.")
 	
 	# Player 2 should be able to take the bishop with the knight
-	game_state.TakeActionAt(Vector2i(3,0), e_queen)
+	assert_true(piece_act_at(e_queen, 3, 0), "Enemy Queen->Knight should be able to move to (3,0)")
 	
 	# The queen should now be a bishop
-	assert_eq(e_queen.info.pieceId, "bishop", "Queen->Knight should have changed into a bishop.")
+	assert_true(piece_has_piece_id(e_queen, "bishop"), "Enemy Queen->Knight should have changed into a bishop.")

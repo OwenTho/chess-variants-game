@@ -136,8 +136,12 @@ public partial class GameState : Node
         gameEvents.AnnounceEvent(GameEvents.PieceMoved);
     }
     
-    public void TakePiece(Piece piece, Piece attacker = null)
+    public bool TakePiece(Piece piece, Piece attacker)
     {
+        if (piece == null || !allPieces.Contains(piece))
+        {
+            return false;
+        }
         // Remove it from the board
         grid.RemoveItem(piece);
         
@@ -161,16 +165,18 @@ public partial class GameState : Node
         
         // Emit signal
         CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.PieceRemoved, piece, attacker);
+        return true;
+    }
+
+    // Alternate function (for Godot to call)
+    public bool TakePiece(Piece piece)
+    {
+        return TakePiece(piece, null);
     }
     
-    public Piece TakePiece(int pieceId)
+    public bool TakePieceId(int pieceId)
     {
-        if (TryGetPiece(pieceId, out Piece piece))
-        {
-            TakePiece(piece);
-            return piece;
-        }
-        return null;
+        return TakePiece(GetPiece(pieceId));
     }
 
     public Piece GetFirstPieceAt(int x, int y)
@@ -366,6 +372,10 @@ public partial class GameState : Node
 
     private bool DoActionsAt(Vector2I actionLocation, Piece piece)
     {
+        if (piece == null)
+        {
+            return false;
+        }
         bool didAct = false;
         // Loop through all actions, and find the ones at x, y.
         foreach (ActionBase action in piece.currentPossibleActions)
@@ -381,6 +391,11 @@ public partial class GameState : Node
 
     public bool TakeActionAt(Vector2I actionLocation, Piece piece)
     {
+        // If piece is null, fail
+        if (piece is null)
+        {
+            return false;
+        }
         // Get the possible actions for this piece
         if (piece.currentPossibleActions == null || piece.currentPossibleActions.Count == 0)
         {
@@ -710,11 +725,6 @@ public partial class GameState : Node
 
     public void NextTurn(int newPlayerNum)
     {
-        // If it's already this player's turn, ignore
-        if (newPlayerNum == currentPlayerNum)
-        {
-            return;
-        }
         // First, end turn
         gameEvents.AnnounceEvent(GameEvents.EndTurn);
         CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.EndTurn);
@@ -753,6 +763,7 @@ public partial class GameState : Node
         CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.NewTurn, currentPlayerNum);
     }
 
+    // Alternate function (for Godot to call)
     public void NextTurn()
     {
         NextTurn(-1);
