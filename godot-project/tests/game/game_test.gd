@@ -51,16 +51,43 @@ func start_game_with_seed(seed: int) -> void:
 	game_state.gameRandom.seed = seed
 	start_game()
 
-func place_piece(piece_id: String, link_id: int, team_id: int, x: int, y: int, id: int = -1) -> Node:
-	return game_state.PlacePiece(piece_id, link_id, team_id, x, y, id)
-
 func next_turn(team_num: int = -1) -> void:
 	game_state.NextTurn(team_num)
 
 
 
+func place_piece(piece_id: String, link_id: int, team_id: int, x: int, y: int, id: int = -1) -> Node:
+	return game_state.PlacePiece(piece_id, link_id, team_id, x, y, id)
 
-func piece_has_actions_at(piece, location: Vector2i, num_ignored: int = 0) -> bool:
+func move_piece(piece: Node, x: int, y: int, enable_action_update: bool = true) -> void:
+	game_state.MovePiece(piece, x, y)
+	if enable_action_update:
+		piece.EnableActionsUpdate()
+
+
+
+func count_piece_actions(piece: Node, must_be_valid: bool = false) -> int:
+	# If either piece or current actions is null, there are no actions
+	if piece == null:
+		return 0
+	if piece.currentPossibleActions == null:
+		return 0
+	
+	# If it doesn't need to check for valid actions, return the length
+	if not must_be_valid:
+		return len(piece.currentPossibleActions)
+	
+	# Count the number of valid actions
+	var count: int = 0
+	for action in piece.currentPossibleActions:
+		if action.valid:
+			count += 1
+	return count
+
+func piece_has_actions(piece: Node, must_be_valid: bool = false, num_ignored: int = 0) -> bool:
+	return count_piece_actions(piece, must_be_valid) > num_ignored
+
+func piece_has_actions_at(piece: Node, location: Vector2i, num_ignored: int = 0) -> bool:
 	var actions_at_pos: int = 0
 	for cell in game_state.actionGrid.cells:
 		if cell.pos == location:
@@ -159,7 +186,7 @@ func get_piece_string(piece_id: String):
 		"knight":
 			return "🐴"
 		"bishop":
-			return "✝️"
+			return " ♗ "
 		"pawn":
 			return " ♟️ "
 		_:

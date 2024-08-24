@@ -435,6 +435,8 @@ public partial class GameState : Node
     
     private void PiecesNewTurn()
     {
+        // Announce that a new turn is about to start
+        gameEvents.AnnounceEvent(GameEvents.PreNewTurn);
         foreach (Piece piece in allPieces)
         {
             bool addToGrid = piece.needsActionUpdate;
@@ -716,8 +718,6 @@ public partial class GameState : Node
         // First, end turn
         gameEvents.AnnounceEvent(GameEvents.EndTurn);
         CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.EndTurn);
-        // Announce that a new turn is about to start
-        gameEvents.AnnounceEvent(GameEvents.PreNewTurn);
         // Tell all pieces that it's the next turn
         foreach (Piece piece in allPieces)
         {
