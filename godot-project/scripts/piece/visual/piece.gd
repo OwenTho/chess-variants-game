@@ -3,6 +3,7 @@ extends BoardItem2D
 class_name Piece2D
 
 var piece_data
+var _cur_tween: Tween
 
 func _ready() -> void:
 	piece_data.ChangedCell.connect(_on_move)
@@ -10,7 +11,11 @@ func _ready() -> void:
 
 func _on_move(new_cell) -> void:
 	if new_cell != null:
-		set_pos(new_cell.x, new_cell.y)
+		if _cur_tween != null:
+			_cur_tween.kill()
+		_cur_tween = create_tween()
+		var move_pos: Vector2 = board.board_to_world_coord(piece_data.cell.pos)
+		_cur_tween.tween_property(self, "position", move_pos, 0.25)
 
 func update_pos() -> void:
 	if piece_data == null:
