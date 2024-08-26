@@ -14,7 +14,28 @@ public partial class GameState : Node
 
     public string KingId { get; set; } = "king";
 
-    public Vector2I gridSize;
+    private Vector2I _gridUpperCorner;
+    public Vector2I gridUpperCorner
+    {
+        get { return _gridUpperCorner; }
+        set
+        {
+            _gridUpperCorner = value;
+            CallDeferred(MethodName.EmitSignal, SignalName.UpperBoundChanged, value);
+        }
+    }
+    
+    private Vector2I _gridLowerCorner;
+
+    public Vector2I gridLowerCorner
+    {
+        get { return _gridLowerCorner; }
+        set
+        {
+            _gridLowerCorner = value;
+            CallDeferred(MethodName.EmitSignal, SignalName.LowerBoundChanged, value);
+        }
+    }
 
     public Array<Piece> allPieces;
     
@@ -57,7 +78,8 @@ public partial class GameState : Node
         actionGrid = new Grid<ActionBase>();
         CallDeferred(Node.MethodName.AddChild, actionGrid);
         allPieces = new Array<Piece>();
-        gridSize = new Vector2I(8, 8);
+        gridUpperCorner = new Vector2I(8, 8);
+        gridLowerCorner = new Vector2I(0, 0);
 
         gameEvents = new GameEvents(this);
         gameRandom = new RandomNumberGenerator();
@@ -898,9 +920,11 @@ public partial class GameState : Node
         
         // Copy over variables
         newState.currentPlayerNum = currentPlayerNum;
-        newState.gridSize = gridSize;
+        newState.gridUpperCorner = gridUpperCorner;
+        newState.gridLowerCorner = gridLowerCorner;
         newState.lastId = lastId;
-
+        newState.KingId = KingId;
+        
         return newState;
     }
 }

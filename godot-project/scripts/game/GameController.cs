@@ -23,8 +23,10 @@ public partial class GameController : Node
 
     public int NUMBER_OF_PLAYERS = 2;
     
-    // This will likely be fine, as the grid size will not change during play.
-    public Vector2I gridSize => currentGameState.gridSize;
+    
+    public Vector2I gridUpperCorner => currentGameState.gridUpperCorner;
+    public Vector2I gridLowerCorner => currentGameState.gridLowerCorner;
+    
     
     // Grid is also unchanging, only changing its contents. Mutex only has to be
     // used as needed when altering / using contents.

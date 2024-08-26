@@ -12,7 +12,8 @@ var piece_scene: PackedScene = preload("res://scenes/game/piece/piece.tscn")
 var in_game: bool
 var game: Game
 var grid
-var grid_size: Vector2i
+var grid_upper_corner: Vector2i
+var grid_lower_corner: Vector2i
 var board: Board2D
 
 # Mutex
@@ -101,7 +102,8 @@ func init() -> void:
 	game_controller.FullInit(is_multiplayer_authority())
 	grid = game_controller.grid
 	
-	grid_size = game_controller.gridSize
+	grid_upper_corner = game_controller.gridUpperCorner
+	grid_lower_corner = game_controller.gridLowerCorner
 	
 	# Get the mutex
 	task_mutex = game_controller.taskMutex
@@ -120,9 +122,15 @@ func setup_signals() -> void:
 	
 	game_controller.PieceRemoved.connect(_on_piece_taken)
 	game_controller.SendNotice.connect(send_notice)
+	
+	game_controller.UpperBoundChanged.connect(_on_upper_bound_changed)
+	game_controller.LowerBoundChanged.connect(_on_lower_bound_changed)
 
+func _on_upper_bound_changed(new_bound: Vector2i) -> void:
+	grid_upper_corner = new_bound
 
-
+func _on_lower_bound_changed(new_bound: Vector2i) -> void:
+	grid_lower_corner = new_bound
 
 
 func start_game(game_seed: int) -> void:
@@ -379,7 +387,7 @@ func place_piece(piece_id: String, link_id: int, team: int, x: int, y: int, id: 
 
 func place_matching(piece_id: String, id: int, x: int, y: int) -> void:
 	place_piece(piece_id, id, 0, x, y)
-	place_piece(piece_id, id, 1, x, game_controller.gridSize.y - y - 1)
+	place_piece(piece_id, id, 1, x, grid_upper_corner.y - y - 1)
 
 
 
@@ -395,14 +403,14 @@ func spaces_off_board(x: int, y: int) -> int:
 	# If it's on the board, return 0
 	var return_val: int = 0
 	# Return the largest distance off the board
-	if x < 0:
-		return_val = max(return_val, abs(x))
-	elif x >= grid_size.x:
-		return_val = max(return_val, abs(grid_size.x - 1 - x))
-	if y < 0:
-		return_val = max(return_val, abs(y))
-	elif y >= grid_size.y:
-		return_val = max(return_val, abs(grid_size.y - 1 - y))
+	if x < grid_lower_corner.x:
+		return_val = max(return_val, abs(grid_lower_corner.x - x))
+	elif x >= grid_upper_corner.x:
+		return_val = max(return_val, abs(grid_upper_corner.x - 1 - x))
+	if y < grid_lower_corner.y:
+		return_val = max(return_val, abs(grid_lower_corner.y - y))
+	elif y >= grid_upper_corner.y:
+		return_val = max(return_val, abs(grid_upper_corner.y - 1 - y))
 	return return_val
 
 ## Tasks

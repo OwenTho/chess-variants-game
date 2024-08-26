@@ -21,6 +21,12 @@ public partial class GameController
     [Signal]
     public delegate void SendNoticeEventHandler(int playerTarget, string text);
 
+    [Signal]
+    public delegate void UpperBoundChangedEventHandler(Vector2I newBound);
     
+    [Signal]
+    public delegate void LowerBoundChangedEventHandler(Vector2I newBound);
+
+
     // Game Controller
 }
