@@ -3,13 +3,22 @@ using Godot.Collections;
 
 public partial class GridCell<T> : Node
 {
-    internal int x;
-    internal int y;
+    internal Vector2I _pos;
 
-    public Vector2I pos { get { return new Vector2I(x, y); } }
+    public Vector2I pos
+    {
+        get => _pos;
+        set => SetPos(value);
+    }
+
+    public int x => _pos.X;
+    public int y => _pos.Y;
+    
 
     private Grid<T> _grid;
-    public Grid<T> grid { get { return _grid; } internal set
+    public Grid<T> grid { 
+        get => _grid;
+        internal set
         {
             _grid = value;
             foreach (var item in items)
@@ -20,18 +29,27 @@ public partial class GridCell<T> : Node
     }
     public Array<GridItem<T>> items { get; internal set; } = new();
 
-    public void SetPos(int x, int y)
+    /**
+     * Updates the position of the cell.
+     * <br></br><br></br>
+     * Setting it to the position of another cell will remove that other cell from the Grid.
+     */
+    public void SetPos(Vector2I newPos)
     {
         // If position is the same, ignore
-        if (this.x == x && this.y == y) return;
+        if (_pos == newPos) return;
 
-        this.x = x;
-        this.y = y;
+        grid.UpdateCellPos(this, newPos);
         // Update all items, as they have "moved" from one cell to another
         foreach (var item in items)
         {
             item.cell = this;
         }
+    }
+    
+    public void SetPos(int newX, int newY)
+    {
+        SetPos(new Vector2I(newX, newY));
     }
 
     public bool HasItem(GridItem<T> item)
@@ -52,6 +70,7 @@ public partial class GridCell<T> : Node
         // then remove it from that cell.
         if (item.cell != null)
         {
+            // Don't update the item, as it will be updated on being added.
             item.cell.RemoveItem(item, false);
         }
         if (HasItem(item))

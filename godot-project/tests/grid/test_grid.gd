@@ -40,7 +40,7 @@ func test_setup():
 	
 	# Make sure the 5 items are in the right place on the grid
 	for i in range(5):
-		assert_true(grid.HasCellAt(i-2,i-2), "Missing a cell on the diagonal.")
+		assert_true(grid.HasCellAt(i-2,i-2), "There should be a cell at %s, %s on the diagonal." % [i-2,i-2])
 		assert_true(items[i].grid == grid, "Item %s should be on the grid." % [i])
 		assert_true(items[i].cell != null, "Item %s should have a cell." % [i])
 		assert_true(cells[i].grid == grid, "Cell %s should be on the grid." % [i])
@@ -73,7 +73,7 @@ func test_place_new():
 	var cell_before = cells[2]
 	grid.PlaceItemAt(middle_item, 1, 0)
 	
-	assert_false(grid.HasCellAt(0,0), "The cell as 0,0 should no longer be there.")
+	assert_false(grid.HasCellAt(0,0), "The cell at 0,0 should no longer be there.")
 	assert_true(grid.HasCellAt(1,0), "There should now be a cell at 1,0.")
 	assert_true(cell_before == grid.GetCellAt(1,0), "The cell the item is in should have moved, not made a new one.")
 	assert_true(middle_item.cell == cell_before, "The cell the item is in should have moved, not made a new one.")
