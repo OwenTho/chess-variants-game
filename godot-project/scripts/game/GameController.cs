@@ -30,19 +30,7 @@ public partial class GameController : Node
     
     // Grid is also unchanging, only changing its contents. Mutex only has to be
     // used as needed when altering / using contents.
-    public Grid<GameItem> grid => currentGameState.grid;
-
-    public Vector2I GetTeamDirection(int teamId)
-    {
-        switch (teamId)
-        {
-            case 0:
-                return Vector2I.Down;
-            case 1:
-                return Vector2I.Up;
-        }
-        return Vector2I.Zero;
-    }
+    public Grid<Piece> pieceGrid => currentGameState.pieceGrid;
 
     public Array<string> GetPieceKeys()
     {
@@ -252,6 +240,26 @@ public partial class GameController : Node
         Piece returnPiece = currentGameState.PlacePiece(pieceId, linkId, teamId, x, y, id);
         gameMutex.Unlock();
         return returnPiece;
+    }
+
+    public void MovePiece(Piece piece, int x, int y)
+    {
+        currentGameState.MovePiece(piece, x, y);
+    }
+
+    public void MovePieceId(int piece, int x, int y)
+    {
+        currentGameState.MovePiece(piece, x, y);
+    }
+
+    public void TakePiece(Piece piece, Piece attacker)
+    {
+        currentGameState.TakePiece(piece, attacker);
+    }
+
+    public void TakePieceId(int piece, int attackerId)
+    {
+        currentGameState.TakePiece(piece, attackerId);
     }
 
     public void SwapPieceTo(int piece_id, string info_id)

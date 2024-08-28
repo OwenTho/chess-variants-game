@@ -13,10 +13,12 @@ internal partial class NoTeamAttackRule : ValidationRuleBase
         // If specific targets, it's invalid if it's a teammate
         if (attackAction.HasSpecificVictims())
         {
-            if (attackAction.specificVictim.teamId == piece.teamId)
+            if (game.TryGetPiece(attackAction.specificVictimId, out Piece specificVictim))
             {
-                action.InvalidTag("team_attack");
-                return;
+                if (specificVictim.teamId == piece.teamId)
+                {
+                    attackAction.moveAction.RemoveInvalidTag("team_overlap");
+                }
             }
         }
         // If the victim and attacker are on the same side, make the attack invalid

@@ -3,25 +3,28 @@ using Godot;
 
 public partial class MoveOther : MoveAction
 {
-    private Piece movePiece;
-    public MoveOther(Piece owner, Vector2I actionLocation, Vector2I moveLocation, Piece movePiece) : base(owner, actionLocation, moveLocation)
+    private int movePieceId;
+    public MoveOther(Piece owner, Vector2I actionLocation, Vector2I moveLocation, int movePieceId) : base(owner, actionLocation, moveLocation)
     {
         this.moveLocation = moveLocation;
-        this.movePiece = movePiece;
+        this.movePieceId = movePieceId;
     }
 
     public override void ActOn(GameState game, Piece piece)
     {
         // Move piece
-        game.MovePiece(movePiece, moveLocation.X, moveLocation.Y);
-        // Now that piece has moved, it needs to be updated
-        movePiece.EnableActionsUpdate();
-        movePiece.timesMoved += 1;
+        if (game.TryGetPiece(movePieceId, out Piece movePiece))
+        {
+            game.MovePiece(movePiece, moveLocation.X, moveLocation.Y);
+            // Now that piece has moved, it needs to be updated
+            movePiece.EnableActionsUpdate();
+            movePiece.timesMoved += 1;
+        }
     }
 
     public override object Clone()
     {
-        MoveOther newMove = new MoveOther(null, actionLocation, moveLocation, null);
+        MoveOther newMove = new MoveOther(null, actionLocation, moveLocation, -1);
         CloneTo(newMove);
         return newMove;
     }
@@ -34,9 +37,9 @@ public partial class MoveOther : MoveAction
             newDictionary.Add("attackAction", attackAction.actionId);
         }
 
-        if (movePiece != null)
+        if (movePieceId != null)
         {
-            newDictionary.Add("movePiece", movePiece.id);
+            newDictionary.Add("movePiece", movePieceId);
         }
 
         return newDictionary;
@@ -54,10 +57,7 @@ public partial class MoveOther : MoveAction
         
         if (extraLinks.TryGetValue("movePiece", out int pieceId))
         {
-            if (game.TryGetPiece(pieceId, out Piece piece))
-            {
-                movePiece = piece;
-            }
+            movePieceId = pieceId;
         }
     }
 }

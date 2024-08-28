@@ -4,7 +4,7 @@ using Godot.Collections;
 
 public partial class AttackAction : ActionBase
 {
-    public Piece specificVictim; // Leave null unless needed
+    public int specificVictimId = -1; // Leave null unless needed
     public Vector2I attackLocation;
     public MoveAction moveAction;
     public AttackAction(Piece owner, Vector2I actionLocation, Vector2I attackLocation, MoveAction moveAction = null) : base(owner, actionLocation)
@@ -13,14 +13,14 @@ public partial class AttackAction : ActionBase
         this.moveAction = moveAction;
     }
 
-    public void AddVictim(Piece piece)
+    public void AddVictim(int pieceId)
     {
-        specificVictim = piece;
+        specificVictimId = pieceId;
     }
 
     public bool HasSpecificVictims()
     {
-        if (specificVictim == null)
+        if (specificVictimId <= -1)
         {
             return false;
         }
@@ -38,7 +38,7 @@ public partial class AttackAction : ActionBase
         // If there are special victims, only take those
         if (HasSpecificVictims())
         {
-            game.TakePiece(specificVictim, piece);
+            game.TakePiece(specificVictimId, piece.id);
             return;
         }
         // Otherwise, if there are no victims, just take whatever isn't on this
@@ -76,9 +76,9 @@ public partial class AttackAction : ActionBase
             newDictionary.Add("moveAction", moveAction.actionId);
         }
 
-        if (specificVictim != null)
+        if (specificVictimId != null)
         {
-            newDictionary.Add("victim", specificVictim.id);
+            newDictionary.Add("victim", specificVictimId);
         }
 
         return newDictionary;
@@ -96,10 +96,7 @@ public partial class AttackAction : ActionBase
 
         if (extraLinks.TryGetValue("victim", out int id))
         {
-            if (game.TryGetPiece(id, out Piece piece))
-            {
-                specificVictim = piece;
-            }
+            specificVictimId = id;
         }
     }
 }

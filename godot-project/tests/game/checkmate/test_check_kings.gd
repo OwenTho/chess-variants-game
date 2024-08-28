@@ -8,8 +8,10 @@ func test_nothing() -> void:
 	start_game_with_seed(game_state.gameRandom.seed)
 	
 	# Both players should immediately be in check
-	assert_true(game_state.PlayerHasNoKing(0))
-	assert_true(game_state.PlayerHasNoKing(1))
+	assert_true(game_state.PlayerHasNoKing(0), "Player 0 should have the 'NoKing' state.")
+	assert_false(game_state.PlayerInCheck(0), "Player 0 should not be in Check.")
+	assert_true(game_state.PlayerHasNoKing(1), "Player 1 should have the 'NoKing' state.")
+	assert_false(game_state.PlayerInCheck(1), "Player 1 should not be in Check.")
 
 
 
@@ -27,8 +29,8 @@ func test_kings() -> void:
 	start_game_with_seed(game_state.gameRandom.seed)
 	
 	# Neither should be in check
-	assert_false(game_state.PlayerInCheck(0))
-	assert_false(game_state.PlayerInCheck(1))
+	assert_false(game_state.PlayerInCheck(0), "Player 0 should not be in Check.")
+	assert_false(game_state.PlayerInCheck(1), "Player 1 should not be in Check.")
 	
 	# Move King on team 0 to the middle
 	# Has to be forced as the Action is invalid
@@ -40,8 +42,8 @@ func test_kings() -> void:
 	next_turn(1)
 	
 	# Both players should be in check
-	assert_true(game_state.PlayerInCheck(0))
-	assert_true(game_state.PlayerInCheck(1))
+	assert_true(game_state.PlayerInCheck(0), "Player 1 should be in Check.")
+	assert_true(game_state.PlayerInCheck(1), "Player 2 should be in Check.")
 	
 	# Removing one King should result in that king
 	# "check" (having check set to "NoKing"), and the other not.
@@ -53,6 +55,6 @@ func test_kings() -> void:
 	next_turn(0)
 	
 	# Neither should be in check, but player 2 should have no king
-	assert_false(game_state.PlayerInCheck(0))
-	assert_false(game_state.PlayerInCheck(1))
-	assert_true(game_state.PlayerHasNoKing(1))
+	assert_false(game_state.PlayerInCheck(0), "Player 0 should not be in Check.")
+	assert_false(game_state.PlayerInCheck(1), "Player 1 should not be in Check.")
+	assert_true(game_state.PlayerHasNoKing(1), "Player 1 should have the 'NoKing' state.")

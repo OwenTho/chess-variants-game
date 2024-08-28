@@ -111,7 +111,7 @@ public partial class Grid<T> : Node
         // If cell is removed, free it. This is because only
         // the Grid should use GridCell, so if it's removed then
         // it should be removed from memory.
-        cell.QueueFree();
+        cell.CallDeferred(Node.MethodName.QueueFree);
         return cells.Remove(cell);
     }
 
@@ -234,7 +234,7 @@ public partial class Grid<T> : Node
     
     
     // Place an item at a position
-    public GridCell<T> PlaceItemAt(GridItem<T> item, Vector2I pos)
+    public GridCell<T> PlaceItemAt(GridItem<T> item, Vector2I pos, bool setGrid = true)
     {
         // Ignore if item is null
         if (item == null)
@@ -252,12 +252,12 @@ public partial class Grid<T> : Node
             }
 
             // If the item is on another grid, remove it from that grid
-            if (item.grid != null && !ReferenceEquals(item.grid, this))
+            if (setGrid && item.grid != null && !ReferenceEquals(item.grid, this))
             {
                 item.grid.RemoveItem(item);
             }
             // Now add the item to the cell.
-            cell.AddItem(item);
+            cell.AddItem(item, setGrid);
             return cell;
         }
 
@@ -274,7 +274,7 @@ public partial class Grid<T> : Node
         }
 
         // If it's on another grid, remove it.
-        if (item.grid != null && !ReferenceEquals(item.grid, this))
+        if (setGrid && item.grid != null && !ReferenceEquals(item.grid, this))
         {
             item.grid.RemoveItem(item);
         }
@@ -282,13 +282,13 @@ public partial class Grid<T> : Node
         // If none of the above puts the item onto a cell,
         // make a new cell for the item.
         GridCell<T> newCell = MakeNewCellAt(pos);
-        newCell.AddItem(item);
+        newCell.AddItem(item, setGrid);
         return newCell;
     }
     
-    public GridCell<T> PlaceItemAt(GridItem<T> item, int x, int y)
+    public GridCell<T> PlaceItemAt(GridItem<T> item, int x, int y, bool setGrid = true)
     {
-        return PlaceItemAt(item, new Vector2I(x, y));
+        return PlaceItemAt(item, new Vector2I(x, y), setGrid);
     }
 
     public void SwapCells(GridCell<T> cell1, GridCell<T> cell2)

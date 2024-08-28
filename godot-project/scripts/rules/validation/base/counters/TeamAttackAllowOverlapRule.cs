@@ -19,9 +19,12 @@ public partial class TeamAttackAllowOverlapRule : ValidationRuleBase
         // If it has a specific target, remove team_overlap as it doesn't matter
         if (attackAction.HasSpecificVictims())
         {
-            if (attackAction.specificVictim.teamId == piece.teamId)
+            if (game.TryGetPiece(attackAction.specificVictimId, out Piece specificVictim))
             {
-                attackAction.moveAction.RemoveInvalidTag("team_overlap");
+                if (specificVictim.teamId == piece.teamId)
+                {
+                    attackAction.moveAction.RemoveInvalidTag("team_overlap");
+                }
             }
             return;
         }

@@ -11,7 +11,7 @@ var piece_scene: PackedScene = preload("res://scenes/game/piece/piece.tscn")
 # Game
 var in_game: bool
 var game: Game
-var grid
+var piece_grid
 var grid_upper_corner: Vector2i
 var grid_lower_corner: Vector2i
 var board: Board2D
@@ -68,7 +68,7 @@ func reset_game() -> void:
 	in_game = false
 	board = null
 	game = null
-	grid = null
+	piece_grid = null
 	task_mutex = null
 	game_mutex = null
 	thread_mutex = null
@@ -100,7 +100,7 @@ func init() -> void:
 	
 	# Initialise the game
 	game_controller.FullInit(is_multiplayer_authority())
-	grid = game_controller.grid
+	piece_grid = game_controller.pieceGrid
 	
 	grid_upper_corner = game_controller.gridUpperCorner
 	grid_lower_corner = game_controller.gridLowerCorner
@@ -330,7 +330,7 @@ func init_board() -> void:
 func board_to_array() -> Array:
 	var ret_array: Array = []
 	game_mutex.lock()
-	for cell in grid.cells:
+	for cell in piece_grid.cells:
 		var cell_pos: Vector2i = cell.pos
 		for item in cell.items:
 			var this_item: Array = []
@@ -387,7 +387,7 @@ func place_piece(piece_id: String, link_id: int, team: int, x: int, y: int, id: 
 
 func place_matching(piece_id: String, id: int, x: int, y: int) -> void:
 	place_piece(piece_id, id, 0, x, y)
-	place_piece(piece_id, id, 1, x, grid_upper_corner.y - y - 1)
+	place_piece(piece_id, id, 1, x, grid_upper_corner.y - y)
 
 
 
@@ -405,12 +405,12 @@ func spaces_off_board(x: int, y: int) -> int:
 	# Return the largest distance off the board
 	if x < grid_lower_corner.x:
 		return_val = max(return_val, abs(grid_lower_corner.x - x))
-	elif x >= grid_upper_corner.x:
-		return_val = max(return_val, abs(grid_upper_corner.x - 1 - x))
+	elif x > grid_upper_corner.x:
+		return_val = max(return_val, abs(grid_upper_corner.x - x))
 	if y < grid_lower_corner.y:
 		return_val = max(return_val, abs(grid_lower_corner.y - y))
-	elif y >= grid_upper_corner.y:
-		return_val = max(return_val, abs(grid_upper_corner.y - 1 - y))
+	elif y > grid_upper_corner.y:
+		return_val = max(return_val, abs(grid_upper_corner.y - y))
 	return return_val
 
 ## Tasks

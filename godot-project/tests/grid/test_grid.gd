@@ -24,7 +24,7 @@ func before_each() -> void:
 	for i in range(5):
 		var new_item = grid_item.new()
 		items.append(new_item)
-		cells.append(grid.PlaceItemAt(new_item, i-2, i-2))
+		cells.append(grid.PlaceItemAt(new_item, Vector2i(i-2, i-2), true))
 
 
 func after_each() -> void:
@@ -71,7 +71,7 @@ func test_place_new():
 	# Move 0,0 to 1,0
 	var middle_item = items[2]
 	var cell_before = cells[2]
-	grid.PlaceItemAt(middle_item, 1, 0)
+	grid.PlaceItemAt(middle_item, Vector2i(1,0), true)
 	
 	assert_false(grid.HasCellAt(0,0), "The cell at 0,0 should no longer be there.")
 	assert_true(grid.HasCellAt(1,0), "There should now be a cell at 1,0.")
@@ -88,15 +88,21 @@ func test_place_move():
 	
 	for i in range(5):
 		# Move the item to 0,0
-		grid.PlaceItemAt(items[i], 0, 0)
+		grid.PlaceItemAt(items[i], Vector2i(0,0), true)
 		
 		if i == 2:
 			# Special case for middle item, as it shouldn't move.
+			if items[i].cell == null:
+				fail_test("Middle item %s does not have a cell after being placed. (Other tests skipped, as they may fail)" % [i])
+				continue
 			assert_true(items[i].cell == middle_cell, "Item %s should have stayed in the middle cell." % [i])
 			assert_true(grid.HasCellAt(0,0), "There should still be a cell at 0,0.")
 			assert_true(items[i].cell.ItemCount() == items_in_middle, "There should still be %s items in the middle cell." % [items_in_middle])
 		else:
 			# Make sure the item was moved, and the cell removed
+			if items[i].cell == null:
+				fail_test("Item %s does not have a cell after being placed. (Other tests skipped, as they may fail)" % [i])
+				continue
 			items_in_middle += 1
 			assert_true(items[i].cell == middle_cell, "Item %s should have been moved to the middle cell." % [i])
 			assert_true(items[i].cell.ItemCount() == items_in_middle, "There should be %s items in the middle cell." % [items_in_middle])

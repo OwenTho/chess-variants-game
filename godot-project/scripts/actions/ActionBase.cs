@@ -30,6 +30,9 @@ public abstract partial class ActionBase : GridItem<ActionBase>
     // Tags that make this action invalid. Add to this in Verification Rules.
     public CountingTags invalidTags { get; } = new CountingTags();
 
+    // A stored validation, for use with Check checks.
+    internal bool StoredValidation = true;
+
     public ActionBase(Piece owner, Vector2I actionLocation)
     {
         this.actionLocation = actionLocation;
@@ -294,6 +297,11 @@ public abstract partial class ActionBase : GridItem<ActionBase>
         invalidTags.Clear();
     }
 
+    internal void SetValidToStored()
+    {
+        valid = StoredValidation;
+    }
+    
     public void SetOwner(Piece newOwner, CarryType carryType = CarryType.Down)
     {
         

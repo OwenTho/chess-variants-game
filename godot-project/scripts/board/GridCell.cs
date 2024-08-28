@@ -64,11 +64,11 @@ public partial class GridCell<T> : Node
 
 
 
-    public bool AddItem(GridItem<T> item)
+    public bool AddItem(GridItem<T> item, bool setGrid = true)
     {
         // If item already has a cell, and it's not this one,
         // then remove it from that cell.
-        if (item.cell != null)
+        if (setGrid && item.cell != null)
         {
             // Don't update the item, as it will be updated on being added.
             item.cell.RemoveItem(item, false);
@@ -78,9 +78,12 @@ public partial class GridCell<T> : Node
             return false;
         }
         items.Add(item);
-        CallDeferred(Node.MethodName.AddChild, item);
-        item.cell = this;
-        item.grid = grid;
+        if (setGrid)
+        {
+            CallDeferred(Node.MethodName.AddChild, item);
+            item.cell = this;
+            item.grid = grid;
+        }
         return true;
     }
 

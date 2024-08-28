@@ -15,7 +15,7 @@ func test_move_to_check() -> void:
 	assert_false(game_state.PlayerInCheck(0))
 	
 	# King shouldn't be able to move in to check
-	assert_false(piece_act_at(king, 0, 0))
+	assert_false(piece_act_at(king, 0, 0), "King should not be able to move into check.")
 
 
 
@@ -31,10 +31,10 @@ func test_attack_defended_piece() -> void:
 	start_game()
 	
 	# King should not be in check
-	assert_false(game_state.PlayerInCheck(0))
+	assert_false(game_state.PlayerInCheck(0), "Team 0 should not be in Check.")
 	
 	# King shouldn't be able to take the rook
-	assert_false(piece_act_at(king, 0, 1))
+	assert_false(piece_act_at(king, 0, 1), "King should not be able to take the rook.")
 
 
 
@@ -51,13 +51,13 @@ func test_move_defending_piece() -> void:
 	start_game()
 	
 	# King should not be in check
-	assert_false(game_state.PlayerInCheck(0))
+	assert_false(game_state.PlayerInCheck(0), "King should not be in check.")
 	
 	# Try to move pawn up
 	# . ♟️ . .
 	# 👑. . 🏰 
 
-	assert_false(piece_act_at(pawn, 1, 1))
+	assert_false(piece_act_at(pawn, 1, 1), "Pawn should not be able to move up.")
 
 
 
@@ -73,11 +73,11 @@ func test_move_non_save() -> void:
 	start_game()
 	
 	# King should be in check
-	assert_true(game_state.PlayerInCheck(0))
+	assert_true(game_state.PlayerInCheck(0), "King should not be in check.")
 	
 	# Try to move pawn up, when king is in check
 	# . ♟️ . .
 	# . . . .
 	# 👑. . 🏰 
 
-	assert_false(piece_act_at(pawn, 1, 2))
+	assert_false(piece_act_at(pawn, 1, 2), "Pawn should not be able to move forward while the King is in Check.")

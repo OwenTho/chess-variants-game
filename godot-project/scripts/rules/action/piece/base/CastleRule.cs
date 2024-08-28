@@ -56,7 +56,7 @@ public partial class CastleRule : ActionRuleBase
                     piece.AddAction(newMove);
                     
                     // then we need to create a move for it 2 back and the current piece and create dependency slides back
-                    MoveOther otherMove = new MoveOther(piece, actionLocation, actionLocation - direction, checkPiece);
+                    MoveOther otherMove = new MoveOther(piece, actionLocation, actionLocation - direction, checkPiece.id);
                     piece.AddAction(otherMove);
                     
                     // New move has to be dependent on a slide, whereas the other move jumps over afterward

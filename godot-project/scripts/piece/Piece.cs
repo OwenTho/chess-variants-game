@@ -1,8 +1,7 @@
-using System;
 using Godot;
 using Godot.Collections;
 
-public partial class Piece : GameItem
+public partial class Piece : GridItem<Piece>
 {
     public int timesMoved = 0;
     internal int teamId = 0;
@@ -19,6 +18,8 @@ public partial class Piece : GameItem
             // Only send out a signal if the value is different
             if (_info != value)
             {
+                // Enable Action updates, as the info of the piece has changed
+                EnableActionsUpdate();
                 CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.InfoChanged, value);
             }
             _info = value;
@@ -26,7 +27,7 @@ public partial class Piece : GameItem
     }
     public int id { get; internal set; }
     public int linkId { get; internal set; }
-    public Vector2I forwardDirection = Vector2I.Down;
+    public PieceDirection forwardDirection = PieceDirection.Down;
 
     public Tags tags = new Tags();
 
@@ -151,7 +152,7 @@ public partial class Piece : GameItem
         actionsToTake.Remove(action);
     }
 
-    private Array<ActionBase> VerifyMyActions(GameState game)
+    internal Array<ActionBase> VerifyMyActions(GameState game)
     {
         return ValidateActions(game, actionsToTake.possibleActions);
     }
@@ -200,7 +201,13 @@ public partial class Piece : GameItem
         {
             if (IsInstanceValid(action))
             {
-                action.QueueFree();
+                // Only continue if this piece (by reference) owns the action.
+                if (action.owner != this)
+                {
+                    continue;
+                }
+                action.CallDeferred(Node.MethodName.QueueFree);
+
                 if (action.cell != null)
                 {
                     action.cell.RemoveItem(action);
@@ -253,7 +260,7 @@ public partial class Piece : GameItem
     }
     
 
-    public override Piece Clone()
+    public Piece Clone()
     {
         Piece newPiece = new Piece();
         // Copy variables

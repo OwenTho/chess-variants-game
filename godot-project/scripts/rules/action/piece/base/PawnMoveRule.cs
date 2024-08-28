@@ -11,7 +11,7 @@ internal partial class PawnMoveRule : ActionRuleBase
         MoveAction lastMove = null;
         for (int i = 1; i <= maxForward; i++)
         {
-            Vector2I actionPos = thisPosition + (piece.forwardDirection * i);
+            Vector2I actionPos = thisPosition + (piece.forwardDirection.AsVector() * i);
             MoveAction newMove = new MoveAction(piece, actionPos, actionPos);
             if (lastMove != null)
             {
@@ -24,7 +24,7 @@ internal partial class PawnMoveRule : ActionRuleBase
         // Allow an extra space forward for the first turn
         if (piece.timesMoved == 0)
         {
-            Vector2I actionPos = thisPosition + (piece.forwardDirection * (maxForward + 1));
+            Vector2I actionPos = thisPosition + (piece.forwardDirection.AsVector() * (maxForward + 1));
             PawnMoveAction newMove = new PawnMoveAction(piece, actionPos, actionPos);
             if (lastMove != null)
             {
@@ -40,8 +40,8 @@ internal partial class PawnMoveRule : ActionRuleBase
         MoveAction prevLeft = null;
         for (int i = 1; i <= maxForward; i++)
         {
-            prevRight = Attack(piece, thisPosition + ((piece.forwardDirection + Vector2I.Right) * i), AttackType.MoveIf, prevRight).moveAction;
-            prevLeft = Attack(piece, thisPosition + ((piece.forwardDirection + Vector2I.Left) * i), AttackType.MoveIf, prevLeft).moveAction;
+            prevRight = Attack(piece, thisPosition + ((piece.forwardDirection.AsVector() + Vector2I.Right) * i), AttackType.MoveIf, prevRight).moveAction;
+            prevLeft = Attack(piece, thisPosition + ((piece.forwardDirection.AsVector() + Vector2I.Left) * i), AttackType.MoveIf, prevLeft).moveAction;
         }
 
         // If next to a piece that moved twice, allow En passant
@@ -58,9 +58,9 @@ internal partial class PawnMoveRule : ActionRuleBase
                 // Ignore pieces of the same id, and that don't have the pawn_initial tag
                 if (victim.teamId != piece.teamId && victim.tags.Contains("pawn_initial"))
                 {
-                    Vector2I attackPos = position + piece.forwardDirection;
+                    Vector2I attackPos = position + piece.forwardDirection.AsVector();
                     AttackAction newAttack = new AttackAction(piece, attackPos, attackPos);
-                    newAttack.AddVictim(victim);
+                    newAttack.AddVictim(victim.id);
                     piece.AddAction(newAttack);
 
                     MoveAction newMove = new MoveAction(piece, attackPos, attackPos);
