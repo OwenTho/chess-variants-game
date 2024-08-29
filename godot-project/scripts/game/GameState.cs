@@ -790,7 +790,6 @@ public partial class GameState : Node
                     }
                     if (!DoesActionCheck(action.actionLocation, piece))
                     {
-                        GD.Print($"Found no check with {piece.info.pieceId}:{piece.id} with action ({action.actionLocation.X}, {action.actionLocation.Y})");
                         foundNoCheck = true;
                         break;
                     }
@@ -845,13 +844,8 @@ public partial class GameState : Node
                     // the player in to Check.
                     if (!DoesActionCheck(action.actionLocation, piece))
                     {
-                        GD.Print($"{piece.info.pieceId}:{piece.id} can move, not stalemate.");
                         isStalemate = false;
                         break;
-                    }
-                    else
-                    {
-                        GD.Print($"{piece.info.pieceId}:{piece.id} cannot move.");
                     }
                 }
 
