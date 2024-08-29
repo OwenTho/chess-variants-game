@@ -20,8 +20,6 @@ public partial class GameController : Node
 
     private GodotThread gameThread;
     public bool singleThread = false;
-
-    public int NUMBER_OF_PLAYERS = 2;
     
     
     public Vector2I gridUpperCorner => currentGameState.gridUpperCorner;

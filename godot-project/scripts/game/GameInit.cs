@@ -35,7 +35,7 @@ public partial class GameController
     public GameState InitGameState(bool needToCheck)
     {
         // Create the GameState
-        currentGameState = new GameState(this);
+        currentGameState = new GameState(this, 2);
         currentGameState.Init(needToCheck);
         AddChild(currentGameState);
         

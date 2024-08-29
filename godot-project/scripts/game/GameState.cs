@@ -12,6 +12,7 @@ public partial class GameState : Node
     private int lastId = 0;
     public int currentPlayerNum;
 
+    public int numberOfPlayers { get; private set; }
     public string KingId { get; set; } = "king";
 
     private Vector2I _gridUpperCorner;
@@ -66,9 +67,10 @@ public partial class GameState : Node
 
     public CheckType[] playerCheck;
 
-    public GameState(GameController gameController)
+    public GameState(GameController gameController, int numberOfPlayers)
     {
         this.gameController = gameController;
+        this.numberOfPlayers = numberOfPlayers;
     }
 
     internal void Init(bool needToCheck)
@@ -86,13 +88,13 @@ public partial class GameState : Node
         gameRandom = new RandomNumberGenerator();
         cards = new Array<CardBase>();
 
-        playerCheck = new CheckType[gameController.NUMBER_OF_PLAYERS];
+        playerCheck = new CheckType[numberOfPlayers];
         for (int i = 0; i < playerCheck.Length; i++)
         {
             playerCheck[i] = CheckType.None;
         }
 
-        this.isServer = needToCheck;
+        isServer = needToCheck;
     }
     
     public PieceDirection GetTeamDirection(int teamId)
@@ -110,7 +112,7 @@ public partial class GameState : Node
     public void SetPlayerNum(int newPlayerNum)
     {
         currentPlayerNum = newPlayerNum;
-        currentPlayerNum %= gameController.NUMBER_OF_PLAYERS;
+        currentPlayerNum %= numberOfPlayers;
         if (currentPlayerNum < 0)
         {
             currentPlayerNum = 0;
@@ -583,7 +585,7 @@ public partial class GameState : Node
         }
 
         // Loop again, to disable certain check moves
-        int[] kingCount = new int[gameController.NUMBER_OF_PLAYERS];
+        int[] kingCount = new int[numberOfPlayers];
         
         List<Piece> kings = new List<Piece>();
         
@@ -710,7 +712,7 @@ public partial class GameState : Node
         // Check if either player is missing a King
         // This is prioritised over being in Checkmate, as having no King means Checkmate
         // isn't possible
-        for (int teamNum = 0; teamNum < gameController.NUMBER_OF_PLAYERS; teamNum++)
+        for (int teamNum = 0; teamNum < numberOfPlayers; teamNum++)
         {
             if (kingCount[teamNum] == 0)
             {
@@ -723,7 +725,7 @@ public partial class GameState : Node
         
         // Check if each player is in check
         bool checkmate = false;
-        for (int teamNum = 0; teamNum < gameController.NUMBER_OF_PLAYERS; teamNum++)
+        for (int teamNum = 0; teamNum < numberOfPlayers; teamNum++)
         {
             // If the team is not the one playing, it means they won't be able to move anyway
             if (teamNum != currentPlayerNum)
@@ -943,7 +945,7 @@ public partial class GameState : Node
     public GameState Clone()
     {
         // Initialise the new state
-        GameState newState = new GameState(gameController);
+        GameState newState = new GameState(gameController, numberOfPlayers);
         newState.Init(isServer);
         // Copy over the seed so any randomness follows the same
         newState.gameRandom.Seed = gameRandom.Seed;
