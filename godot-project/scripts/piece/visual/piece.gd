@@ -10,6 +10,9 @@ func _ready() -> void:
 	piece_data.ChangedCell.connect(_on_move)
 	piece_data.InfoChanged.connect(_on_info_changed)
 
+func _process(delta: float) -> void:
+	z_index = clampi(global_position.y, RenderingServer.CANVAS_ITEM_Z_MIN, RenderingServer.CANVAS_ITEM_Z_MAX)
+
 func _on_move(new_cell) -> void:
 	if new_cell != null:
 		if _cur_move_tween != null:
