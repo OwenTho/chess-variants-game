@@ -16,6 +16,9 @@ public partial class GameController
     public delegate void PlayerLostEventHandler(int playerNum);
 
     [Signal]
+    public delegate void GameStalemateEventHandler(int stalematePlayer);
+
+    [Signal]
     public delegate void PieceRemovedEventHandler(Piece removedPiece, Piece attackerPiece);
     
     [Signal]

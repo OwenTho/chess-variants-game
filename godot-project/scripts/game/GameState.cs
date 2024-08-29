@@ -62,7 +62,8 @@ public partial class GameState : Node
         None,
         NoKing,
         InCheck,
-        PossibleCheckmate
+        PossibleCheckmate,
+        PossibleStalemate
     }
 
     public CheckType[] playerCheck;
@@ -696,9 +697,16 @@ public partial class GameState : Node
                 }
             }
 
-            if (!canMove && playerCheck[king.teamId] == CheckType.InCheck)
+            if (!canMove)
             {
-                playerCheck[king.teamId] = CheckType.PossibleCheckmate;
+                if (playerCheck[king.teamId] == CheckType.InCheck)
+                {
+                    playerCheck[king.teamId] = CheckType.PossibleCheckmate;
+                }
+                else
+                {
+                    playerCheck[king.teamId] = CheckType.PossibleStalemate;
+                }
             }
         }
         
@@ -806,6 +814,60 @@ public partial class GameState : Node
         {
             CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, -1, "Checkmate!");
             CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.PlayerLost, currentPlayerNum);
+        }
+        
+        // Check if the game is in Stalemate
+        // Check if the current playing team is possibly in stalemate.
+        if (playerCheck[currentPlayerNum] == CheckType.PossibleStalemate)
+        {
+            bool isStalemate = true;
+            // Check all piece actions
+            foreach (var piece in allPieces)
+            {
+                // Only check the current team
+                if (piece.teamId != currentPlayerNum)
+                {
+                    continue;
+                }
+
+                // If there are any valid actions, then the game is not in stalemate.
+                List<Vector2I> checkLocations = new();
+                foreach (var action in piece.currentPossibleActions)
+                {
+                    // If the location is already checked, or the action is invalid, ignore
+                    if (checkLocations.Contains(action.actionLocation) || !action.valid)
+                    {
+                        continue;
+                    }
+                    checkLocations.Add(action.actionLocation);
+                    // Only continue if the move does not result in Check. This is neeeded,
+                    // otherwise it will accept moves that aren't possible due to them putting
+                    // the player in to Check.
+                    if (!DoesActionCheck(action.actionLocation, piece))
+                    {
+                        GD.Print($"{piece.info.pieceId}:{piece.id} can move, not stalemate.");
+                        isStalemate = false;
+                        break;
+                    }
+                    else
+                    {
+                        GD.Print($"{piece.info.pieceId}:{piece.id} cannot move.");
+                    }
+                }
+
+                // If it's not stalemate, break out of the piece loop.
+                if (!isStalemate)
+                {
+                    break;
+                }
+            }
+            
+            // If isStalemate is still true, the game is over.
+            if (isStalemate)
+            {
+                CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, -1, "Stalemate.");
+                CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.GameStalemate, currentPlayerNum);
+            }
         }
     }
 

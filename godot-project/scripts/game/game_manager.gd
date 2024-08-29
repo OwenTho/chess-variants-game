@@ -46,6 +46,9 @@ signal action_was_failed(reason: String)
 
 signal player_has_won(player_num: int)
 signal player_lost(player_num: int)
+
+signal game_stalemate(stalemate_player: int)
+
 signal piece_taken(taken_piece, attacker)
 
 signal notice_received(message: String)
@@ -119,6 +122,7 @@ func setup_signals() -> void:
 	game_controller.ActionProcessed.connect(_on_action_processed)
 	
 	game_controller.PlayerLost.connect(_on_player_lost)
+	game_controller.GameStalemate.connect(_on_game_stalemate)
 	
 	game_controller.PieceRemoved.connect(_on_piece_taken)
 	game_controller.SendNotice.connect(send_notice)
@@ -487,6 +491,11 @@ func _on_player_lost(player_num: int) -> void:
 	
 	player_won.rpc(2 - player_num)
 
+func _on_game_stalemate(stalemate_player: int) -> void:
+	if not is_multiplayer_authority():
+		return
+	
+	game_statemate.rpc(stalemate_player)
 
 func send_notice(player_target: int, text: String) -> void:
 	if not is_multiplayer_authority():
@@ -585,6 +594,7 @@ func to_next_turn(new_player_num: int) -> void:
 	starting_next_turn.emit(new_player_num)
 	game_controller.NextTurn(new_player_num)
 
+
 @rpc("authority", "call_local", "reliable")
 func player_won(winner: int) -> void:
 	# Only run if game is on
@@ -593,10 +603,23 @@ func player_won(winner: int) -> void:
 	# Reset game data, given that it's not needed anymore.
 	reset_game()
 	if not Lobby.is_player:
-		# Leave the game scene
+		# Dedicated servers unload the game scene
 		get_tree().unload_current_scene()
 		return
 	player_has_won.emit(winner)
+
+
+@rpc("authority", "call_local", "reliable")
+func game_statemate(stalemate_player: int) -> void:
+	if not in_game:
+		return
+	# Reset game data, given that it's not needed anymore.
+	reset_game()
+	if not Lobby.is_player:
+		# Dedicated servers unload the game scene
+		get_tree().unload_current_scene()
+		return
+	game_stalemate.emit(stalemate_player)
 
 
 @rpc("authority", "call_local", "reliable", 2)

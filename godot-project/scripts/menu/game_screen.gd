@@ -35,6 +35,9 @@ func _ready() -> void:
 	
 	GameManager.player_has_won.connect(_on_player_won)
 	GameManager.player_lost.connect(_on_player_lost)
+	
+	GameManager.game_stalemate.connect(_on_game_stalemate)
+	
 	GameManager.piece_taken.connect(_on_piece_taken)
 	
 	GameManager.notice_received.connect(_on_notice_received)
@@ -207,11 +210,10 @@ func _on_piece_taken(taken_piece, attacker) -> void:
 		return
 	remove_piece.queue_free()
 
-
-func _on_player_won(winner: int) -> void:
+func _end_game_message(title: String, message: String) -> void:
 	var pop_up: AcceptDialog = AcceptDialog.new()
-	pop_up.dialog_text = "Player %s has won." % [winner]
-	pop_up.title = "Checkmate!"
+	pop_up.title = title
+	pop_up.dialog_text = message
 	pop_up.dialog_hide_on_ok = false
 	add_child(pop_up)
 	pop_up.close_requested.connect(to_lobby)
@@ -221,8 +223,16 @@ func _on_player_won(winner: int) -> void:
 	
 	pop_up.popup_centered()
 
+func _on_player_won(winner: int) -> void:
+	_end_game_message("Checkmate!", "Player %s has won." % [winner])
+
 func _on_player_lost(player_num: int) -> void:
 	pass
+
+func _on_game_stalemate(stalemate_player: int) -> void:
+	_end_game_message("Stalemate.", "Player %s is unable to act, putting the game in Stalemate." % [stalemate_player])
+
+
 
 func _on_notice_received(text: String) -> void:
 	notices.add_notice(text)
