@@ -469,6 +469,9 @@ func send_message(message: String, id: int = -1):
 	text += player_info.name
 	if player_info.is_admin:
 		text += "[/color]"
+	# Finally, before adding the message, add a zero-width space after every "["
+	# to disable user bbcode.
+	message = message.replace("[", "[​")
 	text += "> [color=lightgray]%s[/color]" % [message]
 	_send(text, id)
 
