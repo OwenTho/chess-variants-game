@@ -48,11 +48,19 @@ public abstract partial class ActionBase : GridItem<ActionBase>
     {
         foreach (ActionBase dependent in dependents)
         {
-            dependent.MakeInvalid();
+            dependent.MakeInvalid(CarryType.Down);
         }
     }
 
-    public void MakeInvalid()
+    public void MakeDependenciesInvalid()
+    {
+        foreach (ActionBase dependency in dependencies)
+        {
+            dependency.MakeInvalid(CarryType.Up);
+        }
+    }
+
+    public void MakeInvalid(CarryType carryType = CarryType.Down)
     {
         // If already invalid, ignore
         if (!valid)
@@ -61,7 +69,15 @@ public abstract partial class ActionBase : GridItem<ActionBase>
         }
         // Make invalid, and pass to dependents
         valid = false;
-        MakeDependentsInvalid();
+        if (carryType == CarryType.Down)
+        {
+            MakeDependentsInvalid();
+        }
+
+        if (carryType == CarryType.Up)
+        {
+            MakeDependenciesInvalid();
+        }
     }
 
     // Find if this action has a certain dependency.

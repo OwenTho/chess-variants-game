@@ -681,14 +681,13 @@ public partial class GameState : Node
             bool canMove = false;
             foreach (var location in locationToAction)
             {
-                // GD.Print($"Checking {location.Key}");
                 if (DoesActionCheck(location.Key, king))
                 {
-                    // GD.Print("Checks.");
-                    // Disable all actions at this location if it does check the King
+                    // Disable all actions at this location if it does check the King, but
+                    // only the actions at this location.
                     foreach (var action in location.Value)
                     {
-                        action.MakeInvalid();
+                        action.MakeInvalid(ActionBase.CarryType.None);
                     }
                 }
                 else
