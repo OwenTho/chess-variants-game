@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 public abstract partial class ActionRuleBase : RuleBase
 {
-    public abstract void AddPossibleActions(GameState game, Piece piece);
+    public abstract void AddPossibleActions(GameState game, Piece piece, int level);
 
     public enum AttackType
     {

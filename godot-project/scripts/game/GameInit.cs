@@ -86,10 +86,10 @@ public partial class GameController
 
         // Register Rules
         MakeNewActionRule("pawn_move", new PawnMoveRule());
-        MakeNewActionRule("rook_move", new RookMoveRule());
+        MakeNewActionRule("rook_move", new RookMoveRule(), 7);
         MakeNewActionRule("knight_move", new KnightMoveRule());
-        MakeNewActionRule("bishop_move", new BishopMoveRule());
-        MakeNewActionRule("queen_move", new QueenMoveRule());
+        MakeNewActionRule("bishop_move", new BishopMoveRule(), 7);
+        MakeNewActionRule("queen_move", new QueenMoveRule(), 7);
         MakeNewActionRule("king_move", new KingMoveRule());
         MakeNewActionRule("castle", new CastleRule());
     }
@@ -100,12 +100,12 @@ public partial class GameController
         pieceInfoRegistry.Clear();
 
         // Register Piece Info
-        MakeNewPieceInfo("pawn", 1, "pawn.png").AddActionRule(actionRuleRegistry.GetValue("pawn_move"));
-        MakeNewPieceInfo("rook", 7, "rook.png").AddActionRule(actionRuleRegistry.GetValue("rook_move"));
-        MakeNewPieceInfo("knight", 4, "knight.png").AddActionRule(actionRuleRegistry.GetValue("knight_move"));
-        MakeNewPieceInfo("bishop", 7, "bishop.png").AddActionRule(actionRuleRegistry.GetValue("bishop_move"));
-        MakeNewPieceInfo("queen", 7, "queen.png").AddActionRule(actionRuleRegistry.GetValue("queen_move"));
-        MakeNewPieceInfo("king", 2, "king.png").AddActionRule(actionRuleRegistry.GetValue("king_move")).AddActionRule(actionRuleRegistry.GetValue("castle"));
+        MakeNewPieceInfo("pawn", "pawn.png").AddActionRule(actionRuleRegistry.GetValue("pawn_move"));
+        MakeNewPieceInfo("rook", "rook.png").AddActionRule(actionRuleRegistry.GetValue("rook_move"));
+        MakeNewPieceInfo("knight", "knight.png").AddActionRule(actionRuleRegistry.GetValue("knight_move"));
+        MakeNewPieceInfo("bishop", "bishop.png").AddActionRule(actionRuleRegistry.GetValue("bishop_move"));
+        MakeNewPieceInfo("queen",  "queen.png").AddActionRule(actionRuleRegistry.GetValue("queen_move"));
+        MakeNewPieceInfo("king", "king.png").AddActionRule(actionRuleRegistry.GetValue("king_move")).AddActionRule(actionRuleRegistry.GetValue("castle"));
     }
 
     internal void InitCardFactories()
@@ -170,16 +170,18 @@ public partial class GameController
         GD.Print($"Made new Validation Rule: {id}");
     }
 
-    private void MakeNewActionRule(string id, ActionRuleBase newRule)
+    private void MakeNewActionRule(string id, ActionRuleBase newRule, int defaultLevel = 1)
     {
         newRule.ruleId = id;
+        newRule.defaultLevel = defaultLevel;
         actionRuleRegistry.Register(id, newRule);
         GD.Print($"Made new Action Rule: {id}");
     }
 
-    private PieceInfo MakeNewPieceInfo(string id, int initialLevel, string textureLocation = "default.png")
+    private PieceInfo MakeNewPieceInfo(string id, string textureLocation = "default.png", int defaultLevel = 0)
     {
         PieceInfo newInfo = new PieceInfo(id, initialLevel);
+        PieceInfo newInfo = new PieceInfo(id, defaultLevel);
 
         foreach (string ruleId in initialValidationRules)
         {
@@ -188,7 +190,7 @@ public partial class GameController
 
         newInfo.textureLoc = textureLocation;
         pieceInfoRegistry.Register(id, newInfo);
-        GD.Print($"Made new Piece Info: {id} (initialLeveL: {initialLevel}, textureLocation: {textureLocation})");
+        GD.Print($"Made new Piece Info: {id} (defaultLevel: {defaultLevel}, textureLocation: {textureLocation})");
         return newInfo;
     }
 

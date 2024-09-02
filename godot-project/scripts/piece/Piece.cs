@@ -30,6 +30,8 @@ public partial class Piece : GridItem<Piece>
     public PieceDirection forwardDirection = PieceDirection.Down;
 
     public Tags tags = new Tags();
+    // Level for this specific piece
+    public int level;
 
 
     [Signal]
@@ -95,12 +97,14 @@ public partial class Piece : GridItem<Piece>
         if (needsActionUpdate)
         {
             actionsToTake.Clear();
-            // Loop through the rules and add all of the possible actions
+            // Loop through the rules and add all the possible actions
             foreach (PieceRule pieceRule in info.rules)
             {
                 if (pieceRule.isEnabled)
                 {
-                    pieceRule.rule.AddPossibleActions(game, this);
+                    // Get all possible actions for this rule
+                    // The level is the sum of this piece, the type's level and the rule's level.
+                    pieceRule.rule.AddPossibleActions(game, this, level + info.level + pieceRule.level);
                 }
             }
         }

@@ -9,6 +9,7 @@ public partial class PieceInfo : Node
     public string pieceId { get; internal set; }
     public string textureLoc { get; internal set; }
 
+    // Level for all pieces of this type
     public int level { get; internal set; } = 1;
 
     internal PieceInfo(string id, int initialLevel = 1, List<PieceRule> initialRules = null, List<ValidationRuleBase> initialValidationRules = null)
@@ -85,7 +86,7 @@ public partial class PieceInfo : Node
         // If it already has the rule, add to count and enable if it's not.
         if (TryGetPieceRule(rule, out PieceRule pieceRule))
         {
-            pieceRule.count += 1;
+            pieceRule.level += 1;
             pieceRule.isEnabled = true;
             return this;
         }

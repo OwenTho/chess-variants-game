@@ -9,7 +9,7 @@ public partial class CastleRule : ActionRuleBase
     private const int MaxDist = 6;
     private const int ActionDist = 2;
     
-    public override void AddPossibleActions(GameState game, Piece piece)
+    public override void AddPossibleActions(GameState game, Piece piece, int level)
     {
         // If the piece has moved, ignore
         if (piece.timesMoved > 0)

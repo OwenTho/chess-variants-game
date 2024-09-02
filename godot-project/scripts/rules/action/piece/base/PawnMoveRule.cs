@@ -3,10 +3,9 @@ using Godot.Collections;
 
 internal partial class PawnMoveRule : ActionRuleBase
 {
-    public override void AddPossibleActions(GameState game, Piece piece)
+    public override void AddPossibleActions(GameState game, Piece piece, int maxForward)
     {
-        // Allow moving forward a number of spaces
-        int maxForward = piece.info.level;
+        // Move forward a number of spaces
         Vector2I thisPosition = new Vector2I(piece.cell.x, piece.cell.y);
         MoveAction lastMove = null;
         for (int i = 1; i <= maxForward; i++)
