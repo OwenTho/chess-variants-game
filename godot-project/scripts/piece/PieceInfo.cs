@@ -7,13 +7,20 @@ public partial class PieceInfo : Node
     internal List<ValidationRuleBase> validationRules;
 
     public string pieceId { get; internal set; }
+    // The name that's displayed to users.
+    public string displayName { get; internal set; }
     public string textureLoc { get; internal set; }
 
     // Level for all pieces of this type
     public int level { get; internal set; } = 1;
 
-    internal PieceInfo(string id, int initialLevel = 1, List<PieceRule> initialRules = null, List<ValidationRuleBase> initialValidationRules = null)
+    internal PieceInfo(string id, string displayName = null, int initialLevel = 1, List<PieceRule> initialRules = null, List<ValidationRuleBase> initialValidationRules = null)
     {
+        if (displayName == null)
+        {
+            displayName = StringUtil.ToTitleCase(id);
+        }
+        this.displayName = displayName;
         if (initialRules == null)
         {
             initialRules = new List<PieceRule>();

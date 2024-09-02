@@ -100,12 +100,12 @@ public partial class GameController
         pieceInfoRegistry.Clear();
 
         // Register Piece Info
-        MakeNewPieceInfo("pawn", "pawn.png").AddActionRule(actionRuleRegistry.GetValue("pawn_move"));
-        MakeNewPieceInfo("rook", "rook.png").AddActionRule(actionRuleRegistry.GetValue("rook_move"));
-        MakeNewPieceInfo("knight", "knight.png").AddActionRule(actionRuleRegistry.GetValue("knight_move"));
-        MakeNewPieceInfo("bishop", "bishop.png").AddActionRule(actionRuleRegistry.GetValue("bishop_move"));
-        MakeNewPieceInfo("queen",  "queen.png").AddActionRule(actionRuleRegistry.GetValue("queen_move"));
-        MakeNewPieceInfo("king", "king.png").AddActionRule(actionRuleRegistry.GetValue("king_move")).AddActionRule(actionRuleRegistry.GetValue("castle"));
+        MakeNewPieceInfo("pawn", "Pawn", "pawn.png").AddActionRule(actionRuleRegistry.GetValue("pawn_move"));
+        MakeNewPieceInfo("rook", "Rook", "rook.png").AddActionRule(actionRuleRegistry.GetValue("rook_move"));
+        MakeNewPieceInfo("knight", "Knight", "knight.png").AddActionRule(actionRuleRegistry.GetValue("knight_move"));
+        MakeNewPieceInfo("bishop", "Bishop", "bishop.png").AddActionRule(actionRuleRegistry.GetValue("bishop_move"));
+        MakeNewPieceInfo("queen", "Queen", "queen.png").AddActionRule(actionRuleRegistry.GetValue("queen_move"));
+        MakeNewPieceInfo("king", "King", "king.png").AddActionRule(actionRuleRegistry.GetValue("king_move")).AddActionRule(actionRuleRegistry.GetValue("castle"));
     }
 
     internal void InitCardFactories()
@@ -178,10 +178,9 @@ public partial class GameController
         GD.Print($"Made new Action Rule: {id}");
     }
 
-    private PieceInfo MakeNewPieceInfo(string id, string textureLocation = "default.png", int defaultLevel = 0)
+    private PieceInfo MakeNewPieceInfo(string id, string displayName = null, string textureLocation = "default.png", int defaultLevel = 0)
     {
-        PieceInfo newInfo = new PieceInfo(id, initialLevel);
-        PieceInfo newInfo = new PieceInfo(id, defaultLevel);
+        PieceInfo newInfo = new PieceInfo(id, displayName, defaultLevel);
 
         foreach (string ruleId in initialValidationRules)
         {

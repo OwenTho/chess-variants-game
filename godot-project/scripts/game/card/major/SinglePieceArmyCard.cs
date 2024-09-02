@@ -5,11 +5,7 @@ using Godot.Collections;
 public partial class SinglePieceArmyCard : CardBase
 {
     public string armyPiece = "";
-    
-    public override void MakeListeners(GameEvents gameEvents)
-    {
-        // gameEvents.AddListener(new EventListener(GameEvents.StartGame, OnStartGame));
-    }
+    public string pieceName = "";
 
     public override void OnAddCard(GameState game)
     {
@@ -33,6 +29,7 @@ public partial class SinglePieceArmyCard : CardBase
     {
         SinglePieceArmyCard newCard = new SinglePieceArmyCard();
         newCard.armyPiece = armyPiece;
+        newCard.pieceName = pieceName;
         return newCard;
     }
 
@@ -45,7 +42,14 @@ public partial class SinglePieceArmyCard : CardBase
 
     public override void FromDict(GameState game, Dictionary<string, string> dataDict)
     {
-        if (!dataDict.TryGetValue("army_piece", out armyPiece))
+        if (dataDict.TryGetValue("army_piece", out armyPiece))
+        {
+            if (game.TryGetPieceInfo(armyPiece, out PieceInfo info))
+            {
+                pieceName = info.displayName;
+            }
+        }
+        else
         {
             GD.PushError("Data did not contain the value for the army piece.");
         }
@@ -58,6 +62,6 @@ public partial class SinglePieceArmyCard : CardBase
 
     public override string GetCardDescription()
     {
-        return $"All pieces on the board will become a [color=aqua]{StringUtil.ToTitleCase(armyPiece)}[/color].";
+        return $"All pieces on the board will become a [color=aqua]{pieceName}[/color].";
     }
 }

@@ -725,7 +725,7 @@ public partial class GameState : Node
             {
                 // Signal that the player has lost.
                 playerCheck[teamNum] = CheckType.NoKing; // Put player as having No King, so that checkmate isn't checked for
-                CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, -1, $"With no {StringUtil.ToTitleCase(KingId)}, Player {teamNum+1}'s army is lost.");
+                CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, -1, $"With no {GetPieceInfo(KingId)?.displayName}, Player {teamNum+1}'s army is lost.");
                 CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.PlayerLost, teamNum);
             }
         }
