@@ -43,7 +43,9 @@ public partial class GameController
         currentGameState.NewTurn += (newPlayerNum) => EmitSignal(SignalName.NewTurn, newPlayerNum);
         currentGameState.ActionProcessed += (success, actionLocation, piece) => EmitSignal(SignalName.ActionProcessed, success, actionLocation, piece);
         currentGameState.EndTurn += () => EmitSignal(SignalName.EndTurn);
+        
         currentGameState.PlayerLost += (playerNum) => EmitSignal(SignalName.PlayerLost, playerNum);
+        currentGameState.GameStalemate += (stalematePlayer) => EmitSignal(SignalName.GameStalemate, stalematePlayer);
         
         currentGameState.PieceRemoved += (removedPiece, attackerPiece) => EmitSignal(SignalName.PieceRemoved, removedPiece, attackerPiece);
         
