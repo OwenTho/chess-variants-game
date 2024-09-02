@@ -51,6 +51,9 @@ public partial class CastleRule : ActionRuleBase
                         continue;
                     }
                     
+                    // If valid castle, add tag to piece
+                    piece.tags.Add("has_castle_action");
+                    
                     // If it is a rook, we need to create a move for the castling piece 2 spaces from the King
                     MoveAction newMove = new MoveAction(piece, actionLocation, actionLocation);
                     piece.AddAction(newMove);
@@ -73,6 +76,16 @@ public partial class CastleRule : ActionRuleBase
                     }
                 }
             }
+        }
+    }
+
+    public override void EndTurn(GameState game, Piece piece)
+    {
+        // If the piece has the 'has_castle_action' tag, EnableActionUpdates
+        if (piece.HasTag("has_castle_action"))
+        {
+            piece.EnableActionsUpdate();
+            piece.tags.Remove("has_castle_action");
         }
     }
 }
