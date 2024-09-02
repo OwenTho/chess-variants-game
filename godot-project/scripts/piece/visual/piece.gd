@@ -6,12 +6,15 @@ var piece_data
 var _cur_move_tween: Tween
 var _cur_info_tween: Tween
 
+@export var sprite: Sprite2D
+@export var sprite_transform_node: RemoteTransform2D
+
 func _ready() -> void:
 	piece_data.ChangedCell.connect(_on_move)
 	piece_data.InfoChanged.connect(_on_info_changed)
 
 func _process(delta: float) -> void:
-	z_index = clampi(global_position.y, RenderingServer.CANVAS_ITEM_Z_MIN, RenderingServer.CANVAS_ITEM_Z_MAX)
+	sprite.z_index = clampi(global_position.y, RenderingServer.CANVAS_ITEM_Z_MIN, RenderingServer.CANVAS_ITEM_Z_MAX)
 
 func _on_move(new_cell) -> void:
 	if new_cell != null:
@@ -33,20 +36,19 @@ func _enter_tree():
 	update_scale()
 
 func update_scale():
-	var tex_scale_x: float = (board.board_width as float) / $SprPiece.texture.get_width() * global_scale.x
-	var tex_scale_y: float = (board.board_height as float) / $SprPiece.texture.get_height() * global_scale.y
-	
-	$SprPiece.scale = Vector2(tex_scale_x, tex_scale_y)
+	var tex_height: float = sprite.texture.get_height()
+
+	sprite.position.y = -sprite.scale.y * tex_height / 3
 
 func set_sprite(new_sprite: Texture2D):
-	$SprPiece.texture = new_sprite
+	sprite.texture = new_sprite
 	
 	# Scale based on board
-	# If there is no board, use default scale
+	# If there is no board, reset the sprite y position
 	if board == null:
-		$SprPiece.scale = Vector2(1,1)
+		sprite.position.y = 0
 		return
-	
+		
 	update_scale()
 
 func get_sprite() -> Texture2D:
@@ -72,18 +74,26 @@ func update_sprite() -> void:
 		return
 	
 	if piece_data.teamId == 0:
-		$SprPiece.material.set_shader_parameter("highlight_color", Color.STEEL_BLUE)
+		sprite.material.set_shader_parameter("palette_colours", [
+			Color.from_string("#656565", Color.WHITE),
+			Color.from_string("#9d9d9d", Color.WHITE),
+			Color.from_string("#ffffff", Color.WHITE)
+		])
 	else:
-		$SprPiece.material.set_shader_parameter("highlight_color", Color.MAROON)
+		sprite.material.set_shader_parameter("palette_colours", [
+			Color.from_string("#1e1e1e", Color.WHITE),
+			Color.from_string("#515151", Color.WHITE),
+			Color.from_string("#747474", Color.WHITE)
+		])
 
 func _on_info_changed(_info) -> void:
 	if _cur_info_tween != null:
 		_cur_info_tween.kill()
 	_cur_info_tween = create_tween()
-	_cur_info_tween.tween_property($SprPiece, "rotation", deg_to_rad(180), 0.1)
+	_cur_info_tween.tween_property(sprite, "rotation", deg_to_rad(180), 0.1)
 	# Get sprite now, as data may be freed when the tween gets to it
 	_cur_info_tween.tween_callback(set_sprite.bind(get_sprite()))
-	_cur_info_tween.tween_property($SprPiece, "rotation", deg_to_rad(360), 0.1)
+	_cur_info_tween.tween_property(sprite, "rotation", deg_to_rad(360), 0.1)
 	_cur_info_tween.tween_callback(_info_tween_end)
 
 func _move_tween_end() -> void:

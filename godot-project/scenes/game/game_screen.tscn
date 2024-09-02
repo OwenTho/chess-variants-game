@@ -27,7 +27,8 @@ offset_right = 315.0
 offset_bottom = 601.0
 
 [node name="GameUI" type="Control" parent="."]
-z_index = 5
+top_level = true
+z_index = 3000
 layout_mode = 3
 anchors_preset = 0
 offset_right = 1154.0

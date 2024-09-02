@@ -1,0 +1,2 @@
+
+- Colour Palette shader (used for Piece colouring): https://godotshaders.com/shader/extensible-color-palette/

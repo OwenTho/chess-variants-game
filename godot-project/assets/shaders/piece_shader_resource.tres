@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://b0esrwnbscy4i"]
+
+[ext_resource type="Shader" path="res://assets/shaders/piece_shader.gdshader" id="1_0edtm"]
+
+[resource]
+resource_local_to_scene = true
+shader = ExtResource("1_0edtm")
+shader_parameter/palette_count = 3
+shader_parameter/palette_colours = PackedColorArray(0.396889, 0.396889, 0.396889, 1, 0.615686, 0.615686, 0.615686, 1, 1, 1, 1, 1)
