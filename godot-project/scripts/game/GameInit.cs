@@ -85,11 +85,21 @@ public partial class GameController
         actionRuleRegistry.Clear();
 
         // Register Rules
+        // Generic
+        MakeNewActionRule(LineMoveId.UpLeft, new UpLeftLineMoveRule());
+        MakeNewActionRule(LineMoveId.Up, new UpLineMoveRule());
+        MakeNewActionRule(LineMoveId.UpRight, new UpRightLineMoveRule());
+        
+        MakeNewActionRule(LineMoveId.Left, new LeftLineMoveRule());
+        MakeNewActionRule(LineMoveId.Right, new RightLineMoveRule());
+        
+        MakeNewActionRule(LineMoveId.DownLeft, new DownLeftLineMoveRule());
+        MakeNewActionRule(LineMoveId.Down, new DownLineMoveRule());
+        MakeNewActionRule(LineMoveId.DownRight, new DownRightLineMoveRule());
+        
+        // Piece Specific
         MakeNewActionRule("pawn_move", new PawnMoveRule());
-        MakeNewActionRule("rook_move", new RookMoveRule(), 7);
         MakeNewActionRule("knight_move", new KnightMoveRule());
-        MakeNewActionRule("bishop_move", new BishopMoveRule(), 7);
-        MakeNewActionRule("queen_move", new QueenMoveRule(), 7);
         MakeNewActionRule("king_move", new KingMoveRule());
         MakeNewActionRule("castle", new CastleRule());
     }
@@ -101,10 +111,18 @@ public partial class GameController
 
         // Register Piece Info
         MakeNewPieceInfo("pawn", "Pawn", "pawn.png").AddActionRule(actionRuleRegistry.GetValue("pawn_move"));
-        MakeNewPieceInfo("rook", "Rook", "rook.png").AddActionRule(actionRuleRegistry.GetValue("rook_move"));
+        PieceInfo rookInfo = MakeNewPieceInfo("rook", "Rook", "rook.png");
+        rookInfo.AddActionRule(GetActionRule(LineMoveId.Left), 7).AddActionRule(GetActionRule(LineMoveId.Up), 7);
+        rookInfo.AddActionRule(GetActionRule(LineMoveId.Right), 7).AddActionRule(GetActionRule(LineMoveId.Down), 7);
         MakeNewPieceInfo("knight", "Knight", "knight.png").AddActionRule(actionRuleRegistry.GetValue("knight_move"));
-        MakeNewPieceInfo("bishop", "Bishop", "bishop.png").AddActionRule(actionRuleRegistry.GetValue("bishop_move"));
-        MakeNewPieceInfo("queen", "Queen", "queen.png").AddActionRule(actionRuleRegistry.GetValue("queen_move"));
+        PieceInfo bishopInfo = MakeNewPieceInfo("bishop", "Bishop", "bishop.png");
+        bishopInfo.AddActionRule(GetActionRule(LineMoveId.UpLeft), 7).AddActionRule(GetActionRule(LineMoveId.UpRight), 7);
+        bishopInfo.AddActionRule(GetActionRule(LineMoveId.DownLeft), 7).AddActionRule(GetActionRule(LineMoveId.DownRight), 7);
+        PieceInfo queenInfo = MakeNewPieceInfo("queen", "Queen", "queen.png");
+        queenInfo.AddActionRule(GetActionRule(LineMoveId.Left), 7).AddActionRule(GetActionRule(LineMoveId.Up), 7);
+        queenInfo.AddActionRule(GetActionRule(LineMoveId.Right), 7).AddActionRule(GetActionRule(LineMoveId.Down), 7);
+        queenInfo.AddActionRule(GetActionRule(LineMoveId.UpLeft), 7).AddActionRule(GetActionRule(LineMoveId.UpRight), 7);
+        queenInfo.AddActionRule(GetActionRule(LineMoveId.DownLeft), 7).AddActionRule(GetActionRule(LineMoveId.DownRight), 7);
         MakeNewPieceInfo("king", "King", "king.png").AddActionRule(actionRuleRegistry.GetValue("king_move")).AddActionRule(actionRuleRegistry.GetValue("castle"));
     }
 
@@ -170,6 +188,16 @@ public partial class GameController
         GD.Print($"Made new Validation Rule: {id}");
     }
 
+    public bool TryGetActionRule(string id, out ActionRuleBase rule)
+    {
+        return actionRuleRegistry.TryGetValue(id, out rule);
+    }
+    
+    public ActionRuleBase GetActionRule(string id)
+    {
+        return actionRuleRegistry.GetValue(id);
+    }
+    
     private void MakeNewActionRule(string id, ActionRuleBase newRule, int defaultLevel = 1)
     {
         newRule.ruleId = id;

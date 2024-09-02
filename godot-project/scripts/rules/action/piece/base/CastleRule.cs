@@ -17,8 +17,8 @@ public partial class CastleRule : ActionRuleBase
             return;
         }
         // Check for castle, left and right
-        CheckCastle(game, piece, Vector2I.Left);
-        CheckCastle(game, piece, Vector2I.Right);
+        CheckCastle(game, piece, GridVectors.Left);
+        CheckCastle(game, piece, GridVectors.Right);
     }
 
     private void CheckCastle(GameState game, Piece piece, Vector2I direction)

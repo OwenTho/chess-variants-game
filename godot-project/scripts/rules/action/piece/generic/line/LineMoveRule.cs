@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-internal abstract partial class LineMoveRule : ActionRuleBase
+public abstract partial class LineMoveRule : ActionRuleBase
 {
 
     public override void AddPossibleActions(GameState game, Piece piece, int maxForward)

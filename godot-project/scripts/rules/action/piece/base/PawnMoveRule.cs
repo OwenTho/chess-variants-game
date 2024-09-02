@@ -39,13 +39,13 @@ internal partial class PawnMoveRule : ActionRuleBase
         MoveAction prevLeft = null;
         for (int i = 1; i <= maxForward; i++)
         {
-            prevRight = Attack(piece, thisPosition + ((piece.forwardDirection.AsVector() + Vector2I.Right) * i), AttackType.MoveIf, prevRight).moveAction;
-            prevLeft = Attack(piece, thisPosition + ((piece.forwardDirection.AsVector() + Vector2I.Left) * i), AttackType.MoveIf, prevLeft).moveAction;
+            prevRight = Attack(piece, thisPosition + ((piece.forwardDirection.AsVector() + GridVectors.Right) * i), AttackType.MoveIf, prevRight).moveAction;
+            prevLeft = Attack(piece, thisPosition + ((piece.forwardDirection.AsVector() + GridVectors.Left) * i), AttackType.MoveIf, prevLeft).moveAction;
         }
 
         // If next to a piece that moved twice, allow En passant
-        CheckEnPassant(game, piece, thisPosition + Vector2I.Left);
-        CheckEnPassant(game, piece, thisPosition + Vector2I.Right);
+        CheckEnPassant(game, piece, thisPosition + GridVectors.Left);
+        CheckEnPassant(game, piece, thisPosition + GridVectors.Right);
     }
 
     private void CheckEnPassant(GameState game, Piece piece, Vector2I position)
@@ -88,8 +88,8 @@ internal partial class PawnMoveRule : ActionRuleBase
 
     private bool CheckNextToPawn(GameState game, Piece piece)
     {
-        return CheckForPawn(game, piece.cell.pos + Vector2I.Left) ||
-               CheckForPawn(game, piece.cell.pos + Vector2I.Right);
+        return CheckForPawn(game, piece.cell.pos + GridVectors.Left) ||
+               CheckForPawn(game, piece.cell.pos + GridVectors.Right);
     }
 
     public override void EndTurn(GameState game, Piece piece)

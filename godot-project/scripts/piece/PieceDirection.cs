@@ -17,16 +17,16 @@ static class PieceDirectionMethods
         switch (dir)
         {
             case PieceDirection.Down:
-                return Vector2I.Up; // This is -Y
+                return GridVectors.Down;
             case PieceDirection.Up:
-                return Vector2I.Down; // This is +Y
+                return GridVectors.Up;
             case PieceDirection.Left:
-                return Vector2I.Left;
+                return GridVectors.Left;
             case PieceDirection.Right:
-                return Vector2I.Right;
+                return GridVectors.Right;
             case PieceDirection.None:
-                return Vector2I.Zero;
+                return GridVectors.Zero;
         }
-        return Vector2I.Zero;
+        return GridVectors.Zero;
     }
 }
