@@ -8,12 +8,19 @@ public struct PieceRule
     internal int level = 1;
     public ActionRuleBase rule;
 
-    public PieceRule(ActionRuleBase rule)
+    public PieceRule(ActionRuleBase rule, int level = -1)
     {
         this.rule = rule;
-        if (rule != null)
+        if (level < 0)
         {
-            level = rule.defaultLevel;
+            if (rule != null)
+            {
+                this.level = rule.defaultLevel;
+            }
+        }
+        else
+        {
+            this.level = level;
         }
     }
 }
