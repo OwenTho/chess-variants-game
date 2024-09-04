@@ -30,6 +30,7 @@ public partial class GameController
             hasInitBefore = true;
             AddChild(pieceInfoRegistry);
             AddChild(actionRuleRegistry);
+            AddChild(actionFactoriesRegistry);
             AddChild(validationRuleRegistry);
             AddChild(cardFactoryRegistry);
         }
