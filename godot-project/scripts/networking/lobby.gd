@@ -12,6 +12,7 @@ var player_nums: Array[int] = [-1,-1]
 
 var player_info: PlayerInfo = PlayerInfo.new(-1)
 
+var doing_init: bool = false
 var players_loaded: int = 0
 
 var is_player: bool = false
@@ -97,6 +98,7 @@ func join_game(address: String = "", port: int = DEFAULT_PORT):
 	var error = peer.create_client(address, port)
 	if error:
 		return error
+	doing_init = false
 	players.clear()
 	player_info.is_admin = false
 	multiplayer.multiplayer_peer = peer
@@ -120,6 +122,7 @@ func create_game(online: bool = true, port: int = DEFAULT_PORT):
 	players.clear()
 	player_info.id = multiplayer.get_unique_id()
 	
+	doing_init = false
 	players_loaded = 0
 	
 	if is_player:
@@ -410,12 +413,15 @@ func done_init():
 
 @rpc("authority", "call_local", "reliable")
 func init_game():
+	doing_init = true
 	GameManager.init()
 	# Done with init. Tell the server.
 	done_init.rpc()
 
 @rpc("authority", "call_remote", "reliable")
 func init_board(board_content: Array):
+	if not doing_init:
+		return
 	if board_content.is_empty():
 		done_init.rpc()
 		return
@@ -423,6 +429,9 @@ func init_board(board_content: Array):
 
 @rpc("authority", "call_local", "reliable")
 func start_game(game_seed: int):
+	if not doing_init:
+		return
+	doing_init = false
 	GameManager.start_game(game_seed)
 
 ### Game Initialisation RPCs
