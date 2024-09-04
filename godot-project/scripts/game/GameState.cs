@@ -360,6 +360,10 @@ public partial class GameState : Node
 
     public bool IsPieceAtEndOfBound(Piece piece)
     {
+        if (piece == null)
+        {
+            return false;
+        }
         // Depending on forward direction, choose comparison
         switch (piece.forwardDirection)
         {

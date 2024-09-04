@@ -27,6 +27,8 @@ var currently_selecting: int = -1
 
 var current_given_cards: Array = []
 
+var addons: Array[GameAddon]
+
 signal has_init()
 
 # Card signals
@@ -77,6 +79,7 @@ func reset_game() -> void:
 	task_mutex = null
 	game_mutex = null
 	thread_mutex = null
+	addons.clear()
 
 func init() -> void:
 	if game != null:
@@ -115,9 +118,30 @@ func init() -> void:
 	game_mutex = game_controller.gameMutex
 	thread_mutex = game_controller.threadMutex
 	
+	# Initialise the addons
+	init_addons()
+	
 	setup_signals()
 	
 	has_init.emit()
+
+func init_addons() -> void:
+	# For simplicity, load them directly
+	var promotion_scene = preload("res://scripts/game/addon/promotion/promotion.gd")
+	add_addon("Promotion", promotion_scene.new())
+
+func add_addon(name: String, addon: GameAddon) -> void:
+	if addon in addons:
+		push_error("Addon is already registered: %s" % [addon])
+		return	
+	addons.append(addon)
+	addon.name = name + "Addon"
+	# Add as a child to the game scene
+	if addon.get_parent() == null:
+		game.add_child(addon)
+	else:
+		addon.reparent(game)
+		push_warning("Addon already had a parent.")
 
 func setup_signals() -> void:
 	game_controller.NewTurn.connect(_on_next_turn)
@@ -393,9 +417,9 @@ func place_piece(piece_id: String, link_id: int, team: int, x: int, y: int, id: 
 	
 	return true
 
-func place_matching(piece_id: String, id: int, x: int, y: int) -> void:
-	place_piece(piece_id, id, 0, x, y)
-	place_piece(piece_id, id, 1, x, grid_upper_corner.y - y)
+func place_matching(piece_id: String, link_id: int, x: int, y: int) -> void:
+	place_piece(piece_id, link_id, 0, x, y)
+	place_piece(piece_id, link_id, 1, x, grid_upper_corner.y - y)
 
 
 
@@ -519,6 +543,12 @@ func _on_actions_processed_at(success: bool, action_location: Vector2i, piece) -
 
 func _on_card_notice(card: Node, notice: String) -> void:
 	print("%s has sent notice '%s'" % [card, notice])
+	for addon in addons:
+		addon._handle_card_notice(card, notice)
+
+func send_card_notice(card: Node, notice: String) -> void:
+	game_controller.SendCardNotice(card, notice)
+
 
 
 func _on_piece_taken(taken_piece, attacker) -> void:

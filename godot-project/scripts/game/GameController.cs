@@ -183,6 +183,11 @@ public partial class GameController : Node
         currentGameState.AddCard(card, true);
     }
 
+    public void SendCardNotice(CardBase card, string notice)
+    {
+        currentGameState.ReceiveCardNotice(card, notice);
+    }
+
 
 
 
@@ -256,6 +261,11 @@ public partial class GameController : Node
         return curPlayer;
     }
 
+    public int UnsafeGetCurrentPlayer()
+    {
+        return currentGameState.currentPlayerNum;
+    }
+
     
     private Piece PlacePiece(string pieceId, int linkId, int teamId, int x, int y, int id = -1)
     {
@@ -310,6 +320,11 @@ public partial class GameController : Node
         Piece returnValue = currentGameState.GetPiece(pieceId);
         gameMutex.Unlock();
         return returnValue;
+    }
+
+    public Piece UnsafeGetPiece(int pieceId)
+    {
+        return currentGameState.GetPiece(pieceId);
     }
 
     public Piece GetFirstPieceAt(int x, int y)

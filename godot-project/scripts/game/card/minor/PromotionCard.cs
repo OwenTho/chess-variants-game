@@ -11,7 +11,7 @@ public partial class PromotionCard : CardBase
     public override void MakeListeners(GameEvents gameEvents)
     {
         AddListener(gameEvents, GameEvents.PieceMoved, OnPieceMove, GetPromotionCardEventFlags);
-        AddListener(gameEvents, GameEvents.EndTurn, OnEndTurn, GetPromotionCardEventFlags);
+        AddListener(gameEvents, GameEvents.EndTurn, OnEndTurn);
         
         AddNotice("promoted", PiecePromoted);
     }
@@ -35,7 +35,7 @@ public partial class PromotionCard : CardBase
     {
         if (toPiece != null && toPiece.Count > 1)
         {
-            if (game.IsPieceAtEndOfBound(game.lastMovePiece))
+            if (game.lastMovePiece.info != null && game.lastMovePiece.info.pieceId == fromPiece && game.IsPieceAtEndOfBound(game.lastMovePiece))
             {
                 return EventResult.Wait;
             }
@@ -110,6 +110,7 @@ public partial class PromotionCard : CardBase
 
     public void PiecePromoted(GameState game)
     {
+        GD.Print("PROMOTED");
         game.EndEventsWait();
     }
 
