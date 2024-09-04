@@ -24,6 +24,7 @@ public partial class GameController
         InitPieceInfo();
         InitCardFactories();
         InitCardDecks(isServer);
+        InitInitialCards();
 
         if (!hasInitBefore)
         {
@@ -45,9 +46,12 @@ public partial class GameController
         
         // Connect the signals
         currentGameState.NewTurn += (newPlayerNum) => EmitSignal(SignalName.NewTurn, newPlayerNum);
+        currentGameState.EndTurn += () => EmitSignal(SignalName.EndTurn);
+        
         currentGameState.ActionProcessed += (action, piece) => EmitSignal(SignalName.ActionProcessed, action, piece);
         currentGameState.ActionsProcessedAt += (success, actionLocation, piece) => EmitSignal(SignalName.ActionsProcessedAt, success, actionLocation, piece);
-        currentGameState.EndTurn += () => EmitSignal(SignalName.EndTurn);
+
+        currentGameState.CardNotice += (card, notice) => EmitSignal(SignalName.CardNotice, card, notice);
         
         currentGameState.PlayerLost += (playerNum) => EmitSignal(SignalName.PlayerLost, playerNum);
         currentGameState.GameStalemate += (stalematePlayer) => EmitSignal(SignalName.GameStalemate, stalematePlayer);
@@ -149,12 +153,20 @@ public partial class GameController
         cardFactoryRegistry.Clear();
         
         // Register Card Factories
-        AddNewFactory("major_shapeshift", new SimpleCardFactory<ShapeshiftCard>());
-        AddNewFactory("major_single_piece_army", new SinglePieceArmyCardFactory());
-        AddNewFactory("major_shuffle", new SimpleCardFactory<ShuffleCard>());
-        AddNewFactory("major_lonely_pieces_stuck", new SimpleCardFactory<LonelyPiecesStuckCard>());
-        AddNewFactory("major_friendly_fire", new SimpleCardFactory<FriendlyFireCard>());
-        AddNewFactory("major_bigger_board", new SimpleCardFactory<BiggerBoardCard>());
+        AddNewCardFactory("major_shapeshift", new SimpleCardFactory<ShapeshiftCard>());
+        AddNewCardFactory("major_single_piece_army", new SinglePieceArmyCardFactory());
+        AddNewCardFactory("major_shuffle", new SimpleCardFactory<ShuffleCard>());
+        AddNewCardFactory("major_lonely_pieces_stuck", new SimpleCardFactory<LonelyPiecesStuckCard>());
+        AddNewCardFactory("major_friendly_fire", new SimpleCardFactory<FriendlyFireCard>());
+        AddNewCardFactory("major_bigger_board", new SimpleCardFactory<BiggerBoardCard>());
+        
+        // Minor Cards
+        // Rules
+        AddNewCardFactory("minor_promotion", new PomotionCardFactory());
+        
+        // Piece
+        
+        // Space
     }
 
     internal void InitCardDecks(bool isServer)
@@ -191,7 +203,18 @@ public partial class GameController
         
         // Set up the Decks
         MinorCardDeck = new CardDeck();
+        MinorCardDeck.AddCard(cardFactoryRegistry.GetValue("minor_promotion"), pieceInfoRegistry.GetKeys().Length);
         AddChild(MinorCardDeck);
+    }
+
+    internal void InitInitialCards()
+    {
+        // TODO: Make this server-only, and send all initial cards when the game starts.
+        AddCard(new PromotionCard
+        {
+            fromPiece = "pawn",
+            toPiece = new Array<string> {"knight", "bishop", "rook", "queen"}
+        });
     }
 
     private void MakeNewValidationRule(string id, ValidationRuleBase newRule, bool makeInitialRule = false)
@@ -248,9 +271,10 @@ public partial class GameController
         return newInfo;
     }
 
-    private void AddNewFactory(string id, CardFactory newFactory)
+    private void AddNewCardFactory(string id, CardFactory newFactory, bool serverOnly = false)
     {
         newFactory.cardId = id;
+        newFactory.serverOnly = serverOnly;
         cardFactoryRegistry.Register(id, newFactory);
     }
 }

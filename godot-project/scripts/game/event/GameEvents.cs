@@ -1,13 +1,23 @@
 using System.Collections.Generic;
+using Godot;
 
 public partial class GameEvents
 {
-    private GameState game;
+    public GameState game { get; }
+    private bool canWait = false;
+    private EventListener currentListener;
     private Dictionary<string, List<EventListener>> eventListeners = new Dictionary<string, List<EventListener>>();
+    private Mutex waitingMutex = new();
+    private bool waiting = false;
 
     public GameEvents(GameState game)
     {
         this.game = game;
+    }
+    
+    public GameEvents(GameState game, bool canWait) : this(game)
+    {
+        this.canWait = canWait;
     }
     
     public void AddListener(EventListener listener)
@@ -29,6 +39,14 @@ public partial class GameEvents
     /// <returns name="stopEvent">Boolean. True if the event should occur, False if it should not.</returns>
     internal bool AnnounceEvent(string eventKey)
     {
+        waitingMutex.Lock();
+        bool isWaiting = waiting;
+        waitingMutex.Unlock();
+        if (isWaiting)
+        {
+            GD.PushError("Can't announce event as there is one currently waiting.");
+            return true;
+        }
         // Get the list of listeners. If there isn't one, just ignore
         if (!eventListeners.TryGetValue(eventKey, out List<EventListener> listeners))
         {
@@ -39,7 +57,14 @@ public partial class GameEvents
         EventResult result = EventResult.Continue;
         foreach (EventListener listener in listeners)
         {
+            currentListener = listener;
+            // If the listener doesn't have a flag function, skip it
             if (listener.flagFunction == null)
+            {
+                continue;
+            }
+            // If the listener is disabled, skip it
+            if (listener.enabledFunction != null && !listener.enabledFunction())
             {
                 continue;
             }
@@ -50,12 +75,19 @@ public partial class GameEvents
             {
                 result &= ~EventResult.Continue;
             }
+            // If it has the Wait tag, push an error if the GameEvents can't wait
+            if (listenerResult.HasFlag(EventResult.Wait) && !canWait)
+            {
+                GD.PushError("A listener provided a Wait flag despite GameEvents having it disabled.");
+            }
             // Remove the Continue tag from the listener result
             listenerResult &= ~EventResult.Continue;
             
             // OR the rest of the results
             result |= listenerResult;
         }
+
+        currentListener = null;
         
         // If the event is cancelled, return
         if (result.HasFlag(EventResult.Cancel))
@@ -66,14 +98,26 @@ public partial class GameEvents
         // Now do the events
         foreach (EventListener listener in listeners)
         {
-            listener.listen(game);
-        }
+            currentListener = listener;
+            if (listener.enabledFunction == null || listener.enabledFunction())
+            {
+                listener.listen(game);
+            }
         
-        // Wait if a listener needs to do something following the listen
-        if (result.HasFlag(EventResult.Wait))
-        {
-            // TODO: Add the ability for Cards to pause the game to do things
+            // Wait if a listener needs to do something following the listen
+            if (result.HasFlag(EventResult.Wait) && canWait)
+            {
+                waitingMutex.Lock();
+                waiting = true;
+                waitingMutex.Unlock();
+                while (waiting)
+                {
+                    
+                }
+            }
         }
+
+        currentListener = null;
         
         // If result does not continue, stop the event
         if (!result.HasFlag(EventResult.Continue))
@@ -82,5 +126,12 @@ public partial class GameEvents
         }
 
         return true;
+    }
+
+    public void EndWait()
+    {
+        waitingMutex.Lock();
+        waiting = false;
+        waitingMutex.Unlock();
     }
 }

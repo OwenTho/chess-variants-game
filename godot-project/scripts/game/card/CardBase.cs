@@ -6,14 +6,49 @@ public abstract partial class CardBase : Node
 {
     public string cardId { get; internal set; }
 
+    internal GameEvents cardNotices;
+
+    public bool enabled = true;
+
+    /// Whether the card is only processed on the server or not.
+    public bool serverOnly { get; internal set; }
+
+    [Signal]
+    public delegate void CardInfoUpdatedEventHandler();
+    
     public virtual void MakeListeners(GameEvents gameEvents)
     {
         
     }
 
+    public void AddNotice(string noticeId, Action<GameState> listener)
+    {
+        cardNotices.AddListener(new EventListener(noticeId, listener));
+    }
+
+    public void AddListener(GameEvents gameEvents, string eventId, Action<GameState> listener, Func<GameState, EventResult> flagFunction = null)
+    {
+        gameEvents.AddListener(new EventListener(eventId, listener, flagFunction, CardIsEnabled));
+    }
+
     public virtual void OnAddCard(GameState game)
     {
         
+    }
+
+    protected void SendCardNotice(GameState game, string notice)
+    {
+        game.SendCardNotice(this, notice);
+    }
+
+    public void ReceiveNotice(string noticeId)
+    {
+        cardNotices.AnnounceEvent(noticeId);
+    }
+
+    public bool CardIsEnabled()
+    {
+        return enabled;
     }
 
     public abstract CardBase Clone();
@@ -28,6 +63,12 @@ public abstract partial class CardBase : Node
         }
         cardData.Add("card_id", cardId);
         return cardData;
+    }
+
+    // By default, matching cards are ignored
+    public virtual CardReturn OnMatchingCard(CardBase card)
+    {
+        return CardReturn.Ignored;
     }
 
     // Used for server sharing card information
@@ -55,5 +96,10 @@ public abstract partial class CardBase : Node
     public virtual String GetCardDescription()
     {
         return "No description provided.";
+    }
+
+    public void MakeNotices(GameState game)
+    {
+        cardNotices = new GameEvents(game);
     }
 }

@@ -90,6 +90,7 @@ public partial class CardDeck : Node
         // Randomly pull a card from the Deck (only for cards with 1 or more)
         List<CardInfo> validCards = new List<CardInfo>();
         int totalWeight = 0;
+            
         foreach (var card in _cards.Values)
         {
             if (card.CardsLeft > 0 && card.Factory.CanMakeNewCard(game))

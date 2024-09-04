@@ -6,11 +6,14 @@ using Godot;
 public abstract partial class CardFactory : Node
 {
     public string cardId { get; internal set; }
+    public bool serverOnly { get; internal set; }
+    
     private List<CardBase> _createdCards = new();
     internal CardBase CreateNewCard(GameState game)
     {
         CardBase newCard = CreateCard(game);
         newCard.cardId = cardId;
+        newCard.serverOnly = serverOnly;
         _createdCards.Add(newCard);
         return newCard;
     }
@@ -47,4 +50,10 @@ public abstract partial class CardFactory : Node
     // For example, a card that changes one piece into another already on the board can't be used if
     // all pieces are the same.
     public abstract bool CanMakeNewCard(GameState game);
+
+    // Returns the cards that currently exist with the cardId that are in the game.
+    public List<CardBase> GetExistingCards(GameState game)
+    {
+        return game.GetExistingCards(cardId);
+    }
 }

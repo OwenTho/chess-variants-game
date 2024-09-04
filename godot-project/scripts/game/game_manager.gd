@@ -124,6 +124,8 @@ func setup_signals() -> void:
 	game_controller.ActionProcessed.connect(_on_action_processed)
 	game_controller.ActionsProcessedAt.connect(_on_actions_processed_at)
 	
+	game_controller.CardNotice.connect(_on_card_notice)
+	
 	game_controller.PlayerLost.connect(_on_player_lost)
 	game_controller.GameStalemate.connect(_on_game_stalemate)
 	
@@ -513,6 +515,10 @@ func _on_actions_processed_at(success: bool, action_location: Vector2i, piece) -
 	
 	# Move to the next turn
 	game_controller.NextTurn()
+
+
+func _on_card_notice(card: Node, notice: String) -> void:
+	print("%s has sent notice '%s'" % [card, notice])
 
 
 func _on_piece_taken(taken_piece, attacker) -> void:

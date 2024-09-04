@@ -5,14 +5,10 @@ using Godot;
 
 public partial class ShuffleCard : CardBase
 {
-    public override void MakeListeners(GameEvents gameEvents)
-    {
-        // gameEvents.AddListener(new EventListener(GameEvents.StartGame, OnStartGame, (game) => (EventResult.Wait)));
-    }
-
+    // TODO: Have a variable shared for the shuffle "seed", rather than relying on the current seed.
     public override void OnAddCard(GameState game)
     {
-        // TODO: Disable Client shuffling
+        // TODO: While this works with matching pieces on both sides, this breaks when this is not the case.
         // Shuffle the positions of all pieces by making two identical arrays of the pieceIds,
         // and then randomising one of them.
         List<int> unshuffled = new List<int>();

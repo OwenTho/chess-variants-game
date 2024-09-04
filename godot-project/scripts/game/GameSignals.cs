@@ -7,13 +7,16 @@ public partial class GameController
     public delegate void NewTurnEventHandler(int newPlayerNum);
 
     [Signal]
+    public delegate void EndTurnEventHandler();
+
+    [Signal]
     public delegate void ActionProcessedEventHandler(ActionBase action, Piece piece);
     
     [Signal]
     public delegate void ActionsProcessedAtEventHandler(bool success, Vector2I actionLocation, Piece piece);
-
+    
     [Signal]
-    public delegate void EndTurnEventHandler();
+    public delegate void CardNoticeEventHandler(CardBase card, string notice);
 
     [Signal]
     public delegate void PlayerLostEventHandler(int playerNum);

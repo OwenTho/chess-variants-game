@@ -5,7 +5,7 @@ public partial class LonelyPiecesStuckCard : CardBase
 {
     public override void MakeListeners(GameEvents gameEvents)
     {
-        gameEvents.AddListener(new EventListener(GameEvents.PreNewTurn, OnPreNewTurn));
+        AddListener(gameEvents, GameEvents.PreNewTurn, OnPreNewTurn);
     }
 
     public override void OnAddCard(GameState game)

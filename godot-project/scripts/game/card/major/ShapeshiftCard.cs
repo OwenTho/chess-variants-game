@@ -3,7 +3,7 @@ public partial class ShapeshiftCard : CardBase
 {
     public override void MakeListeners(GameEvents gameEvents)
     {
-        gameEvents.AddListener(new EventListener(GameEvents.PieceTaken, OnPieceTaken));
+        AddListener(gameEvents, GameEvents.PieceTaken, OnPieceTaken);
     }
 
     public void OnPieceTaken(GameState game)

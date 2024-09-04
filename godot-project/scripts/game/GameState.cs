@@ -47,7 +47,7 @@ public partial class GameState : Node
     
     // If the State is on the server. Allows game to avoid checking Checkmate if it's on
     // a Client side, given the Client can be told by the server.
-    bool isServer = true;
+    public bool isServer { get; private set; } = true;
 
     public GameEvents gameEvents;
     public Array<CardBase> cards;
@@ -74,7 +74,7 @@ public partial class GameState : Node
         this.numberOfPlayers = numberOfPlayers;
     }
 
-    internal void Init(bool needToCheck)
+    internal void Init(bool stateIsServer)
     {
         lastId = 0;
         pieceGrid = new Grid<Piece>();
@@ -85,7 +85,7 @@ public partial class GameState : Node
         gridUpperCorner = new Vector2I(7, 7);
         gridLowerCorner = new Vector2I(0, 0);
 
-        gameEvents = new GameEvents(this);
+        gameEvents = new GameEvents(this, true);
         gameRandom = new RandomNumberGenerator();
         cards = new Array<CardBase>();
 
@@ -95,7 +95,7 @@ public partial class GameState : Node
             playerCheck[i] = CheckType.None;
         }
 
-        isServer = needToCheck;
+        isServer = stateIsServer;
     }
     
     public PieceDirection GetTeamDirection(int teamId)
@@ -452,8 +452,8 @@ public partial class GameState : Node
             return false;
         }
 
-        action.ActOn(this, piece);
         CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.ActionProcessed, action, piece);
+        action.ActOn(this, piece);
         return true;
     }
 
@@ -950,13 +950,40 @@ public partial class GameState : Node
 
     internal void AddCard(CardBase card, bool callCardAdd)
     {
+        card.MakeNotices(this);
         cards.Add(card);
-        card.MakeListeners(gameEvents);
-        if (callCardAdd)
+        // If the card should only be processed on the server,
+        // don't add listeners or call AddCard.
+        bool processCard = !(card.serverOnly && !isServer);
+        if (processCard)
         {
-            card.OnAddCard(this);
+            card.MakeListeners(gameEvents);
+            if (callCardAdd)
+            {
+                card.OnAddCard(this);
+            }
         }
+
         CallDeferred(Node.MethodName.AddChild, card);
+    }
+    
+    internal void SendCardNotice(CardBase card, string notice)
+    {
+        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.CardNotice, card, notice);
+    }
+
+    internal void ReceiveCardNotice(CardBase card, string notice)
+    {
+        // Tell the current active card (if there is one).
+        if (cards.Contains(card))
+        {
+            card.ReceiveNotice(notice);
+        }
+    }
+
+    public void EndEventsWait()
+    {
+        gameEvents.EndWait();
     }
 
     public List<CardBase> GetExistingCards(string cardId)
