@@ -1,10 +1,11 @@
 ﻿using System;
 using Godot;
 using System.Collections.Generic;
+using Godot.Collections;
 
 public abstract partial class ActionBase : GridItem<ActionBase>
 {
-    public int actionId = -1;
+    public int id = -1;
     public Piece owner { get; private set; }
     public Vector2I actionLocation;
     
@@ -33,6 +34,11 @@ public abstract partial class ActionBase : GridItem<ActionBase>
     // A stored validation, for use with Check checks.
     internal bool StoredValidation = true;
 
+    public ActionBase()
+    {
+        
+    }
+    
     public ActionBase(Piece owner, Vector2I actionLocation)
     {
         this.actionLocation = actionLocation;
@@ -391,18 +397,69 @@ public abstract partial class ActionBase : GridItem<ActionBase>
         
         // Copy over the other variables
         // Don't copy owner, as it would have the copy owner too
-        action.actionId = actionId;
+        action.id = id;
         action.valid = valid;
         action.actionLocation = actionLocation;
     }
 
-    public virtual Dictionary<string, int> GetExtraCopyLinks()
+    internal Godot.Collections.Dictionary<string, string> ConvertToDict(GameState game)
     {
-        return null;
+        Godot.Collections.Dictionary<string, string> actionData = ToDict();
+        // Remove action_id from the dictionary, and force the correct one
+        actionData.Remove("action_id");
+        actionData.Add("action_id", game.GetActionId(this));
+        return actionData;
     }
 
-    public virtual void SetExtraCopyLinks(GameState game, Dictionary<string, int> extraLinks, Dictionary<int, ActionBase> links)
+    public void AddVector2IToDict(string name, Vector2I location, Godot.Collections.Dictionary<string, string> actionDict)
     {
-        
+        actionDict.Add($"{name}_x", location.X.ToString());
+        actionDict.Add($"{name}_y", location.Y.ToString());
     }
+
+    public Vector2I ReadVector2IFromDict(string name, Godot.Collections.Dictionary<string, string> actionDict)
+    {
+        Vector2I location = new Vector2I();
+        if (actionDict.TryGetValue($"{name}_x", out string dictLocX))
+        {
+            if (int.TryParse(dictLocX, out int locX))
+            {
+                location.X = locX;
+            }
+            else
+            {
+                GD.PushError($"{name}_x is not a number.");
+            }
+        }
+        else
+        {
+            GD.PushError($"{name}_x not found in dictionary.");
+        }
+        
+        
+        if (actionDict.TryGetValue($"{name}_y", out string dictMoveLocY))
+        {
+            if (int.TryParse(dictMoveLocY, out int locY))
+            {
+                location.Y = locY;
+            }
+            else
+            {
+                GD.PushError($"{name}_y is not a number.");
+            }
+        }
+        else
+        {
+            GD.PushError($"{name}_y not found in dictionary.");
+        }
+
+        return location;
+    }
+    
+    public virtual Godot.Collections.Dictionary<string, string> ToDict()
+    {
+        return new Godot.Collections.Dictionary<string, string>();
+    }
+
+    public abstract void FromDict(Godot.Collections.Dictionary<string, string> actionDict);
 }

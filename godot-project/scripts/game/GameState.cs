@@ -129,6 +129,11 @@ public partial class GameState : Node
     {
         return gameController.TryGetPieceInfo(pieceInfoId, out info);
     }
+
+    public string GetActionId(ActionBase action)
+    {
+        return gameController.GetActionId(action);
+    }
     
     
     public Piece PlacePiece(string pieceInfoId, int linkId, int teamId, int x, int y, int id = -1)
@@ -448,6 +453,7 @@ public partial class GameState : Node
         }
 
         action.ActOn(this, piece);
+        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.ActionProcessed, action, piece);
         return true;
     }
 
@@ -488,7 +494,7 @@ public partial class GameState : Node
         if (piece.currentPossibleActions == null || piece.currentPossibleActions.Count == 0)
         {
             CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, currentPlayerNum, "No actions available at selected location.");
-            CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.ActionProcessed, false, actionLocation, piece);
+            CallDeferred(GodotObject.MethodName.EmitSignal,SignalName.ActionsProcessedAt, false, actionLocation, piece);
             return false;
         }
         
@@ -496,12 +502,12 @@ public partial class GameState : Node
         if (DoesActionCheck(actionLocation, piece))
         {
             CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.SendNotice, currentPlayerNum, "Action leads to Check.");
-            CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.ActionProcessed, false, actionLocation, piece);
+            CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.ActionsProcessedAt, false, actionLocation, piece);
             return false;
         }
 
         bool returnVal = DoActionsAt(actionLocation, piece);
-        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.ActionProcessed, returnVal, actionLocation, piece);
+        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.ActionsProcessedAt, returnVal, actionLocation, piece);
         return returnVal;
     }
     
@@ -510,8 +516,8 @@ public partial class GameState : Node
     public void StartGame()
     {
         gameEvents.AnnounceEvent(GameEvents.StartGame);
-        // Tell all pieces to update their possible moves
-        PiecesNewTurn();
+        // Start the first turn on player 0
+        NextTurn(0);
         gameEvents.AnnounceEvent(GameEvents.GameStarted);
     }
 
@@ -893,25 +899,28 @@ public partial class GameState : Node
         // First, end turn
         gameEvents.AnnounceEvent(GameEvents.EndTurn);
         CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.EndTurn);
-        // Tell all pieces that it's the next turn
-        foreach (Piece piece in allPieces)
+        if (isServer)
         {
-            // Tell the piece it's the end of the turn. It's
-            // possible that the piece will request actions to
-            // be remade as a result.
-            piece.EndTurn(this);
-            // Remove all actions from the Grid if the piece needs updating
-            if (piece.needsActionUpdate)
+            // Tell all pieces that it's the next turn
+            foreach (Piece piece in allPieces)
             {
-                foreach (ActionBase action in piece.currentPossibleActions)
+                // Tell the piece it's the end of the turn. It's
+                // possible that the piece will request actions to
+                // be remade as a result.
+                piece.EndTurn(this);
+                // Remove all actions from the Grid if the piece needs updating
+                if (piece.needsActionUpdate)
                 {
-                    if (action.cell != null && action.owner == piece)
+                    foreach (ActionBase action in piece.currentPossibleActions)
                     {
-                        action.cell.RemoveItem(action);
+                        if (action.cell != null && action.owner == piece)
+                        {
+                            action.cell.RemoveItem(action);
+                        }
                     }
-                }
 
-                piece.ClearActions();
+                    piece.ClearActions();
+                }
             }
         }
 
@@ -923,7 +932,11 @@ public partial class GameState : Node
         SetPlayerNum(newPlayerNum);
 
         // Tell all pieces that it's the next turn
-        PiecesNewTurn();
+        if (isServer)
+        {
+            PiecesNewTurn();
+        }
+
         gameEvents.AnnounceEvent(GameEvents.NewTurn);
         CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.NewTurn, currentPlayerNum);
     }

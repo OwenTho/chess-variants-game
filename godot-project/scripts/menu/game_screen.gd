@@ -30,7 +30,8 @@ func _ready() -> void:
 	GameManager.next_turn.connect(_on_next_turn)
 	GameManager.end_turn.connect(_on_end_turn)
 	
-	GameManager.taking_action_at.connect(_on_taking_action)
+	GameManager.taking_action.connect(_on_taking_action)
+	GameManager.taking_actions_at.connect(_on_taking_actions_at)
 	GameManager.action_was_failed.connect(_on_action_failed)
 	
 	GameManager.player_has_won.connect(_on_player_won)
@@ -90,10 +91,10 @@ func select_cell(cell_pos: Vector2i) -> void:
 		return
 	# First check if the player is selecting an action
 	var actions_to_take: Array = []
-	if selected_piece != null and selected_piece.piece_data != null and selected_piece.piece_data.currentPossibleActions != null: 
+	if selected_piece != null: 
 		# Check if there is an action being selected
-		for action in selected_piece.piece_data.currentPossibleActions:
-			if action.actionLocation == cell_pos and action.valid and action.acting:
+		for action in selected_piece.possible_actions:
+			if action == cell_pos:
 				# If there is, request to act on that location
 				GameManager.game_mutex.unlock()
 				disabled_selection = true
@@ -118,38 +119,19 @@ func select_cell(cell_pos: Vector2i) -> void:
 
 func select_item(piece: Piece2D) -> void:
 	selected_piece = piece
-	# If a piece is missing data, or missing info, then it can't
-	# be played
-	if piece == null or piece.piece_data == null:
-		return
-	if piece.piece_data.info == null:
-		return
 	
-	# If the selection can't get the game mutex, just ignore
-	if not GameManager.game_mutex.try_lock():
-		return
-	var possible_actions: Array = piece.piece_data.currentPossibleActions
+	var possible_actions: Array[Vector2i] = piece.possible_actions
 	
 	# If the piece has no actions, then ignore it
 	if possible_actions == null:
 		return
 	
-	var checked_locations: Array[Vector2i] = []
 	for action in possible_actions:
-		# Skip if invalid or not an acting action
-		if not action.valid or not action.acting:
-			continue
-		# Ignore if position already checked
-		if checked_locations.has(action.actionLocation):
-			continue
-		checked_locations.append(action.actionLocation)
 		var new_highlight: Node2D = highlight_scene.instantiate()
 		
 		new_highlight.board = board
-		new_highlight.set_pos(action.actionLocation.x, action.actionLocation.y)
+		new_highlight.set_pos(action.x, action.y)
 		action_highlights.add_child.call_deferred(new_highlight)
-	# Unlock the mutex once done
-	GameManager.game_mutex.unlock()
 
 
 
@@ -186,10 +168,16 @@ func _on_next_turn(new_player_num: int) -> void:
 func _on_end_turn() -> void:
 	pass
 
-func _on_taking_action(action_location: Vector2i, piece) -> void:
+func _on_taking_action(action: Node, piece: Node) -> void:
 	allow_quit = false
 
-func _on_action_processed(success: bool, action_location: Vector2i, piece) -> void:
+func _on_taking_actions_at(action_location: Vector2i, piece: Node) -> void:
+	allow_quit = false
+
+func _on_action_processed(action: Node, piece: Node) -> void:
+	pass
+
+func _on_actions_processed(success: bool, action_location: Vector2i, piece: Node) -> void:
 	if not is_multiplayer_authority():
 		allow_quit = true
 		return

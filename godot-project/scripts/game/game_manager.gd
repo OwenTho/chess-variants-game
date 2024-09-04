@@ -40,8 +40,10 @@ signal starting_next_turn(player_num: int)
 signal next_turn(player_num: int)
 signal end_turn()
 
-signal taking_action_at(action_location: Vector2i, piece)
-signal action_processed(success: bool, action_location: Vector2i, piece)
+signal taking_action(action: Node, piece: Node)
+signal taking_actions_at(action_location: Vector2i, piece: Node)
+signal action_processed(action: Node, piece: Node)
+signal actions_processed_at(success: bool, action_location: Vector2i, piece: Node)
 signal action_was_failed(reason: String)
 
 signal player_has_won(player_num: int)
@@ -49,7 +51,7 @@ signal player_lost(player_num: int)
 
 signal game_stalemate(stalemate_player: int)
 
-signal piece_taken(taken_piece, attacker)
+signal piece_taken(taken_piece: Node, attacker: Node)
 
 signal notice_received(message: String)
 
@@ -120,6 +122,7 @@ func init() -> void:
 func setup_signals() -> void:
 	game_controller.NewTurn.connect(_on_next_turn)
 	game_controller.ActionProcessed.connect(_on_action_processed)
+	game_controller.ActionsProcessedAt.connect(_on_actions_processed_at)
 	
 	game_controller.PlayerLost.connect(_on_player_lost)
 	game_controller.GameStalemate.connect(_on_game_stalemate)
@@ -386,7 +389,6 @@ func place_piece(piece_id: String, link_id: int, team: int, x: int, y: int, id: 
 	# Add node to tree
 	get_tree().get_first_node_in_group("piece_holder").add_child(new_piece)
 	
-	print("Placed %s (id: %s) at %s,%s" % [piece_id, id, x, y])
 	return true
 
 func place_matching(piece_id: String, id: int, x: int, y: int) -> void:
@@ -461,20 +463,55 @@ func _on_next_turn(player_num: int) -> void:
 	next_turn.emit(player_num)
 	if is_multiplayer_authority():
 		to_next_turn.rpc(player_num)
+		_send_valid_actions()
 
+func _send_valid_actions() -> void:
+	if not in_game:
+		return
+	# Send all of the valid actions to the players
+	game_mutex.lock()
+	for piece in game_controller.GetAllPieces():
+		_send_piece_actions(piece)
+	game_mutex.unlock()
 
+func _send_piece_actions(piece: Node) -> void:
+	if piece == null:
+		push_error("Tried to send actions of null piece.")
+		return
+	# Get all of the action locations
+	var action_locations: Array[Vector2i] = []
+	for action in piece.currentPossibleActions:
+		# Only process the action if it's acting and valid
+		if not action.valid or not action.acting:
+			continue
+		if action.actionLocation not in action_locations:
+			action_locations.append(action.actionLocation)
+	
+	# Now send the action locations for the piece
+	_receive_piece_actions.rpc(piece.id, action_locations)
 
-func _on_action_processed(success: bool, action_location: Vector2i, piece) -> void:
-	action_processed.emit()
+@rpc("authority", "call_local", "reliable")
+func _receive_piece_actions(piece_id: int, piece_actions: Array[Vector2i]) -> void:
+	# Get the related Piece2D
+	var piece: Piece2D = get_piece_id(piece_id)
+	piece.set_actions(piece_actions)
+
+func _on_action_processed(action: Node, piece) -> void:
+	action_processed.emit(action, piece)
+	if not is_multiplayer_authority():
+		return
+	take_action.rpc(game_controller.ActionToDict(action), piece.id)
+
+func _on_actions_processed_at(success: bool, action_location: Vector2i, piece) -> void:
+	actions_processed_at.emit(success, action_location, piece)
 	if not is_multiplayer_authority():
 		return
 	if not success:
 		var cur_player_id: int = Lobby.player_nums[await get_current_player()]
 		failed_action.rpc_id(cur_player_id)
 		return
-	# Tell everyone to take the action
-	take_action_at.rpc(action_location, piece.id)
 	
+	# Move to the next turn
 	game_controller.NextTurn()
 
 
@@ -563,7 +600,7 @@ func request_action(action_location: Vector2i, piece_id: int) -> void:
 		return
 	
 	# Take the actions
-	taking_action_at.emit(action_location, piece)
+	taking_actions_at.emit(action_location, piece)
 	game_controller.TakeActionAt(action_location, piece)
 
 
@@ -574,6 +611,16 @@ func failed_action(reason: String = "") -> void:
 		return
 	action_was_failed.emit(reason)
 
+@rpc("authority", "call_remote", "reliable")
+func take_action(action_dict: Dictionary, piece_id: int) -> void:
+	# Only run if game is on
+	if not in_game:
+		return
+	
+	var action = game_controller.ActionFromDict(action_dict)
+	var piece = await get_piece(piece_id)
+	taking_action.emit(action, piece)
+	game_controller.TakeAction(action, piece)
 
 @rpc("authority", "call_remote", "reliable")
 func take_action_at(action_location: Vector2i, piece_id: int) -> void:
@@ -582,7 +629,7 @@ func take_action_at(action_location: Vector2i, piece_id: int) -> void:
 		return
 	var piece = await get_piece(piece_id)
 	if piece != null:
-		taking_action_at.emit(action_location, piece)
+		taking_actions_at.emit(action_location, piece)
 		game_controller.TakeActionAt(action_location, piece)
 
 

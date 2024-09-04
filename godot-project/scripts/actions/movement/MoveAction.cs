@@ -1,10 +1,17 @@
-﻿using System.Collections.Generic;
-using Godot;
+﻿using Godot;
+using Godot.Collections;
 
 public partial class MoveAction : ActionBase
 {
     public Vector2I moveLocation;
+    // Only on server
     public AttackAction attackAction;
+
+    public MoveAction() : base()
+    {
+        
+    }
+    
     public MoveAction(Piece owner, Vector2I actionLocation, Vector2I moveLocation) : base(owner, actionLocation)
     {
         this.moveLocation = moveLocation;
@@ -33,25 +40,15 @@ public partial class MoveAction : ActionBase
         return newMove;
     }
 
-    public override Dictionary<string, int> GetExtraCopyLinks()
+    public override Dictionary<string, string> ToDict()
     {
-        Dictionary<string, int> newDictionary = new Dictionary<string, int>();
-        if (attackAction != null)
-        {
-            newDictionary.Add("attackAction", attackAction.actionId);
-        }
-
-        return newDictionary;
+        Dictionary<string, string> actionDict = new();
+        AddVector2IToDict("move_loc", moveLocation, actionDict);
+        return actionDict;
     }
 
-    public override void SetExtraCopyLinks(GameState game, Dictionary<string, int> extraLinks, Dictionary<int, ActionBase> links)
+    public override void FromDict(Dictionary<string, string> actionDict)
     {
-        if (extraLinks.TryGetValue("attackAction", out int attackActionId))
-        {
-            if (links.TryGetValue(attackActionId, out ActionBase linkedAttackAction))
-            {
-                attackAction = (AttackAction)linkedAttackAction;
-            }
-        }
+        moveLocation = ReadVector2IFromDict("move_loc", actionDict);
     }
 }

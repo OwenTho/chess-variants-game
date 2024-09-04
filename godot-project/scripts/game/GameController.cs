@@ -57,6 +57,31 @@ public partial class GameController : Node
         return actionRuleRegistry.GetValue(key);
     }
 
+    public string GetActionId(ActionBase action)
+    {
+        foreach (var actionFactory in actionFactoriesRegistry.GetValues())
+        {
+            if (actionFactory.ActionTypeMatches(action))
+            {
+                return actionFactory.actionId;
+            }
+        }
+
+        return null;
+    }
+
+
+
+    public Array<Piece> GetAllPieces()
+    {
+        if (currentGameState == null)
+        {
+            return null;
+        }
+
+        return currentGameState.allPieces;
+    }
+
 
 
     public CardBase PullCardFromDeck(CardDeck deck)
@@ -305,14 +330,12 @@ public partial class GameController : Node
         gameMutex.Unlock();
         return result;
     }
-    
-    
-    
 
-    private void TakeActionAtTask(Vector2I actionLocation, Piece piece)
+
+    private void TakeActionTask(ActionBase action, Piece piece)
     {
         gameMutex.Lock();
-        currentGameState.TakeActionAt(actionLocation, piece);
+        currentGameState.TakeAction(action, piece);
         gameMutex.Unlock();
     }
     
@@ -322,12 +345,43 @@ public partial class GameController : Node
         {
             return;
         }
-        TakeActionAt(action.actionLocation, piece);
+        DoTask(() => TakeActionTask(action, piece));
+    }
+
+    private void TakeActionAtTask(Vector2I actionLocation, Piece piece)
+    {
+        gameMutex.Lock();
+        currentGameState.TakeActionAt(actionLocation, piece);
+        gameMutex.Unlock();
     }
 
     public void TakeActionAt(Vector2I actionLocation, Piece piece)
     {
         DoTask(() => TakeActionAtTask(actionLocation, piece));
+    }
+
+
+
+    public Godot.Collections.Dictionary<string, string> ActionToDict(ActionBase action)
+    {
+        return action.ConvertToDict(currentGameState);
+    }
+
+    public ActionBase ActionFromDict(Godot.Collections.Dictionary<string, string> actionDict)
+    {
+        if (actionDict.TryGetValue("action_id", out string actionId))
+        {
+            if (actionFactoriesRegistry.TryGetValue(actionId, out ActionFactory actionFactory))
+            {
+                return actionFactory.CreateNewActionFromDict(actionDict);
+            }
+            GD.PushError($"Could not find an ActionFactory for {actionId}.");
+        }
+        else
+        {
+            GD.PushError("Action dictionary missing action_id.");
+        }
+        return null;
     }
 
     

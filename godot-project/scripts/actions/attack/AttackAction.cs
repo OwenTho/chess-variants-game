@@ -1,12 +1,18 @@
 ﻿using Godot;
-using System.Collections.Generic;
 using Godot.Collections;
 
 public partial class AttackAction : ActionBase
 {
     public int specificVictimId = -1; // Leave null unless needed
     public Vector2I attackLocation;
+    // Only on server
     public MoveAction moveAction;
+
+    public AttackAction() : base()
+    {
+        
+    }
+    
     public AttackAction(Piece owner, Vector2I actionLocation, Vector2I attackLocation, MoveAction moveAction = null) : base(owner, actionLocation)
     {
         this.attackLocation = attackLocation;
@@ -68,35 +74,34 @@ public partial class AttackAction : ActionBase
         return newAttack;
     }
 
-    public override System.Collections.Generic.Dictionary<string, int> GetExtraCopyLinks()
+    public override Dictionary<string, string> ToDict()
     {
-        System.Collections.Generic.Dictionary<string, int> newDictionary = new();
-        if (moveAction != null)
+        Dictionary<string, string> actionDict = new();
+        AddVector2IToDict("attack_loc", attackLocation, actionDict);
+        if (HasSpecificVictims())
         {
-            newDictionary.Add("moveAction", moveAction.actionId);
+            actionDict.Add("victim_id", specificVictimId.ToString());
         }
-
-        if (specificVictimId != null)
-        {
-            newDictionary.Add("victim", specificVictimId);
-        }
-
-        return newDictionary;
+        return actionDict;
     }
 
-    public override void SetExtraCopyLinks(GameState game, System.Collections.Generic.Dictionary<string, int> extraLinks, System.Collections.Generic.Dictionary<int, ActionBase> links)
+    public override void FromDict(Dictionary<string, string> actionDict)
     {
-        if (extraLinks.TryGetValue("moveAction", out int attackActionId))
+        attackLocation = ReadVector2IFromDict("attack_loc", actionDict);
+        if (actionDict.TryGetValue("victim_id", out string dictVictimId))
         {
-            if (links.TryGetValue(attackActionId, out ActionBase linkedMoveAction))
+            if (int.TryParse(dictVictimId, out int victimId))
             {
-                moveAction = (MoveAction)linkedMoveAction;
+                specificVictimId = victimId;
+            }
+            else
+            {
+                GD.PushError("victim_id is not an int.");
             }
         }
-
-        if (extraLinks.TryGetValue("victim", out int id))
+        else
         {
-            specificVictimId = id;
+            specificVictimId = -1;
         }
     }
 }

@@ -1,14 +1,16 @@
 ﻿using Godot;
 using System.Collections.Generic;
+using Godot.Collections;
 
 public partial class GameController
 {
-    internal Registry<PieceInfo> pieceInfoRegistry = new Registry<PieceInfo>();
-    internal Registry<ActionRuleBase> actionRuleRegistry = new Registry<ActionRuleBase>();
-    internal Registry<ValidationRuleBase> validationRuleRegistry = new Registry<ValidationRuleBase>();
-    List<string> initialValidationRules = new List<string>();
-    internal Registry<CardFactory> cardFactoryRegistry = new Registry<CardFactory>();
-    private bool hasInitBefore = false;
+    internal Registry<PieceInfo> pieceInfoRegistry = new();
+    internal Registry<ActionRuleBase> actionRuleRegistry = new();
+    internal Registry<ActionFactory> actionFactoriesRegistry = new();
+    internal Registry<ValidationRuleBase> validationRuleRegistry = new();
+    internal List<string> initialValidationRules = new();
+    internal Registry<CardFactory> cardFactoryRegistry = new();
+    private bool hasInitBefore;
 
     public CardDeck MajorCardDeck { get; private set; }
     public CardDeck MinorCardDeck { get; private set; }
@@ -18,6 +20,7 @@ public partial class GameController
         InitGameState(isServer);
         InitValidationRules();
         InitActionRules();
+        InitActionFactories();
         InitPieceInfo();
         InitCardFactories();
         InitCardDecks(isServer);
@@ -41,7 +44,8 @@ public partial class GameController
         
         // Connect the signals
         currentGameState.NewTurn += (newPlayerNum) => EmitSignal(SignalName.NewTurn, newPlayerNum);
-        currentGameState.ActionProcessed += (success, actionLocation, piece) => EmitSignal(SignalName.ActionProcessed, success, actionLocation, piece);
+        currentGameState.ActionProcessed += (action, piece) => EmitSignal(SignalName.ActionProcessed, action, piece);
+        currentGameState.ActionsProcessedAt += (success, actionLocation, piece) => EmitSignal(SignalName.ActionsProcessedAt, success, actionLocation, piece);
         currentGameState.EndTurn += () => EmitSignal(SignalName.EndTurn);
         
         currentGameState.PlayerLost += (playerNum) => EmitSignal(SignalName.PlayerLost, playerNum);
@@ -102,6 +106,18 @@ public partial class GameController
         MakeNewActionRule("knight_move", new KnightMoveRule());
         MakeNewActionRule("king_move", new KingMoveRule());
         MakeNewActionRule("castle", new CastleRule());
+    }
+
+    internal void InitActionFactories()
+    {
+        // Make sure registry is cleared
+        actionFactoriesRegistry.Clear();
+        
+        // Register factories for the actions
+        RegisterNewAction<MoveAction>(ActionIds.Move);
+        RegisterNewAction<AttackAction>(ActionIds.Attack);
+        RegisterNewAction<MoveOther>(ActionIds.MoveOther);
+        RegisterNewAction<PawnMoveAction>(ActionIds.PawnMove);
     }
 
     internal void InitPieceInfo()
@@ -204,6 +220,16 @@ public partial class GameController
         newRule.defaultLevel = defaultLevel;
         actionRuleRegistry.Register(id, newRule);
         GD.Print($"Made new Action Rule: {id}");
+    }
+
+    private ActionFactory RegisterNewAction<T>(string id) where T : ActionBase, new()
+    {
+        // Update the Action's actionId
+        SimpleActionFactory<T> newFactory = new SimpleActionFactory<T>();
+        newFactory.actionId = id;
+        actionFactoriesRegistry.Register(id, newFactory);
+        GD.Print($"Made new Action Factory for {typeof(T).Name}: {id}");
+        return newFactory;
     }
 
     private PieceInfo MakeNewPieceInfo(string id, string displayName = null, string textureLocation = "default.png", int defaultLevel = 0)

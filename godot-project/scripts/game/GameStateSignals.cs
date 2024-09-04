@@ -4,9 +4,12 @@ public partial class GameState
 {
     [Signal]
     public delegate void NewTurnEventHandler(int newPlayerNum);
+
+    [Signal]
+    public delegate void ActionProcessedEventHandler(ActionBase action, Piece piece);
     
     [Signal]
-    public delegate void ActionProcessedEventHandler(bool success, Vector2I actionLocation, Piece piece);
+    public delegate void ActionsProcessedAtEventHandler(bool success, Vector2I actionLocation, Piece piece);
 
     [Signal]
     public delegate void EndTurnEventHandler();

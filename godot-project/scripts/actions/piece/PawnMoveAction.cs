@@ -3,6 +3,11 @@ using Godot;
 
 internal partial class PawnMoveAction : MoveAction
 {
+    public PawnMoveAction() : base()
+    {
+        
+    }
+    
     public PawnMoveAction(Piece owner, Vector2I actionLocation, Vector2I moveLocation) : base(owner, actionLocation, moveLocation) { }
 
     public override void ActOn(GameState game, Piece piece)

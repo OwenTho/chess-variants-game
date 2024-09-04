@@ -4,6 +4,12 @@ using Godot;
 public partial class MoveOther : MoveAction
 {
     private int movePieceId;
+
+    public MoveOther() : base()
+    {
+        
+    }
+    
     public MoveOther(Piece owner, Vector2I actionLocation, Vector2I moveLocation, int movePieceId) : base(owner, actionLocation, moveLocation)
     {
         this.moveLocation = moveLocation;
@@ -29,35 +35,32 @@ public partial class MoveOther : MoveAction
         return newMove;
     }
 
-    public override Dictionary<string, int> GetExtraCopyLinks()
+    public override Godot.Collections.Dictionary<string, string> ToDict()
     {
-        Dictionary<string, int> newDictionary = new Dictionary<string, int>();
-        if (attackAction != null)
-        {
-            newDictionary.Add("attackAction", attackAction.actionId);
-        }
-
-        if (movePieceId != null)
-        {
-            newDictionary.Add("movePiece", movePieceId);
-        }
-
-        return newDictionary;
+        // Get the base dictionary from MoveAction
+        Godot.Collections.Dictionary<string, string> actionDict = base.ToDict();
+        
+        actionDict.Add("move_piece_id", movePieceId.ToString());
+        return actionDict;
     }
 
-    public override void SetExtraCopyLinks(GameState game, Dictionary<string, int> extraLinks, Dictionary<int, ActionBase> links)
+    public override void FromDict(Godot.Collections.Dictionary<string, string> actionDict)
     {
-        if (extraLinks.TryGetValue("attackAction", out int attackActionId))
+        base.FromDict(actionDict);
+        if (actionDict.TryGetValue("move_piece_id", out string dictMovePieceId))
         {
-            if (links.TryGetValue(attackActionId, out ActionBase linkedAttackAction))
+            if (int.TryParse(dictMovePieceId, out int newMovePieceId))
             {
-                attackAction = (AttackAction)linkedAttackAction;
+                movePieceId = newMovePieceId;
+            }
+            else
+            {
+                GD.PushError("move_piece_id was not a number.");
             }
         }
-        
-        if (extraLinks.TryGetValue("movePiece", out int pieceId))
+        else
         {
-            movePieceId = pieceId;
+            GD.PushError("move_piece_id not found in dictionary.");
         }
     }
 }

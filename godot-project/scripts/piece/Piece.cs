@@ -49,7 +49,7 @@ public partial class Piece : GridItem<Piece>
         internal void Add(ActionBase action)
         {
             possibleActions.Add(action);
-            action.actionId = curActionId++;
+            action.id = curActionId++;
         }
 
         internal void Remove(ActionBase action)

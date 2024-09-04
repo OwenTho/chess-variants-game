@@ -2,12 +2,16 @@ extends BoardItem2D
 
 class_name Piece2D
 
+@export var sprite: Sprite2D
+@export var sprite_transform_node: RemoteTransform2D
+
 var piece_data
 var _cur_move_tween: Tween
 var _cur_info_tween: Tween
 
-@export var sprite: Sprite2D
-@export var sprite_transform_node: RemoteTransform2D
+var possible_actions: Array[Vector2i] = []
+
+
 
 func _ready() -> void:
 	piece_data.ChangedCell.connect(_on_move)
@@ -15,6 +19,12 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	sprite.z_index = clampi(global_position.y, RenderingServer.CANVAS_ITEM_Z_MIN, RenderingServer.CANVAS_ITEM_Z_MAX)
+
+func set_actions(action_locations: Array[Vector2i]) -> void:
+	if action_locations == null:
+		possible_actions = []
+		return
+	possible_actions = action_locations
 
 func _on_move(new_cell) -> void:
 	if new_cell != null:
