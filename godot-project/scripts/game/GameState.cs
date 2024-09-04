@@ -86,6 +86,7 @@ public partial class GameState : Node
         gridLowerCorner = new Vector2I(0, 0);
 
         gameEvents = new GameEvents(this, true);
+        CallDeferred(Node.MethodName.AddChild, gameEvents);
         gameRandom = new RandomNumberGenerator();
         cards = new Array<CardBase>();
 
@@ -956,6 +957,7 @@ public partial class GameState : Node
     {
         card.MakeNotices(this);
         cards.Add(card);
+        card.CallDeferred(Node.MethodName.AddChild, card.cardNotices);
         // If the card should only be processed on the server,
         // don't add listeners or call AddCard.
         bool processCard = !(card.serverOnly && !isServer);
