@@ -137,14 +137,12 @@ public partial class GameEvents : Node
                 waiting = true;
                 bool stillWaiting = true;
                 waitingMutex.Unlock();
-                GD.Print($"WAIT STARTED BY {listener.GetType().Name}: {listener.listen.Method.Name}, {listener.flagFunction.Method.Name}");
                 while (stillWaiting)
                 {
                     waitingMutex.Lock();
                     stillWaiting = waiting;
                     waitingMutex.Unlock();
                 }
-                GD.Print("WAIT ENDED");
             }
         }
 
@@ -164,7 +162,6 @@ public partial class GameEvents : Node
     public void EndWait()
     {
         waitingMutex.Lock();
-        GD.Print("End wait");
         if (waiting)
         {
             CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.WaitEnded);

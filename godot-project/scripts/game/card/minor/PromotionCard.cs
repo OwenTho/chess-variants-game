@@ -110,7 +110,6 @@ public partial class PromotionCard : CardBase
 
     public void PiecePromoted(GameState game)
     {
-        GD.Print("PROMOTED");
         game.EndEventsWait();
     }
 
