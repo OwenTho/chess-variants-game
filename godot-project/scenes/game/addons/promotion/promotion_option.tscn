@@ -1,0 +1,33 @@
+[gd_scene load_steps=3 format=3 uid="uid://c5cbv7kad3tsq"]
+
+[ext_resource type="Texture2D" uid="uid://csrdg7gpqv3im" path="res://assets/texture/piece/invalid_piece.png" id="1_8q1lx"]
+[ext_resource type="Script" path="res://scripts/game/addon/promotion/promotion_option.gd" id="2_r5j0d"]
+
+[node name="PromotionOption" type="Button" node_paths=PackedStringArray("texture_rect")]
+custom_minimum_size = Vector2(48, 96)
+offset_right = 48.0
+offset_bottom = 48.0
+flat = true
+icon_alignment = 1
+script = ExtResource("2_r5j0d")
+texture_rect = NodePath("TextureRect")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+custom_minimum_size = Vector2(48, 0)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -24.0
+offset_right = 24.0
+offset_bottom = 24.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_8q1lx")
+expand_mode = 5
+stretch_mode = 4
+
+[connection signal="pressed" from="." to="." method="_on_pressed"]

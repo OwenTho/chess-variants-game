@@ -33,6 +33,11 @@ public partial class PromotionCard : CardBase
 
     public EventResult GetPromotionCardEventFlags(GameState game)
     {
+        // If not server, just continue
+        if (!game.isServer)
+        {
+            return EventResult.Continue;
+        }
         if (toPiece != null && toPiece.Count > 1)
         {
             if (game.lastMovePiece.info != null && game.lastMovePiece.info.pieceId == fromPiece && game.IsPieceAtEndOfBound(game.lastMovePiece))

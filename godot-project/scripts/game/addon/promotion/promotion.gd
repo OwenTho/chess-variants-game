@@ -3,9 +3,13 @@ extends GameAddon
 func _init() -> void:
 	add_card_notice("promotion", _on_promotion)
 
+var promotion_selector_scene: PackedScene = preload("res://scenes/game/addons/promotion/promotion_selector.tscn")
+
 var cur_card: Node
 var cur_promoting_piece: Node
-var cur_selection: Array
+var cur_selection: Array = []
+
+var cur_selection_node: Node2D
 
 func _on_promotion(card: Node) -> void:
 	# Only server can promote
@@ -14,20 +18,41 @@ func _on_promotion(card: Node) -> void:
 	
 	# Get the promotion options
 	cur_card = card
-	cur_selection = card.toPiece
+	cur_selection = card.toPiece.duplicate(true)
 	
 	cur_promoting_piece = card.promotingPiece
 	
 	# Send the options to the current player
 	var player_id = Lobby.get_player_id_from_num(GameManager.game_controller.UnsafeGetCurrentPlayer())
-	_give_promotion_options.rpc_id(player_id, cur_selection)
+	_give_promotion_options.rpc_id(player_id, cur_promoting_piece.id, cur_selection)
 
 @rpc("authority", "call_local", "reliable")
-func _give_promotion_options(options: Array) -> void:
+func _give_promotion_options(piece_id: int, options: Array) -> void:
 	if !GameManager.in_game:
 		return
-	print(options)
-	_pick_option.rpc(randi_range(0, options.size()-1))
+	# If there is an existing selection, free it
+	if cur_selection_node != null and is_instance_valid(cur_selection_node):
+		cur_selection_node.queue_free()
+		cur_selection_node = null
+	
+	# Make a new selection
+	cur_selection_node = promotion_selector_scene.instantiate()
+	
+	# Add all of the options
+	for i in range(options.size()):
+		var option_info = GameManager.game_controller.GetPieceInfo(options[i])
+		cur_selection_node.add_option(option_info, i)
+	
+	# Add the signal
+	cur_selection_node.selection_made.connect(_on_selection_made)
+	
+	# Get the piece by the id
+	var piece: Piece2D = GameManager.get_piece_id(piece_id)
+	# Add the selector as a child
+	piece.sprite_transform_node.add_child(cur_selection_node)
+
+func _on_selection_made(piece_info, option_id) -> void:
+	_pick_option.rpc(option_id)
 
 @rpc("any_peer", "call_local", "reliable")
 func _pick_option(option_ind: int) -> void:
@@ -36,27 +61,45 @@ func _pick_option(option_ind: int) -> void:
 	if !is_multiplayer_authority():
 		return
 	
-	if cur_selection == null:
+	if cur_selection.is_empty():
 		return
 	if option_ind < 0 or option_ind >= cur_selection.size():
 		return
 	
+	# Get the variables to send
 	var chosen_promotion = cur_selection[option_ind]
-	_promote_piece.rpc(cur_promoting_piece.id, chosen_promotion)
+	var card = cur_card
+	var piece = cur_promoting_piece
+	
+	# Reset the variables (so that players can't double select)
+	cur_card = null
+	cur_promoting_piece = null
+	cur_selection.clear()
+	
+	# Send the players the promotion to make
+	_promote_piece.rpc(piece.id, chosen_promotion)
 	# Finally, send the card notice
-	GameManager.send_card_notice(cur_card, "promoted")
+	GameManager.send_card_notice(card, "promoted")
 
 @rpc("authority", "call_local", "reliable")
 func _promote_piece(piece_id: int, new_piece: String) -> void:
 	if !GameManager.in_game:
 		return
 	
+	# Free the promotion node
+	if cur_selection_node != null:
+		cur_selection_node.queue_free()
+		cur_selection_node.selection_made.disconnect(_on_selection_made)
+		cur_selection_node = null
+	
 	var info = GameManager.game_controller.GetPieceInfo(new_piece)
 	if info == null:
+		print("Couldn't promote piece as '%s' has no info." % [new_piece])
 		return
 	
 	var piece = GameManager.game_controller.UnsafeGetPiece(piece_id)
 	if piece == null:
+		print("Couldn't promote piece as there is no piece with id %s." % [piece_id])
 		return
 	
 	piece.info = info

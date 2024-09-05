@@ -3,7 +3,7 @@ extends BoardItem2D
 class_name Piece2D
 
 @export var sprite: Sprite2D
-@export var sprite_transform_node: RemoteTransform2D
+@export var sprite_transform_node: Node2D
 
 var piece_data
 var _cur_move_tween: Tween
@@ -18,7 +18,7 @@ func _ready() -> void:
 	piece_data.InfoChanged.connect(_on_info_changed)
 
 func _process(delta: float) -> void:
-	sprite.z_index = clampi(global_position.y, RenderingServer.CANVAS_ITEM_Z_MIN, RenderingServer.CANVAS_ITEM_Z_MAX)
+	sprite_transform_node.z_index = clampi(global_position.y, RenderingServer.CANVAS_ITEM_Z_MIN, RenderingServer.CANVAS_ITEM_Z_MAX)
 
 func set_actions(action_locations: Array[Vector2i]) -> void:
 	if action_locations == null:
@@ -61,24 +61,8 @@ func set_sprite(new_sprite: Texture2D):
 		
 	update_scale()
 
-func get_sprite() -> Texture2D:
-	# If null, use the error sprite
-	var image_loc: String = "assets/texture/piece/invalid_piece.png"
-	var team_id: int = 0
-	if piece_data != null and piece_data.info != null:
-		image_loc = "assets/texture/piece/" + piece_data.info.textureLoc
-		team_id = piece_data.teamId
-	# print("Using image %s" % [image_loc])
-	var piece_sprite: Texture
-	if ResourceLoader.exists("res://" + image_loc):
-		piece_sprite = load("res://" + image_loc)
-	else:
-		push_warning("Could not find sprite at path '%s', so defalt is being used." % [image_loc])
-		piece_sprite = load("res://assets/texture/piece/default.png")
-	return piece_sprite
-
 func update_sprite() -> void:
-	set_sprite(get_sprite())
+	set_sprite(GameResources.get_piece_texture_from_piece(piece_data))
 	
 	if piece_data == null:
 		return
@@ -99,10 +83,12 @@ func update_sprite() -> void:
 func _on_info_changed(_info) -> void:
 	if _cur_info_tween != null:
 		_cur_info_tween.kill()
+	# Reset rotation of sprite
+	sprite.rotation = 0
 	_cur_info_tween = create_tween()
 	_cur_info_tween.tween_property(sprite, "rotation", deg_to_rad(180), 0.1)
 	# Get sprite now, as data may be freed when the tween gets to it
-	_cur_info_tween.tween_callback(set_sprite.bind(get_sprite()))
+	_cur_info_tween.tween_callback(set_sprite.bind(GameResources.get_piece_texture_from_piece(piece_data)))
 	_cur_info_tween.tween_property(sprite, "rotation", deg_to_rad(360), 0.1)
 	_cur_info_tween.tween_callback(_info_tween_end)
 
@@ -110,4 +96,5 @@ func _move_tween_end() -> void:
 	_cur_move_tween = null
 
 func _info_tween_end() -> void:
+	sprite.rotation = 0
 	_cur_info_tween = null

@@ -1,0 +1,28 @@
+[gd_scene load_steps=2 format=3 uid="uid://b02mxqsv4122p"]
+
+[ext_resource type="Script" path="res://scripts/game/addon/promotion/promotion_selector.gd" id="1_5mfa7"]
+
+[node name="PromotionSelector" type="Node2D" node_paths=PackedStringArray("promotion_container")]
+z_index = 1
+script = ExtResource("1_5mfa7")
+promotion_container = NodePath("PanelContainer/CenterContainer/OptionsContainer")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -48.0
+offset_right = 24.0
+offset_bottom = 48.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="PanelContainer"]
+layout_mode = 2
+
+[node name="OptionsContainer" type="HBoxContainer" parent="PanelContainer/CenterContainer"]
+layout_mode = 2
+alignment = 1
