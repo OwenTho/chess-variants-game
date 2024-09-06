@@ -427,6 +427,8 @@ public partial class GameState : Node
         GameState newState = Clone();
         CallDeferred(Node.MethodName.AddChild, newState);
         newState.tempState = true;
+        newState.gameEvents.canWait = true; // Can flag wait
+        newState.gameEvents.doWait = false; // But don't wait
         newState.currentPlayerNum = piece.teamId;
         // Temporarily use the existing action grid so that it doesn't have to be cloned.
         newState.actionGrid = actionGrid;

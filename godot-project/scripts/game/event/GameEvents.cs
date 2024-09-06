@@ -4,7 +4,8 @@ using Godot;
 public partial class GameEvents : Node
 {
     public GameState game { get; }
-    private bool canWait = false;
+    public bool doWait = false;
+    public bool canWait = false;
     private EventListener currentListener;
     private Dictionary<string, List<EventListener>> eventListeners = new Dictionary<string, List<EventListener>>();
     private Mutex processMutex = new();
@@ -22,7 +23,13 @@ public partial class GameEvents : Node
         this.game = game;
     }
     
-    public GameEvents(GameState game, bool canWait) : this(game)
+    public GameEvents(GameState game, bool doWait) : this(game)
+    {
+        this.doWait = doWait;
+        this.canWait = doWait;
+    }
+
+    public GameEvents(GameState game, bool doWait, bool canWait) : this(game, doWait)
     {
         this.canWait = canWait;
     }
@@ -87,9 +94,9 @@ public partial class GameEvents : Node
                 result &= ~EventResult.Continue;
             }
 
-            if (listenerResult.HasFlag(EventResult.Wait))
+            if (canWait)
             {
-                if (canWait)
+                if (listenerResult.HasFlag(EventResult.Wait) && doWait)
                 {
                     waitingListeners.Add(listener);
                 }
@@ -97,11 +104,14 @@ public partial class GameEvents : Node
                 {
                     // Remove the wait if it should not be there.
                     listenerResult &= ~EventResult.Wait;
-                    GD.PushError("A listener provided a Wait flag despite GameEvents having it disabled.");
                 }
             }
+            else
+            {
+                GD.PushError("A listener provided a Wait flag despite GameEvents having it disabled.");
+            }
             // If it has the Wait tag, push an error if the GameEvents can't wait
-            if (!canWait && listenerResult.HasFlag(EventResult.Wait))
+            if (!doWait && listenerResult.HasFlag(EventResult.Wait))
             {
             }
             // Remove the Continue tag from the listener result
@@ -130,7 +140,7 @@ public partial class GameEvents : Node
             }
         
             // Wait if a listener needs to do something following the listen
-            if (canWait && result.HasFlag(EventResult.Wait) && waitingListeners.Contains(listener))
+            if (canWait && doWait && result.HasFlag(EventResult.Wait) && waitingListeners.Contains(listener))
             {
                 waitingMutex.Lock();
                 CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.WaitStarted);
