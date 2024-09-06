@@ -92,6 +92,7 @@ func delete_selection() -> void:
 func remove_selection() -> void:
 	if selected_piece != null:
 		selected_piece.actions_updated.disconnect(_on_actions_updated)
+		selected_piece.set_selected(false)
 	selected_piece = null
 	delete_selection()
 
@@ -121,6 +122,7 @@ func set_selection(new_piece: Piece2D) -> void:
 		return
 	remove_selection()
 	selected_piece = new_piece
+	selected_piece.set_selected(true)
 	if selected_piece != null:
 		selected_piece.actions_updated.connect(_on_actions_updated)
 	update_selection()

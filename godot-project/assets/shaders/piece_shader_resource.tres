@@ -7,3 +7,7 @@ resource_local_to_scene = true
 shader = ExtResource("1_0edtm")
 shader_parameter/palette_count = 3
 shader_parameter/palette_colours = PackedColorArray(0.396889, 0.396889, 0.396889, 1, 0.615686, 0.615686, 0.615686, 1, 1, 1, 1, 1)
+shader_parameter/outline_margin = true
+shader_parameter/outline_enabled = false
+shader_parameter/outline_size = 3.0
+shader_parameter/outline_color = Color(0.552941, 1, 0.945098, 1)

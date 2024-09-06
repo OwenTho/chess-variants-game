@@ -1,2 +1,4 @@
 
-- Colour Palette shader (used for Piece colouring): https://godotshaders.com/shader/extensible-color-palette/
+- (CC0) Colour Palette shader (used for Piece colouring): https://godotshaders.com/shader/extensible-color-palette
+
+- (MIT) Outline that disrespects boundaries (used for Piece selection): https://godotshaders.com/shader/outline-that-disrespects-boundaries
