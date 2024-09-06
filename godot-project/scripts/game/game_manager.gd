@@ -42,6 +42,10 @@ signal starting_next_turn(player_num: int)
 signal next_turn(player_num: int)
 signal end_turn()
 
+signal piece_added(piece: Piece2D)
+signal piece_removed(piece: Piece2D)
+
+signal starting_actions()
 signal taking_action(action: Node, piece: Node)
 signal taking_actions_at(action_location: Vector2i, piece: Node)
 signal action_processed(action: Node, piece: Node)
@@ -419,7 +423,18 @@ func place_piece(piece_id: String, link_id: int, team: int, x: int, y: int, id: 
 	# Add node to tree
 	get_tree().get_first_node_in_group("piece_holder").add_child(new_piece)
 	
+	piece_added.emit(new_piece)
+	
 	return true
+
+func remove_piece(piece: Piece2D) -> void:
+	if piece == null:
+		return
+	piece.queue_free()
+	piece_removed.emit(piece)
+
+func remove_piece_by_id(id: int) -> void:
+	remove_piece(get_piece_id(id))
 
 func place_matching(piece_id: String, link_id: int, x: int, y: int) -> void:
 	place_piece(piece_id, link_id, 0, x, y)
@@ -641,6 +656,7 @@ func request_action(action_location: Vector2i, piece_id: int) -> void:
 	
 	# Take the actions
 	taking_actions_at.emit(action_location, piece)
+	start_actions.rpc()
 	game_controller.TakeActionAt(action_location, piece)
 
 
@@ -650,6 +666,13 @@ func failed_action(reason: String = "") -> void:
 	if not in_game:
 		return
 	action_was_failed.emit(reason)
+
+@rpc("authority", "call_local", "reliable")
+func start_actions() -> void:
+	# Only run if game is on
+	if not in_game:
+		return
+	starting_actions.emit()
 
 @rpc("authority", "call_remote", "reliable")
 func take_action(action_dict: Dictionary, piece_id: int) -> void:

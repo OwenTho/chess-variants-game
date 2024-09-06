@@ -64,6 +64,7 @@ func _pick_option(option_ind: int) -> void:
 	if cur_selection.is_empty():
 		return
 	if option_ind < 0 or option_ind >= cur_selection.size():
+		print("Invalid option index: %s, 0 <= x < %s" % [option_ind, cur_selection.size()])
 		return
 	
 	# Get the variables to send
@@ -94,12 +95,11 @@ func _promote_piece(piece_id: int, new_piece: String) -> void:
 	
 	var info = GameManager.game_controller.GetPieceInfo(new_piece)
 	if info == null:
-		print("Couldn't promote piece as '%s' has no info." % [new_piece])
-		return
+		push_warning("'%s' has no info, so piece info will be set to null." % [new_piece])
 	
 	var piece = GameManager.game_controller.UnsafeGetPiece(piece_id)
 	if piece == null:
-		print("Couldn't promote piece as there is no piece with id %s." % [piece_id])
+		push_error("Couldn't promote piece as there is no piece with id %s." % [piece_id])
 		return
 	
 	piece.info = info

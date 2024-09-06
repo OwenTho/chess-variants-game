@@ -8,6 +8,7 @@ var last_cell: Vector2i = Vector2.ZERO
 signal cell_updated(new_cell: Vector2i)
 
 var active: bool = true
+var visible_on_active: bool = true
 
 func _update_cell(new_cell: Vector2i):
 	if new_cell != last_cell:
@@ -17,7 +18,6 @@ func _update_cell(new_cell: Vector2i):
 
 func _process(_delta):
 	if not active:
-		visible = false
 		return
 	# For mouse, do every frame (as that's what the player will see)
 	if input_mouse:

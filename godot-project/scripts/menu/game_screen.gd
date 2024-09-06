@@ -21,6 +21,8 @@ var allow_quit: bool = true
 
 var cur_selected_card: int = -1
 
+var all_pieces: Array[Piece2D]
+
 func _ready() -> void:
 	GameManager.clear_cards.connect(_on_clear_cards)
 	GameManager.display_card.connect(card_selection.add_card)
@@ -30,6 +32,10 @@ func _ready() -> void:
 	GameManager.next_turn.connect(_on_next_turn)
 	GameManager.end_turn.connect(_on_end_turn)
 	
+	GameManager.piece_added.connect(_on_piece_added)
+	GameManager.piece_removed.connect(_on_piece_removed)
+	
+	GameManager.starting_actions.connect(_on_starting_actions)
 	GameManager.taking_action.connect(_on_taking_action)
 	GameManager.taking_actions_at.connect(_on_taking_actions_at)
 	GameManager.action_was_failed.connect(_on_action_failed)
@@ -63,7 +69,7 @@ func _process(delta) -> void:
 
 func _on_cursor_highlight_cell_updated(new_cell: Vector2i) -> void:
 	# If cursor is outside range, then hide it
-	cursor.visible = (GameManager.spaces_off_board(cursor.last_cell.x, cursor.last_cell.y) == 0) and cursor.active
+	cursor.visible = (GameManager.spaces_off_board(cursor.last_cell.x, cursor.last_cell.y) == 0) and cursor.active and cursor.visible_on_active
 
 func _input(event) -> void:
 	# Ignore inputs from non-players
@@ -75,53 +81,27 @@ func _input(event) -> void:
 		# Get the piece the player is selecting
 		var cell_pos: Vector2i = cursor.last_cell
 		
-		if disabled_selection:
-			return
 		select_cell(cell_pos)
 
-func remove_selection() -> void:
-	selected_piece = null
+func delete_selection() -> void:
 	for child in action_highlights.get_children():
 		child.queue_free()
 
-func select_cell(cell_pos: Vector2i) -> void:
-	# Try to get the game mutex
-	if not GameManager.game_mutex.try_lock():
-		# If it couldn't get the mutex, then return
-		return
-	# First check if the player is selecting an action
-	var actions_to_take: Array = []
-	if selected_piece != null: 
-		# Check if there is an action being selected
-		for action in selected_piece.possible_actions:
-			if action == cell_pos:
-				# If there is, request to act on that location
-				GameManager.game_mutex.unlock()
-				disabled_selection = true
-				allow_quit = false
-				GameManager.request_action.rpc(cell_pos, selected_piece.piece_data.id)
-				remove_selection()
-				return
-	# Remove lock
-	GameManager.game_mutex.unlock()
-	
-	# Remove existing selection before moving on	
-	remove_selection()
-	
-	# Get the first piece
-	var piece = await GameManager.get_first_piece_at(cell_pos.x, cell_pos.y)
-	if piece == null:
-		return
-	
-	var item_node: Piece2D = GameManager.get_piece_id(piece.id)
-	
-	select_item(item_node)
+func remove_selection() -> void:
+	if selected_piece != null:
+		selected_piece.actions_updated.disconnect(_on_actions_updated)
+	selected_piece = null
+	delete_selection()
 
-func select_item(piece: Piece2D) -> void:
-	selected_piece = piece
+func update_selection() -> void:
 	
-	var possible_actions: Array[Vector2i] = piece.possible_actions
+	delete_selection()
 	
+	# If there is no selected piece, then ignore it
+	if selected_piece == null:
+		return
+		
+	var possible_actions: Array[Vector2i] = selected_piece.possible_actions
 	# If the piece has no actions, then ignore it
 	if possible_actions == null:
 		return
@@ -133,9 +113,70 @@ func select_item(piece: Piece2D) -> void:
 		new_highlight.set_pos(action.x, action.y)
 		action_highlights.add_child.call_deferred(new_highlight)
 
+func set_selection(new_piece: Piece2D) -> void:
+	if selected_piece == new_piece:
+		update_selection()
+		return
+	remove_selection()
+	selected_piece = new_piece
+	if selected_piece != null:
+		selected_piece.actions_updated.connect(_on_actions_updated)
+	update_selection()
+
+func _on_actions_updated(piece: Piece2D) -> void:
+	if piece != selected_piece:
+		return
+	update_selection()
+
+func select_cell(cell_pos: Vector2i) -> void:
+	# First check if the player is selecting an action
+	var actions_to_take: Array = []
+	if selected_piece != null and not disabled_selection: 
+		# Check if there is an action being selected
+		for action in selected_piece.possible_actions:
+			if action == cell_pos:
+				# If there is, request to act on that location
+				var selected = selected_piece
+				remove_selection()
+				disabled_selection = true
+				allow_quit = false
+				GameManager.request_action.rpc(cell_pos, selected.piece_data.id)
+				return
+	
+	# Try to get the game mutex
+	if not GameManager.game_mutex.try_lock():
+		# If not, return, as it can't get the piece otherwise
+		return
+	
+	# Get the first piece
+	var piece = await GameManager.get_first_piece_at(cell_pos.x, cell_pos.y)
+	# Unlock the mutex as it's not needed anymore
+	GameManager.game_mutex.unlock()
+	if piece == null:
+		# If there's no piece, remove the selection
+		remove_selection()
+		return
+	
+	var item_node: Piece2D = GameManager.get_piece_id(piece.id)
+	set_selection(item_node)
 
 
 
+
+
+# Piece signals
+
+func _on_piece_added(piece: Piece2D) -> void:
+	all_pieces.append(piece)
+
+func _on_piece_removed(piece: Piece2D) -> void:
+	all_pieces.erase(piece)
+
+
+
+
+
+# Game Signals
 
 func _on_clear_cards() -> void:
 	card_selection.visible = false
@@ -161,12 +202,25 @@ func _on_btn_use_pressed() -> void:
 
 
 func _on_next_turn(new_player_num: int) -> void:
-	remove_selection()
+	# Re-enable the cursors visibility
+	cursor.visible_on_active = true
+	_on_cursor_highlight_cell_updated(cursor.pos)
+	# Re-enable the selection and quit
 	disabled_selection = false
 	allow_quit = true
 
 func _on_end_turn() -> void:
 	pass
+
+func _on_starting_actions() -> void:
+	# Hide the selection, but don't disable
+	cursor.visible_on_active = false
+	# Remove selection first
+	remove_selection()
+	# Then remove all possible actions
+	for piece in all_pieces:
+		piece.reset_actions()
+
 
 func _on_taking_action(action: Node, piece: Node) -> void:
 	allow_quit = false
@@ -196,6 +250,7 @@ func _on_piece_taken(taken_piece, attacker) -> void:
 	var remove_piece: Piece2D = GameManager.get_piece_id(taken_piece.id)
 	if remove_piece == null:
 		return
+	GameManager.remove_piece(remove_piece)
 	remove_piece.queue_free()
 
 func _end_game_message(title: String, message: String) -> void:

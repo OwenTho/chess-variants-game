@@ -5,6 +5,8 @@ class_name Piece2D
 @export var sprite: Sprite2D
 @export var sprite_transform_node: Node2D
 
+signal actions_updated(piece: Piece2D)
+
 var piece_data
 var _cur_move_tween: Tween
 var _cur_info_tween: Tween
@@ -25,6 +27,10 @@ func set_actions(action_locations: Array[Vector2i]) -> void:
 		possible_actions = []
 		return
 	possible_actions = action_locations
+	actions_updated.emit(self)
+
+func reset_actions() -> void:
+	set_actions([])
 
 func _on_move(new_cell) -> void:
 	if new_cell != null:
@@ -79,6 +85,9 @@ func update_sprite() -> void:
 			Color.from_string("#515151", Color.WHITE),
 			Color.from_string("#747474", Color.WHITE)
 		])
+
+func set_selected(selected: bool) -> void:
+	sprite.material.set_shader_parameter("outline_enabled", selected)
 
 func _on_info_changed(_info) -> void:
 	if _cur_info_tween != null:

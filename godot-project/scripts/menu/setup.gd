@@ -100,4 +100,4 @@ func process_argument(name: String, value: String = ""):
 				Lobby.DEFAULT_PORT = port_number
 				print("Default port has been set to %s." % [port_number])
 			_:
-				print("Unknown argument \"%s\"" % [name])
+				push_warning("Unknown argument \"%s\"" % [name])
