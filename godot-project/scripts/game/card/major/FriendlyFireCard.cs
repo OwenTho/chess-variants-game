@@ -9,7 +9,7 @@ public partial class FriendlyFireCard : CardBase
         game.AddVerificationRule("team_attack_allow_overlap");
     }
 
-    public override CardBase Clone()
+    protected override CardBase CloneCard()
     {
         return new FriendlyFireCard();
     }

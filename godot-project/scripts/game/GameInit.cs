@@ -210,11 +210,10 @@ public partial class GameController
     internal void InitInitialCards()
     {
         // TODO: Make this server-only, and send all initial cards when the game starts.
-        AddCard(new PromotionCard
-        {
-            fromPiece = "pawn",
-            toPiece = new Array<string> {"knight", "bishop", "rook", "queen"}
-        });
+        PromotionCard newCard = (PromotionCard) cardFactoryRegistry.GetValue("minor_promotion").CreateNewBlankCard(currentGameState);
+        newCard.fromPiece = "pawn";
+        newCard.toPiece = new Array<string> { "knight", "bishop", "rook", "queen" };
+        AddCard(newCard);
     }
 
     private void MakeNewValidationRule(string id, ValidationRuleBase newRule, bool makeInitialRule = false)

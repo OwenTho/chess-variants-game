@@ -955,6 +955,11 @@ public partial class GameState : Node
 
     internal void AddCard(CardBase card, bool callCardAdd)
     {
+        if (card.cardId == null)
+        {
+            GD.PushError($"Could not add {card.GetType().Name} as it does not have a card id. Was it created through a Factory?");
+            return;
+        }
         card.MakeNotices(this);
         cards.Add(card);
         card.CallDeferred(Node.MethodName.AddChild, card.cardNotices);

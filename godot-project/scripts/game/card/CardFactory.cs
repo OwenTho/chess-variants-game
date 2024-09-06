@@ -21,6 +21,7 @@ public abstract partial class CardFactory : Node
     {
         CardBase newCard = CreateFromDict(game, cardData);
         newCard.cardId = cardId;
+        newCard.serverOnly = serverOnly;
         _createdCards.Add(newCard);
         return newCard;
     }
@@ -34,6 +35,16 @@ public abstract partial class CardFactory : Node
     // it forces the cardId to be the same as the factory's.
     protected abstract CardBase CreateCard(GameState game);
 
+
+    public CardBase CreateNewBlankCard(GameState game)
+    {
+        CardBase newCard = CreateBlankCard(game);
+        newCard.cardId = cardId;
+        newCard.serverOnly = serverOnly;
+        _createdCards.Add(newCard);
+        return newCard;
+    }
+
     // A blank instance of the Card, so that any cards that process the board normally don't need to do so.
     protected abstract CardBase CreateBlankCard(GameState game);
 
@@ -43,6 +54,9 @@ public abstract partial class CardFactory : Node
     {
         CardBase newCard = CreateBlankCard(game);
         newCard.FromDict(game, cardData);
+        newCard.cardId = cardId;
+        newCard.serverOnly = serverOnly;
+        _createdCards.Add(newCard);
         return newCard;
     }
 

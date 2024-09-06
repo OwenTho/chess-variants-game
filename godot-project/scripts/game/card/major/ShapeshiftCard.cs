@@ -16,7 +16,7 @@ public partial class ShapeshiftCard : CardBase
         game.lastAttackerPiece.info = game.lastTakenPiece.info;
     }
     
-    public override CardBase Clone()
+    protected override CardBase CloneCard()
     {
         return new ShapeshiftCard();
     }

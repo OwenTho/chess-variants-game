@@ -88,7 +88,7 @@ public partial class ShuffleCard : CardBase
         }
     }
 
-    public override CardBase Clone()
+    protected override CardBase CloneCard()
     {
         return new ShuffleCard();
     }

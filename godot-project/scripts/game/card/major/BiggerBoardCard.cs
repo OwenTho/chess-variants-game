@@ -11,7 +11,7 @@ public partial class BiggerBoardCard : CardBase
         game.gridLowerCorner -= sizeChange;
     }
 
-    public override CardBase Clone()
+    protected override CardBase CloneCard()
     {
         return new BiggerBoardCard();
     }

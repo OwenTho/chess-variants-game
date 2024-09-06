@@ -1,7 +1,7 @@
 extends GameAddon
 
 func _init() -> void:
-	add_card_notice("promotion", _on_promotion)
+	add_card_notice("minor_promotion", "promotion", _on_promotion)
 
 var promotion_selector_scene: PackedScene = preload("res://scenes/game/addons/promotion/promotion_selector.tscn")
 

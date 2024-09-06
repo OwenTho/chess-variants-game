@@ -48,7 +48,7 @@ public partial class LonelyPiecesStuckCard : CardBase
         }
     }
 
-    public override CardBase Clone()
+    protected override CardBase CloneCard()
     {
         return new LonelyPiecesStuckCard();
     }

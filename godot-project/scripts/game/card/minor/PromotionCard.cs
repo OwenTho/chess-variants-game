@@ -118,10 +118,11 @@ public partial class PromotionCard : CardBase
         game.EndEventsWait();
     }
 
-    public override CardBase Clone()
+    protected override CardBase CloneCard()
     {
         PromotionCard newCard = new PromotionCard();
-
+        newCard.fromPiece = fromPiece;
+        newCard.toPiece = toPiece.Duplicate();
         return newCard;
     }
     

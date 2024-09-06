@@ -133,7 +133,11 @@ func init_addons() -> void:
 func add_addon(name: String, addon: GameAddon) -> void:
 	if addon in addons:
 		push_error("Addon is already registered: %s" % [addon])
-		return	
+		return
+	for other_addon in addons:
+		if other_addon.name == name:
+			push_error("Can't register new addon with name '%s' as it's already used by another addon.")
+			return
 	addons.append(addon)
 	addon.name = name + "Addon"
 	# Add as a child to the game scene
@@ -542,7 +546,7 @@ func _on_actions_processed_at(success: bool, action_location: Vector2i, piece) -
 
 
 func _on_card_notice(card: Node, notice: String) -> void:
-	print("%s has sent notice '%s'" % [card, notice])
+	print("%s has sent notice '%s'" % [card.GetCardName(), notice])
 	for addon in addons:
 		addon._handle_card_notice(card, notice)
 

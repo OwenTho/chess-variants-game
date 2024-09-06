@@ -25,7 +25,7 @@ public partial class SinglePieceArmyCard : CardBase
         game.KingId = armyPiece;
     }
     
-    public override CardBase Clone()
+    protected override CardBase CloneCard()
     {
         SinglePieceArmyCard newCard = new SinglePieceArmyCard();
         newCard.armyPiece = armyPiece;

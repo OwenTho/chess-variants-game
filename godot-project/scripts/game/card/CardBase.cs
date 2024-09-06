@@ -51,7 +51,15 @@ public abstract partial class CardBase : Node
         return enabled;
     }
 
-    public abstract CardBase Clone();
+    public CardBase Clone()
+    {
+        CardBase newCard = CloneCard();
+        newCard.cardId = cardId;
+        newCard.enabled = enabled;
+        return newCard;
+    }
+    
+    protected abstract CardBase CloneCard();
 
     internal Dictionary<string, string> ConvertToDict(GameState game)
     {
