@@ -38,6 +38,8 @@ func _ready() -> void:
 	GameManager.starting_actions.connect(_on_starting_actions)
 	GameManager.taking_action.connect(_on_taking_action)
 	GameManager.taking_actions_at.connect(_on_taking_actions_at)
+	
+	GameManager.action_processed.connect(_on_action_processed)
 	GameManager.action_was_failed.connect(_on_action_failed)
 	
 	GameManager.player_has_won.connect(_on_player_won)
@@ -212,24 +214,30 @@ func _on_next_turn(new_player_num: int) -> void:
 func _on_end_turn() -> void:
 	pass
 
+var just_started_actions: bool = false
 func _on_starting_actions() -> void:
 	# Hide the selection, but don't disable
 	cursor.visible_on_active = false
 	# Remove selection first
 	remove_selection()
-	# Then remove all possible actions
-	for piece in all_pieces:
-		piece.reset_actions()
+	just_started_actions = true
 
+func _reset_on_starting() -> void:
+	# If just started actions, reset the current actions
+	if just_started_actions:
+		just_started_actions = false
+		for cur_piece in all_pieces:
+			cur_piece.reset_actions()
 
 func _on_taking_action(action: Node, piece: Node) -> void:
+	_reset_on_starting()
 	allow_quit = false
 
 func _on_taking_actions_at(action_location: Vector2i, piece: Node) -> void:
 	allow_quit = false
 
 func _on_action_processed(action: Node, piece: Node) -> void:
-	pass
+	_reset_on_starting()
 
 func _on_actions_processed(success: bool, action_location: Vector2i, piece: Node) -> void:
 	if not is_multiplayer_authority():
@@ -243,6 +251,9 @@ func _on_action_failed(reason: String) -> void:
 	if not reason.is_empty():
 		notices.add_notice(reason)
 	remove_selection()
+	cursor.visible_on_active = true
+	_on_cursor_highlight_cell_updated(cursor.pos)
+	just_started_actions = false
 	disabled_selection = false
 	allow_quit = true
 
