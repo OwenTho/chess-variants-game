@@ -52,14 +52,7 @@ public partial class GameEvents : Node
     /// </summary>
     /// <param name="eventKey">String name of the event.</param>
     /// <returns name="stopEvent">Boolean. True if the event should occur, False if it should not.</returns>
-    internal bool AnnounceEvent(string eventKey)
-    {
-        Task<bool> announcement = AnnounceToListeners(eventKey);
-        announcement.Wait();
-        return announcement.Result;
-    }
-    
-    private async Task<bool> AnnounceToListeners(string eventKey)
+    public bool AnnounceEvent(string eventKey)
     {
         processMutex.Lock();
         waitingMutex.Lock();
@@ -150,18 +143,8 @@ public partial class GameEvents : Node
             // Wait if a listener needs to do something following the listen
             if (canWait && doWait && result.HasFlag(EventResult.Wait) && waitingListeners.Contains(listener))
             {
-                waitingMutex.Lock();
-                CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.WaitStarted);
-                waiting = true;
-                bool stillWaiting = true;
-                waitingMutex.Unlock();
-                while (stillWaiting)
-                {
-                    await Task.Delay(25);
-                    waitingMutex.Lock();
-                    stillWaiting = waiting;
-                    waitingMutex.Unlock();
-                }
+                Task waitTask = Wait();
+                waitTask.Wait();
             }
         }
 
@@ -176,6 +159,22 @@ public partial class GameEvents : Node
 
         processMutex.Unlock();
         return true;
+    }
+
+    internal async Task Wait()
+    {
+        waitingMutex.Lock();
+        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.WaitStarted);
+        waiting = true;
+        bool stillWaiting = true;
+        waitingMutex.Unlock();
+        while (stillWaiting)
+        {
+            await Task.Delay(25);
+            waitingMutex.Lock();
+            stillWaiting = waiting;
+            waitingMutex.Unlock();
+        }
     }
 
     public void EndWait()
