@@ -177,10 +177,17 @@ public partial class GameController : Node
         return cardData;
     }
 
+    public void AddCardTask(CardBase card)
+    {
+        gameMutex.Lock();
+        currentGameState.AddCard(card, true);
+        gameMutex.Unlock();
+    }
+
     public void AddCard(CardBase card)
     {
         // For now, simply add the card to the game
-        currentGameState.AddCard(card, true);
+        DoTask(() => AddCardTask(card));
     }
 
     public void SendCardNotice(CardBase card, string notice)
