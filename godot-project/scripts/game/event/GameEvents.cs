@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Godot;
 
 public partial class GameEvents : Node
@@ -45,13 +46,20 @@ public partial class GameEvents : Node
 
         listeners.Add(listener);
     }
-        
+
     /// <summary>
     /// Announce the event to listeners listing for a certain event.
     /// </summary>
     /// <param name="eventKey">String name of the event.</param>
     /// <returns name="stopEvent">Boolean. True if the event should occur, False if it should not.</returns>
     internal bool AnnounceEvent(string eventKey)
+    {
+        Task<bool> announcement = AnnounceToListeners(eventKey);
+        announcement.Wait();
+        return announcement.Result;
+    }
+    
+    private async Task<bool> AnnounceToListeners(string eventKey)
     {
         processMutex.Lock();
         waitingMutex.Lock();
@@ -149,6 +157,7 @@ public partial class GameEvents : Node
                 waitingMutex.Unlock();
                 while (stillWaiting)
                 {
+                    await Task.Delay(25);
                     waitingMutex.Lock();
                     stillWaiting = waiting;
                     waitingMutex.Unlock();
