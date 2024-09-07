@@ -51,6 +51,8 @@ func _ready() -> void:
 	
 	GameManager.notice_received.connect(_on_notice_received)
 	
+	cursor.cell_selected.connect(select_cell)
+	
 	var my_num = Lobby.get_player_num(multiplayer.get_unique_id())
 	# If it's player 2, flip the board
 	if my_num == 1:
@@ -72,18 +74,6 @@ func _process(delta) -> void:
 func _on_cursor_highlight_cell_updated(new_cell: Vector2i) -> void:
 	# If cursor is outside range, then hide it
 	cursor.visible = (GameManager.spaces_off_board(cursor.last_cell.x, cursor.last_cell.y) == 0) and cursor.active and cursor.visible_on_active
-
-func _input(event) -> void:
-	# Ignore inputs from non-players
-	if not Lobby.is_player:
-		return
-	if not game_active:
-		return
-	if event is InputEventMouseButton and event.is_action_pressed("mouse_left"):
-		# Get the piece the player is selecting
-		var cell_pos: Vector2i = cursor.last_cell
-		
-		select_cell(cell_pos)
 
 func delete_selection() -> void:
 	for child in action_highlights.get_children():
@@ -133,6 +123,11 @@ func _on_actions_updated(piece: Piece2D) -> void:
 	update_selection()
 
 func select_cell(cell_pos: Vector2i) -> void:
+	# Ignore inputs from non-players
+	if not Lobby.is_player:
+		return
+	if not game_active:
+		return
 	# First check if the player is selecting an action
 	var actions_to_take: Array = []
 	if selected_piece != null and not disabled_selection: 
@@ -165,6 +160,12 @@ func select_cell(cell_pos: Vector2i) -> void:
 	set_selection(item_node)
 
 
+func show_cursor() -> void:
+	cursor.visible_on_active = true
+	_on_cursor_highlight_cell_updated(cursor.pos)
+
+func hide_cursor() -> void:
+	cursor.visible_on_active = false
 
 
 
@@ -207,8 +208,7 @@ func _on_btn_use_pressed() -> void:
 
 func _on_next_turn(new_player_num: int) -> void:
 	# Re-enable the cursors visibility
-	cursor.visible_on_active = true
-	_on_cursor_highlight_cell_updated(cursor.pos)
+	show_cursor()
 	# Re-enable the selection and quit
 	disabled_selection = false
 	allow_quit = true
@@ -218,8 +218,8 @@ func _on_end_turn() -> void:
 
 var just_started_actions: bool = false
 func _on_starting_actions() -> void:
-	# Hide the selection, but don't disable
-	cursor.visible_on_active = false
+	# Hide the selection
+	hide_cursor()
 	# Remove selection first
 	remove_selection()
 	just_started_actions = true
@@ -253,8 +253,7 @@ func _on_action_failed(reason: String) -> void:
 	if not reason.is_empty():
 		notices.add_notice(reason)
 	remove_selection()
-	cursor.visible_on_active = true
-	_on_cursor_highlight_cell_updated(cursor.pos)
+	show_cursor()
 	just_started_actions = false
 	disabled_selection = false
 	allow_quit = true
