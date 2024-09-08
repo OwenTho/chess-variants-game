@@ -65,6 +65,10 @@ public partial class CardDeck : Node
     // Put card back into the pile, claiming it unused.
     public bool PutCard(CardBase card)
     {
+        if (card == null)
+        {
+            return false;
+        }
         // Check if the card id exists
         if (!_cards.TryGetValue(card.cardId, out CardInfo cardInfo))
         {

@@ -135,6 +135,15 @@ public partial class GameController : Node
         return newCard;
     }
 
+    public CardBase MakeCardUsingFactory(CardFactory cardFactory)
+    {
+        gameMutex.Lock();
+        CardBase newCard = cardFactory.CreateNewCard(currentGameState);
+        gameMutex.Unlock();
+
+        return newCard;
+    }
+
     public CardBase MakeCardFromDict(Godot.Collections.Dictionary<string, string> cardData)
     {
         if (cardData == null)
@@ -320,26 +329,44 @@ public partial class GameController : Node
         }
     }
     
-    
-    public Piece GetPiece(int pieceId)
-    {
-        gameMutex.Lock();
-        Piece returnValue = currentGameState.GetPiece(pieceId);
-        gameMutex.Unlock();
-        return returnValue;
-    }
 
     public Piece UnsafeGetPiece(int pieceId)
     {
         return currentGameState.GetPiece(pieceId);
     }
+    
+    public Piece GetPiece(int pieceId)
+    {
+        gameMutex.Lock();
+        Piece returnValue = UnsafeGetPiece(pieceId);
+        gameMutex.Unlock();
+        return returnValue;
+    }
 
+    public Piece UnsafeGetFirstPieceAt(int x, int y)
+    {
+        return currentGameState.GetFirstPieceAt(x, y);
+    }
+    
     public Piece GetFirstPieceAt(int x, int y)
     {
         gameMutex.Lock();
-        Piece returnPiece = currentGameState.GetFirstPieceAt(x, y);
+        Piece returnPiece = UnsafeGetFirstPieceAt(x, y);
         gameMutex.Unlock();
         return returnPiece;
+    }
+
+    public Array<Piece> UnsafeGetPiecesByLinkId(int linkId)
+    {
+        return currentGameState.GetPiecesByLinkId(linkId);
+    }
+
+    public Array<Piece> GetPiecesByLinkId(int linkId)
+    {
+        gameMutex.Lock();
+        Array<Piece> returnPieces = UnsafeGetPiecesByLinkId(linkId);
+        gameMutex.Unlock();
+        return returnPieces;
     }
 
 
@@ -418,6 +445,12 @@ public partial class GameController : Node
     public void NextTurn()
     {
         NextTurn(-1);
+    }
+
+    public void EndTurn()
+    {
+        // Call on the game thread
+        DoTask(() => currentGameState.EndTurn());
     }
     
     
@@ -504,6 +537,7 @@ public partial class GameController : Node
             threadMutex.Unlock();
             threadSemaphore.Post();
             // End the GameEvents wait, if it's currently happening
+            currentGameState.gameEvents.canWait = false;
             currentGameState.EndEventsWait();
             // Wait for the thread to stop
             if (gameThread != null)

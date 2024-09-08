@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Godot;
 using Godot.Collections;
 
@@ -260,6 +262,21 @@ public partial class GameState : Node
         return piece != null;
     }
 
+    public Array<Piece> GetPiecesByLinkId(int linkId)
+    {
+        Array<Piece> pieces = new Array<Piece>();
+        foreach (var piece in allPieces)
+        {
+            if (piece.linkId == linkId)
+            {
+                pieces.Add(piece);
+            }
+        }
+
+        return pieces;
+    }
+    
+    
     public bool HasPieceAt(int x, int y)
     {
         if (pieceGrid.TryGetCellAt(x, y, out GridCell<Piece> cell))
@@ -878,6 +895,23 @@ public partial class GameState : Node
         }
     }
 
+    // Returns the id of the player in the next turn
+    public int GetNextPlayerNumber()
+    {
+        int newPlayer = currentPlayerNum + 1;
+        newPlayer %= numberOfPlayers;
+        return newPlayer;
+    }
+
+    public int EndTurn()
+    {
+        // First, end turn
+        gameEvents.AnnounceEvent(GameEvents.EndTurn);
+        int nextPlayer = GetNextPlayerNumber();
+        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.TurnEnded, currentPlayerNum, nextPlayer);
+        return nextPlayer;
+    }
+
     public void NextTurn(int newPlayerNum)
     {
         // If action grid was temporary, replace it with a new one
@@ -903,9 +937,8 @@ public partial class GameState : Node
                 }
             }
         }
-        // First, end turn
-        gameEvents.AnnounceEvent(GameEvents.EndTurn);
-        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.EndTurn);
+        
+        
         if (isServer)
         {
             // Tell all pieces that it's the next turn
@@ -945,7 +978,7 @@ public partial class GameState : Node
         }
 
         gameEvents.AnnounceEvent(GameEvents.NewTurn);
-        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.NewTurn, currentPlayerNum);
+        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.TurnStarted, currentPlayerNum);
     }
 
     // Alternate function (for Godot to call)
@@ -955,29 +988,56 @@ public partial class GameState : Node
     }
 
 
-    internal void AddCard(CardBase card, bool callCardAdd)
+    public void AddCard(CardBase card, bool callCardAdd)
     {
         if (card.cardId == null)
         {
             GD.PushError($"Could not add {card.GetType().Name} as it does not have a card id. Was it created through a Factory?");
             return;
         }
-        card.MakeNotices(this);
-        cards.Add(card);
-        card.CallDeferred(Node.MethodName.AddChild, card.cardNotices);
+
+        if (!card.immediateUse)
+        {
+            card.MakeNotices(this);
+            cards.Add(card);
+            card.CallDeferred(Node.MethodName.AddChild, card.cardNotices);
+        }
+
         // If the card should only be processed on the server,
         // don't add listeners or call AddCard.
         bool processCard = !(card.serverOnly && !isServer);
         if (processCard)
         {
-            card.MakeListeners(gameEvents);
+            if (!card.immediateUse)
+            {
+                card.MakeListeners(gameEvents);
+            }
+
             if (callCardAdd)
             {
                 card.OnAddCard(this);
             }
         }
 
+        if (card.immediateUse)
+        {
+            CallDeferred(Node.MethodName.QueueFree, card);
+        }
+
         CallDeferred(Node.MethodName.AddChild, card);
+        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.CardAdded, card);
+    }
+
+    public bool RemoveCard(CardBase card)
+    {
+        if (!cards.Remove(card))
+        {
+            GD.PushWarning($"Tried to remove card {card.GetCardName()} when it is not added.");
+            return false;
+        }
+
+        cards.Remove(card);
+        return true;
     }
     
     internal void SendCardNotice(CardBase card, string notice)
@@ -994,6 +1054,12 @@ public partial class GameState : Node
         }
     }
 
+    public void StartEventsWait()
+    {
+        Task waitEvent = gameEvents.Wait();
+        waitEvent.Wait();
+    }
+    
     public void EndEventsWait()
     {
         gameEvents.EndWait();
@@ -1065,6 +1131,7 @@ public partial class GameState : Node
         }
 
         // Copy over the pieces
+        // TODO: Copy over PieceInfo, too.
         foreach (var piece in allPieces)
         {
             Piece newPiece = piece.Clone();

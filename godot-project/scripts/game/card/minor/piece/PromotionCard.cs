@@ -6,7 +6,7 @@ public partial class PromotionCard : CardBase
 {
     public string fromPiece = "";
     public const string promotedTag = "just_promoted";
-    public Array<string> toPiece;
+    public Array<string> toPiece = new();
     public Piece promotingPiece;
     public override void MakeListeners(GameEvents gameEvents)
     {
@@ -115,7 +115,7 @@ public partial class PromotionCard : CardBase
 
     public void PiecePromoted(GameState game)
     {
-        game.EndEventsWait();
+        EndWait(game);
     }
 
     protected override CardBase CloneCard()

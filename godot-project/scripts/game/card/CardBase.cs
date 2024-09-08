@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Godot;
 using Godot.Collections;
 
@@ -10,8 +11,16 @@ public abstract partial class CardBase : Node
 
     public bool enabled = true;
 
+    /// <summary>
     /// Whether the card is only processed on the server or not.
+    /// </summary>
     public bool serverOnly { get; internal set; }
+
+    /// <summary>
+    /// If true, card does not have MakeListeners called and will be freed
+    /// after OnAddCard is called.
+    /// </summary>
+    public bool immediateUse { get; internal set;}
 
     [Signal]
     public delegate void CardInfoUpdatedEventHandler();
@@ -77,6 +86,16 @@ public abstract partial class CardBase : Node
     public virtual CardReturn OnMatchingCard(CardBase card)
     {
         return CardReturn.Ignored;
+    }
+
+    public void Wait(GameState game)
+    {
+        game.StartEventsWait();
+    }
+
+    public void EndWait(GameState game)
+    {
+        game.EndEventsWait();
     }
 
     // Used for server sharing card information

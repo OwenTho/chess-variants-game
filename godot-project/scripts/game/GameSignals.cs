@@ -4,16 +4,19 @@ public partial class GameController
 {
     // Carried from GameState
     [Signal]
-    public delegate void NewTurnEventHandler(int newPlayerNum);
+    public delegate void TurnStartedEventHandler(int newPlayerNum);
 
     [Signal]
-    public delegate void EndTurnEventHandler();
+    public delegate void TurnEndedEventHandler(int oldPlayerNum, int newPlayerNum);
 
     [Signal]
     public delegate void ActionProcessedEventHandler(ActionBase action, Piece piece);
     
     [Signal]
     public delegate void ActionsProcessedAtEventHandler(bool success, Vector2I actionLocation, Piece piece);
+
+    [Signal]
+    public delegate void CardAddedEventHandler(CardBase card);
     
     [Signal]
     public delegate void CardNoticeEventHandler(CardBase card, string notice);

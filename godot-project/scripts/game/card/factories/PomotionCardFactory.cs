@@ -32,8 +32,18 @@ public partial class PomotionCardFactory : CardFactory
     protected override CardBase CreateCard(GameState game)
     {
         List<string> possiblePromotions = GetPossiblePromotions(game);
+        if (possiblePromotions.Count == 0)
+        {
+            GD.PushError("Tried to make a PromotionCard, but there were no possible promotions.");
+            return null;
+        }
         // Randomly pick a promotion from the list
         string promotion = possiblePromotions[game.gameRandom.RandiRange(0, possiblePromotions.Count - 1)];
+        if (promotion == null)
+        {
+            GD.PushError("Tried to make a PromotionCard, but the promotion string obtained was 'null'.");
+            return null;
+        }
 
         PromotionCard newCard = new PromotionCard();
         

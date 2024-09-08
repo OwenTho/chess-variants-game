@@ -4,20 +4,24 @@ using Godot.Collections;
 
 public partial class GameController
 {
+    private bool hasInitBefore;
     internal Registry<PieceInfo> pieceInfoRegistry = new();
+    
     internal Registry<ActionRuleBase> actionRuleRegistry = new();
     internal Registry<ActionFactory> actionFactoriesRegistry = new();
+    
     internal Registry<ValidationRuleBase> validationRuleRegistry = new();
     internal List<string> initialValidationRules = new();
+    
     internal Registry<CardFactory> cardFactoryRegistry = new();
-    private bool hasInitBefore;
 
     public CardDeck MajorCardDeck { get; private set; }
     public CardDeck MinorCardDeck { get; private set; }
+    public CardFactory ChangePieceFactory { get; private set; }
     
-    public void FullInit(bool isServer)
+    public void FullInit(bool isServer, int playerCount)
     {
-        InitGameState(isServer);
+        InitGameState(isServer, playerCount);
         InitValidationRules();
         InitActionRules();
         InitActionFactories();
@@ -37,20 +41,21 @@ public partial class GameController
         }
     }
 
-    public GameState InitGameState(bool needToCheck)
+    public GameState InitGameState(bool needToCheck, int playerCount)
     {
         // Create the GameState
-        currentGameState = new GameState(this, 2);
+        currentGameState = new GameState(this, playerCount);
         currentGameState.Init(needToCheck);
         AddChild(currentGameState);
         
         // Connect the signals
-        currentGameState.NewTurn += (newPlayerNum) => EmitSignal(SignalName.NewTurn, newPlayerNum);
-        currentGameState.EndTurn += () => EmitSignal(SignalName.EndTurn);
+        currentGameState.TurnStarted += (newPlayerNum) => EmitSignal(SignalName.TurnStarted, newPlayerNum);
+        currentGameState.TurnEnded += (oldPlayerNum, newPlayerNum) => EmitSignal(SignalName.TurnEnded, oldPlayerNum, newPlayerNum);
         
         currentGameState.ActionProcessed += (action, piece) => EmitSignal(SignalName.ActionProcessed, action, piece);
         currentGameState.ActionsProcessedAt += (success, actionLocation, piece) => EmitSignal(SignalName.ActionsProcessedAt, success, actionLocation, piece);
 
+        currentGameState.CardAdded += (card) => EmitSignal(SignalName.CardAdded, card);
         currentGameState.CardNotice += (card, notice) => EmitSignal(SignalName.CardNotice, card, notice);
         
         currentGameState.PlayerLost += (playerNum) => EmitSignal(SignalName.PlayerLost, playerNum);
@@ -165,6 +170,7 @@ public partial class GameController
         AddNewCardFactory("minor_promotion", new PomotionCardFactory());
         
         // Piece
+        ChangePieceFactory = AddNewCardFactory("minor_change_piece", new ChangePieceCardFactory(), true);
         
         // Space
     }
@@ -270,10 +276,12 @@ public partial class GameController
         return newInfo;
     }
 
-    private void AddNewCardFactory(string id, CardFactory newFactory, bool serverOnly = false)
+    private CardFactory AddNewCardFactory(string id, CardFactory newFactory, bool serverOnly = false, bool immediateUse = false)
     {
         newFactory.cardId = id;
         newFactory.serverOnly = serverOnly;
+        newFactory.immediateUse = immediateUse;
         cardFactoryRegistry.Register(id, newFactory);
+        return newFactory;
     }
 }

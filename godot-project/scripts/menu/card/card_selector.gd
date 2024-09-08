@@ -1,18 +1,127 @@
+class_name CardSelector
 extends Node
 
-class_name CardSelector
-
-# Card Selection
 class SelectionInfo:
-	var player_num: int
+	var player_num: int = -1
 	
-	var deck
+	func _init(player_num: int) -> void:
+		self.player_num = player_num
+	
+	func _reset_next() -> void:
+		push_error("_reset_next not defined in SelectionInfo extended class.")
+	
+	func _get_next() -> Node:
+		push_error("_get_next not defined in SelectionInfo extended class.")
+		return null
+	
+	func _return_card(card: Node) -> void:
+		card.queue_free()
+		push_error("_return_card not defined in SelectionInfo extended class.")
+	
+# Card Selection
+class DeckSelectionInfo extends SelectionInfo:
+	var deck: Node
+	var _cur_taken: int = 0
 	var quantity: int
 	
 	func _init(player_num: int, deck, quantity: int) -> void:
-		self.player_num = player_num
+		super._init(player_num)
 		self.deck = deck
 		self.quantity = quantity
+	
+	func _reset_next() -> void:
+		_cur_taken = 0
+	
+	func _get_next() -> Node:
+		if _cur_taken >= quantity:
+			return null
+		_cur_taken += 1
+		return GameManager.game_controller.PullCardFromDeck(deck)
+	
+	func _return_card(card: Node) -> void:
+		# Return to deck and free card
+		card.queue_free()
+		GameManager.game_controller.ReturnCardToDeck(card, deck)
+
+class CustomSelectionCardGetter:
+	
+	func _get_card() -> Node:
+		return null
+	
+	func _return_card(card) -> bool:
+		card.queue_free()
+		return false
+
+
+
+class CustomSelectionDeck extends CustomSelectionCardGetter:
+	var deck
+	var remove_card: bool = false
+	func _init(deck, remove_card: bool) -> void:
+		self.deck = deck
+		self.remove_card = remove_card
+	
+	func _get_card() -> Node:
+		var card = GameManager.game_controller.PullCardFromDeck(deck)
+		# If not removing card, re-add it to the deck
+		if card != null and not remove_card:
+			GameManager.game_controller.ReturnCardToDeck(card, deck)
+		return card
+	
+	func _return_card(card) -> bool:
+		# If remove_card is enabled, it has already
+		# been returned
+		card.queue_free()
+		if not remove_card:
+			return true
+		return GameManager.game_controller.ReturnCardToDeck(card, deck)
+
+class CustomSelectionFactory extends CustomSelectionCardGetter:
+	var factory
+	func _init(factory) -> void:
+		self.factory = factory
+	
+	func _get_card() -> Node:
+		return GameManager.game_controller.MakeCardUsingFactory(factory)
+	
+	func _return_card(card) -> bool:
+		card.queue_free()
+		return factory.ReturnCard(card)
+
+class CustomSelectionInfo extends SelectionInfo:
+	var card_getters: Array[CustomSelectionCardGetter]
+	var _cur: int = 0
+	var _cur_cards: Array = []
+	
+	func add_card_getter(card_getter: CustomSelectionCardGetter) -> void:
+		card_getters.append(card_getter)
+	
+	func _reset_next() -> void:
+		_cur = 0
+		_cur_cards.clear()
+	
+	func _get_next() -> Node:
+		if _cur < 0 or _cur >= card_getters.size():
+			return null
+		
+		var card: Node = null
+		while card == null:
+			card = card_getters[_cur]._get_card()
+			_cur += 1
+		if card != null:
+			_cur_cards.append(card)
+		return card
+	
+	func _return_card(card: Node) -> void:
+		# Free card
+		card.queue_free()
+		for i in range(0,_cur_cards.size()):
+			var getter = card_getters[i]
+			if card == _cur_cards[i]:
+				getter._return_card(card)
+				break
+
+
 
 # For converting the Card into a dictionary
 var game_controller
@@ -53,7 +162,16 @@ func add_card_selection(player_num: int, deck, quantity) -> void:
 		push_error("Can't select from an invalid deck.")
 		return
 	# Add to the selections to make
-	_selections.append(SelectionInfo.new(player_num, deck, quantity))
+	_selections.append(DeckSelectionInfo.new(player_num, deck, quantity))
+
+func create_custom_selection(player_num: int) -> CustomSelectionInfo:
+	return CustomSelectionInfo.new(player_num)
+
+func add_custom_selection(custom_selection: CustomSelectionInfo) -> void:
+	if custom_selection == null:
+		push_error("Can't select from a null selection.")
+		return
+	_selections.append(custom_selection)
 
 func select() -> void:
 	if _selecting:
@@ -73,25 +191,27 @@ func _next_select() -> void:
 		# Set the currently selecting player for the GameManager
 		_cur = cur_selection.player_num
 		if cur_selection.player_num < 0:
-			push_warning("Tried to have an invalid player select a card.")
+			push_error("Tried to have an invalid player select a card.")
 			continue
 		before_new_selection.emit()
 		var player_cards: Array[Node] = []
-		for j in range(cur_selection.quantity):
-			# Pull a new card
-			# Await as it uses the game mutex
-			var new_card = await game_controller.PullCardFromDeck(cur_selection.deck)
-			# If new card is null, break as there is no more cards available
-			if new_card == null:
-				break
+		cur_selection._reset_next()
+		var cur_card_num: int = 0
+		# Pull the first
+		var new_card = await cur_selection._get_next()
+		# If new card is null, break as it has reached the end of the card list
+		while new_card != null:
 			# Temporarily add as a child to avoid possible memory leak
 			add_child(new_card)
 			player_cards.append(new_card)
 			# Send the card to the player
 			var card_data: Dictionary = game_controller.ConvertCardToDict(new_card)
 			# Add the card number
-			card_data.card_num = j
+			card_data.card_num = cur_card_num
 			card_option_added.emit(card_data)
+			cur_card_num += 1
+			# Pull a new card
+			new_card = await cur_selection._get_next()
 		
 		# If there are no cards, break out of the loop
 		if player_cards.size() == 0:
@@ -109,8 +229,7 @@ func _next_select() -> void:
 		# Free the unused cards
 		for j in range(player_cards.size()):
 			if j != selected_card:
-				game_controller.ReturnCardToDeck(player_cards[j], cur_selection.deck)
-				player_cards[j].queue_free()
+				cur_selection._return_card(player_cards[j])
 		# Remove the child now that we can add it to the game
 		remove_child(player_cards[selected_card])
 		var card_data = game_controller.ConvertCardToDict(player_cards[selected_card])

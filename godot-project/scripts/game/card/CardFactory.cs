@@ -7,6 +7,7 @@ public abstract partial class CardFactory : Node
 {
     public string cardId { get; internal set; }
     public bool serverOnly { get; internal set; }
+    public bool immediateUse { get; internal set; }
     
     private List<CardBase> _createdCards = new();
     internal CardBase CreateNewCard(GameState game)
@@ -14,6 +15,7 @@ public abstract partial class CardFactory : Node
         CardBase newCard = CreateCard(game);
         newCard.cardId = cardId;
         newCard.serverOnly = serverOnly;
+        newCard.immediateUse = immediateUse;
         _createdCards.Add(newCard);
         return newCard;
     }
@@ -22,6 +24,7 @@ public abstract partial class CardFactory : Node
         CardBase newCard = CreateFromDict(game, cardData);
         newCard.cardId = cardId;
         newCard.serverOnly = serverOnly;
+        newCard.immediateUse = immediateUse;
         _createdCards.Add(newCard);
         return newCard;
     }
@@ -41,6 +44,7 @@ public abstract partial class CardFactory : Node
         CardBase newCard = CreateBlankCard(game);
         newCard.cardId = cardId;
         newCard.serverOnly = serverOnly;
+        newCard.immediateUse = immediateUse;
         _createdCards.Add(newCard);
         return newCard;
     }
@@ -56,6 +60,7 @@ public abstract partial class CardFactory : Node
         newCard.FromDict(game, cardData);
         newCard.cardId = cardId;
         newCard.serverOnly = serverOnly;
+        newCard.immediateUse = immediateUse;
         _createdCards.Add(newCard);
         return newCard;
     }

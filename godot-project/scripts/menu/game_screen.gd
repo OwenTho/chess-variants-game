@@ -29,8 +29,8 @@ func _ready() -> void:
 	GameManager.show_cards.connect(_on_show_cards)
 	
 	GameManager.has_init.connect(_on_init)
-	GameManager.next_turn.connect(_on_next_turn)
-	GameManager.end_turn.connect(_on_end_turn)
+	GameManager.turn_started.connect(_on_next_turn)
+	GameManager.turn_ended.connect(_on_end_turn)
 	
 	GameManager.piece_added.connect(_on_piece_added)
 	GameManager.piece_removed.connect(_on_piece_removed)
@@ -66,6 +66,7 @@ func _on_init() -> void:
 	cursor.board = GameManager.board
 	
 	Debug.stats.add_property(GameManager.game_controller.currentGameState, "currentPlayerNum")
+	Debug.stats.add_property(GameManager, "card_score")
 
 func _process(delta) -> void:
 	if Input.is_action_pressed("mouse_right"):

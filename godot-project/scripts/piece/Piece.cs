@@ -248,6 +248,12 @@ public partial class Piece : GridItem<Piece>
 
 
 
+
+    public string GetPieceInfoId()
+    {
+        return info?.pieceId;
+    }
+
     public bool IsPiece(string id)
     {
         if (info == null)

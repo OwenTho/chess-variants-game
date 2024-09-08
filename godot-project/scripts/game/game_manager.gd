@@ -1,6 +1,45 @@
 extends Node
 
+const PLAYER_COUNT: int = 2
+
 const MAJOR_SELECT_COUNT: int = 3
+
+const CARD_SCORE_PER_TURN: int = 1
+const CARD_SCORE_PER_PIECE_TAKEN: int = 2
+const CARD_SCORE_FOR_MINOR_CARD: int = 8
+
+signal has_init()
+
+# Card signals
+signal display_card(card_data: Dictionary)
+signal clear_cards()
+signal show_cards()
+signal card_selected(card_id: int)
+
+# Game signals
+signal starting_next_turn(player_num: int)
+signal turn_started(player_num: int)
+signal turn_ended()
+
+signal piece_added(piece: Piece2D)
+signal piece_removed(piece: Piece2D)
+
+signal starting_actions()
+signal taking_action(action: Node, piece: Node)
+signal taking_actions_at(action_location: Vector2i, piece: Node)
+signal action_processed(action: Node, piece: Node)
+signal actions_processed_at(success: bool, action_location: Vector2i, piece: Node)
+signal action_was_failed(reason: String)
+
+signal player_has_won(player_num: int)
+signal player_lost(player_num: int)
+
+signal game_stalemate(stalemate_player: int)
+
+signal piece_taken(taken_piece: Node, attacker: Node)
+
+signal notice_received(message: String)
+
 
 var game_controller_script: CSharpScript = preload("res://scripts/game/GameController.cs")
 var game_controller: Object
@@ -25,41 +64,13 @@ var thread_mutex: Mutex
 var card_selector: CardSelector
 var currently_selecting: int = -1
 
+var card_score: Array[int] = []
+
 var current_given_cards: Array = []
 
+# Addons
 var addons: Array[GameAddon]
 
-signal has_init()
-
-# Card signals
-signal display_card(card_data: Dictionary)
-signal clear_cards()
-signal show_cards()
-signal card_selected(card_id: int)
-
-# Game signals
-signal starting_next_turn(player_num: int)
-signal next_turn(player_num: int)
-signal end_turn()
-
-signal piece_added(piece: Piece2D)
-signal piece_removed(piece: Piece2D)
-
-signal starting_actions()
-signal taking_action(action: Node, piece: Node)
-signal taking_actions_at(action_location: Vector2i, piece: Node)
-signal action_processed(action: Node, piece: Node)
-signal actions_processed_at(success: bool, action_location: Vector2i, piece: Node)
-signal action_was_failed(reason: String)
-
-signal player_has_won(player_num: int)
-signal player_lost(player_num: int)
-
-signal game_stalemate(stalemate_player: int)
-
-signal piece_taken(taken_piece: Node, attacker: Node)
-
-signal notice_received(message: String)
 
 func _ready() -> void:
 	Lobby.server_disconnected.connect(_on_server_disconnect)
@@ -111,7 +122,7 @@ func init() -> void:
 	
 	
 	# Initialise the game
-	game_controller.FullInit(is_multiplayer_authority())
+	game_controller.FullInit(is_multiplayer_authority(), PLAYER_COUNT)
 	piece_grid = game_controller.pieceGrid
 	
 	grid_upper_corner = game_controller.gridUpperCorner
@@ -122,6 +133,10 @@ func init() -> void:
 	game_mutex = game_controller.gameMutex
 	thread_mutex = game_controller.threadMutex
 	
+	card_score.clear()
+	for i in range(PLAYER_COUNT):
+		card_score.append(0)
+	
 	# Initialise the addons
 	init_addons()
 	
@@ -131,8 +146,10 @@ func init() -> void:
 
 func init_addons() -> void:
 	# For simplicity, load them directly
-	var promotion_scene = preload("res://scripts/game/addon/promotion/promotion.gd")
-	add_addon("Promotion", promotion_scene.new())
+	var promotion_script = preload("res://scripts/game/addon/promotion/promotion.gd")
+	add_addon("Promotion", promotion_script.new())
+	var change_piece_script = preload("res://scripts/game/addon/change_piece/change_piece.gd")
+	add_addon("Change Piece", change_piece_script.new())
 
 func add_addon(name: String, addon: GameAddon) -> void:
 	if addon in addons:
@@ -152,7 +169,9 @@ func add_addon(name: String, addon: GameAddon) -> void:
 		push_warning("Addon already had a parent.")
 
 func setup_signals() -> void:
-	game_controller.NewTurn.connect(_on_next_turn)
+	game_controller.TurnStarted.connect(_on_turn_started)
+	game_controller.TurnEnded.connect(_on_turn_ended)
+	
 	game_controller.ActionProcessed.connect(_on_action_processed)
 	game_controller.ActionsProcessedAt.connect(_on_actions_processed_at)
 	
@@ -180,6 +199,11 @@ func start_game(game_seed: int) -> void:
 	# Ignore if not the server
 	if not is_multiplayer_authority():
 		return
+	
+	# If no major cards will be added, wait for data to prepare for C#.
+	# Normally it would have time as the players have to select the cards.
+	if MAJOR_SELECT_COUNT == 0:
+		await get_tree().create_timer(0.2).timeout
 	
 	# Set the seed + state before starting
 	set_seed.rpc(game_seed)
@@ -236,6 +260,7 @@ func _on_invalid_selection(card_num: int) -> void:
 func _on_card_selected(card) -> void:
 	add_card(card)
 	add_card_from_data.rpc(game_controller.ConvertCardToDict(card))
+	await game_controller.CardAdded
 
 func _on_all_cards_selected(game_seed: int) -> void:
 	# Disconnect the signals
@@ -322,6 +347,7 @@ func add_card_from_data(card_data: Dictionary) -> void:
 		push_error("Received an invalid card from the server.")
 		return
 	add_card(card)
+	await GameManager.CardAdded
 
 func add_card(card) -> void:
 	game_controller.AddCard(card)
@@ -351,6 +377,9 @@ func start_chess_game() -> void:
 
 func init_board() -> void:
 	# Add all of the pieces
+	#place_matching("king", 0, -5, 0)
+	#place_matching("pawn", 1, 4, 5)
+	#return
 	place_matching("pawn", 0, 0, 1)
 	place_matching("pawn", 1, 1, 1)
 	place_matching("pawn", 2, 2, 1)
@@ -483,11 +512,27 @@ func get_current_player() -> int:
 		return -1
 	return await game_controller.GetCurrentPlayer()
 
+func unsafe_get_current_player() -> int:
+	if not game_controller_valid():
+		return -1
+	return game_controller.UnsafeGetCurrentPlayer()
 
-func get_piece(id: int) -> Object:
+
+func get_piece_info(info_id: String) -> Node:
+	if not game_controller_valid():
+		return null
+	return game_controller.GetPieceInfo(info_id)
+
+
+func get_piece(id: int) -> Node:
 	if not game_controller_valid():
 		return null
 	return await game_controller.GetPiece(id)
+
+func unsafe_get_piece(id: int) -> Node:
+	if not game_controller_valid():
+		return null
+	return game_controller.UnsafeGetPiece(id)
 
 
 func get_first_piece_at(x: int, y: int) -> Object:
@@ -495,20 +540,116 @@ func get_first_piece_at(x: int, y: int) -> Object:
 		return null
 	return await game_controller.GetFirstPieceAt(x,y)
 
+func unsafe_get_first_piece_at(x: int, y: int) -> Object:
+	if not game_controller_valid():
+		return null
+	return game_controller.UnsafeGetFirstPieceAt(x,y)
+
+
+func get_pieces_by_link_id(link_id: int) -> Array:
+	if not game_controller_valid():
+		return []
+	return await game_controller.GetPiecesByLinkId(link_id)
+
+func unsafe_get_pieces_by_link_id(link_id: int) -> Array:
+	if not game_controller_valid():
+		return []
+	return game_controller.UnsafeGetPiecesByLinkId(link_id)
+
 
 func swap_piece_to(piece_id: int, id: String) -> void:
 	game_controller.SwapPieceTo(piece_id, id)
 
 
 
+### Card Score
+
+func add_card_score(player_num: int, score: int) -> void:
+	# Make sure player_num is valid
+	if player_num < 0 or player_num >= PLAYER_COUNT:
+		push_error("Failed to add score to player num %s, as there is only %s players. (0-%s)" % [player_num, PLAYER_COUNT, PLAYER_COUNT-1])
+		return
+	card_score[player_num] += score
 
 ### Events
 
-func _on_next_turn(player_num: int) -> void:
-	next_turn.emit(player_num)
+func _on_turn_started(player_num: int) -> void:
+	turn_started.emit(player_num)
+	
+	# Then send actions
 	if is_multiplayer_authority():
 		to_next_turn.rpc(player_num)
 		_send_valid_actions()
+
+
+
+
+func _on_turn_ended(old_player_num: int, new_player_num: int) -> void:
+	# Add score to the player
+	add_card_score(old_player_num, CARD_SCORE_PER_TURN)
+	turn_ended.emit()
+	
+	# Before moving to next turn, if the NEW player has
+	# enough card score, give them a choice of card.
+	# This only happens once per turn (so if score card is high enough
+	# for two, it is given next turn)
+	await send_minor_card_options(new_player_num)
+	
+	# Move to the next turn
+	game_controller.NextTurn()
+
+# Signal for indicating that all minor card selection is finished
+# This includes waiting for the cards to be added, and whatever Waits the
+# cards themselves do.
+signal _minor_card_selection_is_finished()
+
+func send_minor_card_options(player_num: int) -> void:
+	# Only if score is high enough
+	if card_score[player_num] < CARD_SCORE_FOR_MINOR_CARD:
+		return
+	# And no one is selecting
+	if currently_selecting != -1:
+		return
+	
+	card_score[player_num] -= CARD_SCORE_FOR_MINOR_CARD
+	
+	# Connect signals to the card selector
+	card_selector.before_new_selection.connect(_on_before_new_selection)
+	card_selector.card_option_added.connect(_on_card_option_added)
+	card_selector.selection_started.connect(_on_selection_started)
+	card_selector.invalid_selection.connect(_on_invalid_selection)
+	card_selector.card_selected.connect(_on_card_selected)
+	card_selector.selection_done.connect(_on_selection_done)
+	card_selector.all_selections_done.connect(_on_minor_card_selection_done)
+	
+	# Start the game by generating Major Cards that the players have to select
+	var selection_info = card_selector.create_custom_selection(player_num)
+	# Rule Deck
+	selection_info.add_card_getter(CardSelector.CustomSelectionDeck.new(game_controller.MinorCardDeck, false))
+	# Piece Card Factory
+	selection_info.add_card_getter(CardSelector.CustomSelectionFactory.new(game_controller.ChangePieceFactory))
+	# Space Card Factory
+	
+	card_selector.add_custom_selection(selection_info)
+	card_selector.select()
+	await _minor_card_selection_is_finished
+
+func _on_minor_card_selection_done() -> void:
+	card_selector.before_new_selection.disconnect(_on_before_new_selection)
+	card_selector.card_option_added.disconnect(_on_card_option_added)
+	card_selector.selection_started.disconnect(_on_selection_started)
+	card_selector.invalid_selection.disconnect(_on_invalid_selection)
+	card_selector.card_selected.disconnect(_on_card_selected)
+	card_selector.selection_done.disconnect(_on_selection_done)
+	card_selector.all_selections_done.disconnect(_on_minor_card_selection_done)
+	
+	currently_selecting = -1
+	
+	_minor_card_selection_is_finished.emit()
+
+
+
+
 
 func _send_valid_actions() -> void:
 	if not in_game:
@@ -556,12 +697,11 @@ func _on_actions_processed_at(success: bool, action_location: Vector2i, piece) -
 		failed_action.rpc_id(cur_player_id)
 		return
 	
-	# Move to the next turn
-	game_controller.NextTurn()
-
+	# End the current turn
+	game_controller.EndTurn()
 
 func _on_card_notice(card: Node, notice: String) -> void:
-	print("%s has sent notice '%s'" % [card.GetCardName(), notice])
+	print("%s Card has sent notice '%s'" % [card.GetCardName(), notice])
 	for addon in addons:
 		addon._handle_card_notice(card, notice)
 
@@ -572,6 +712,13 @@ func send_card_notice(card: Node, notice: String) -> void:
 
 func _on_piece_taken(taken_piece, attacker) -> void:
 	piece_taken.emit(taken_piece, attacker)
+	# Add card score to the player that lost the piece
+	# It is this way, as they lose a piece but can get a card sooner.
+	# It is this way, rather than the person taking the piece, as otherwise
+	# people can aim to take pieces for their benefit, whereas this forces
+	# players to be more cautious about taking pieces.
+	add_card_score(taken_piece.teamId, CARD_SCORE_PER_PIECE_TAKEN)
+
 
 
 # TODO: Rather than calling player_won, instead remove the player from
@@ -623,6 +770,10 @@ func request_action(action_location: Vector2i, piece_id: int) -> void:
 		return
 	
 	var sender_id: int = multiplayer.get_remote_sender_id()
+	# If currently selecting a card, disallow action
+	if currently_selecting != -1:
+		failed_action.rpc_id(sender_id)
+		return
 	
 	# Get the player number of this player
 	var player_num: int = Lobby.get_player_num(sender_id)

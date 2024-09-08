@@ -1,5 +1,9 @@
 extends GameAddon
 
+const CARD_ID = "promotion"
+const START_NOTICE = "promotion"
+const FIN_NOTICE = "promoted"
+
 func _init() -> void:
 	add_card_notice("minor_promotion", "promotion", _on_promotion)
 
@@ -12,8 +16,13 @@ var cur_selection: Array = []
 var cur_selection_node: Node2D
 
 func _on_promotion(card: Node) -> void:
+	if not GameManager.in_game:
+		send_card_notice(card, FIN_NOTICE)
+		return
 	# Only server can promote
 	if not is_multiplayer_authority():
+		push_error("Client should not process %s card." % [CARD_ID])
+		send_card_notice(card, FIN_NOTICE)
 		return
 	
 	# Get the promotion options
@@ -80,7 +89,7 @@ func _pick_option(option_ind: int) -> void:
 	# Send the players the promotion to make
 	_promote_piece.rpc(piece.id, chosen_promotion)
 	# Finally, send the card notice
-	GameManager.send_card_notice(card, "promoted")
+	send_card_notice(card, FIN_NOTICE)
 
 @rpc("authority", "call_local", "reliable")
 func _promote_piece(piece_id: int, new_piece: String) -> void:
