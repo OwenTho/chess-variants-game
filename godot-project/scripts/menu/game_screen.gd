@@ -297,7 +297,8 @@ func _on_notice_received(text: String) -> void:
 
 func to_lobby() -> void:
 	GameManager.reset_game()
-	if multiplayer.multiplayer_peer is OfflineMultiplayerPeer:
+	if not multiplayer.has_multiplayer_peer() or multiplayer.multiplayer_peer is OfflineMultiplayerPeer:
+		Lobby.remove_multiplayer_peer()
 		get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
 	else:
 		get_tree().change_scene_to_file("res://scenes/menu/lobby_menu.tscn")

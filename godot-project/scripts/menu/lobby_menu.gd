@@ -16,6 +16,13 @@ var player_labels: Dictionary = {}
 var player_nums: Array[int] = [-1,-1]
 
 func _ready():
+	# If no multiplayer found, return to main menu
+	if not multiplayer.has_multiplayer_peer():
+		# Wait a frame so that the tree can load the scene
+		await get_tree().process_frame
+		close_lobby()
+		return
+	
 	Lobby.player_connected.connect(_on_player_registered)
 	Lobby.player_disconnected.connect(_on_player_disconnected)
 	Lobby.player_data_received.connect(_on_data_received)
@@ -89,6 +96,7 @@ func _on_player_nums_changed(id: int, player_num: int):
 	player_labels[id].set_player(player_num)
 
 func close_lobby():
+	Lobby.leave_game()
 	get_tree().change_scene_to_file("res://scenes/menu/main_menu.tscn")
 
 func _on_name_edit_text_changed(text: String):
