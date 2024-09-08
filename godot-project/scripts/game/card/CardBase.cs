@@ -19,6 +19,7 @@ public abstract partial class CardBase : Node
     /// <summary>
     /// If true, card does not have MakeListeners called and will be freed
     /// after OnAddCard is called.
+    /// Immediate use Cards will break the game if they require any Waits.
     /// </summary>
     public bool immediateUse { get; internal set;}
 
