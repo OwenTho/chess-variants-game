@@ -268,16 +268,16 @@ func _update_name(id, name):
 	player_data_received.emit(players[id])
 
 
-@rpc("call_remote", "authority", "reliable", 1)
-func _change_name(id, name) -> String:
+@rpc("authority", "call_remote", "reliable", 1)
+func _change_name(id: int, name: String) -> String:
 	var new_name: String = verify_name(name)
 	if new_name.is_empty():
 		return new_name
 	_update_name(id, new_name)
 	return new_name
 
-@rpc("call_local", "any_peer", "reliable", 1)
-func change_name(name):
+@rpc("any_peer", "call_local", "reliable", 1)
+func change_name(name: String):
 	if not is_multiplayer_authority():
 		return
 	# Make sure name is valid
