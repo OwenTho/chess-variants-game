@@ -536,9 +536,17 @@ public partial class GameController : Node
             stillTasking = false;
             threadMutex.Unlock();
             threadSemaphore.Post();
-            // End the GameEvents wait, if it's currently happening
-            currentGameState.gameEvents.canWait = false;
-            currentGameState.EndEventsWait();
+            if (currentGameState != null)
+            {
+                // End the GameEvents wait, if it's currently happening
+                if (currentGameState.gameEvents != null)
+                {
+                    currentGameState.gameEvents.canWait = false;
+                }
+
+                currentGameState.EndEventsWait();
+            }
+
             // Wait for the thread to stop
             if (gameThread != null)
             {

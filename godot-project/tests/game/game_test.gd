@@ -26,7 +26,7 @@ func before_all() -> void:
 # Before each test, initialise the board
 func before_each() -> void:
 	# And then initialise a new game
-	game_controller.FullInit(true)
+	game_controller.FullInit(true, 2)
 	
 	# Store the GameController variables so that they're easy to access
 	game_state = game_controller.currentGameState

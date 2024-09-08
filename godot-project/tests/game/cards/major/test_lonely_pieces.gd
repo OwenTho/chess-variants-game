@@ -23,6 +23,7 @@ func _verify_piece_movement(piece: Node, piece_name: String, should_have_valid: 
 
 func test_card_team() -> void:
 	var card = card_script.new()
+	card.cardId = "lonely_pieces"
 	
 	# Place the pieces
 	# 🐴  . 
@@ -90,6 +91,7 @@ func test_card_team() -> void:
 func test_card_enemies() -> void:
 	
 	var card = card_script.new()
+	card.cardId = "lonely_pieces"
 	
 	# Add two pieces on opposing teams
 	#  .   🤴  .  

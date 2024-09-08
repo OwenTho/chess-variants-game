@@ -88,9 +88,9 @@ public partial class GameController
         MakeNewValidationRule("attack_needs_target", new AttackNeedsTargetRule(), true);
         
         // Register Major Card Rules
-        MakeNewValidationRule("lonely_piece_card", new LonelyPiecesStuckRule(), false);
-        MakeNewValidationRule("allow_team_attack", new AllowTeamAttackRule(), false);
-        MakeNewValidationRule("team_attack_allow_overlap", new TeamAttackAllowOverlapRule(), false);
+        MakeNewValidationRule(LonelyPiecesStuckCard.RuleId, new LonelyPiecesStuckRule());
+        MakeNewValidationRule("allow_team_attack", new AllowTeamAttackRule());
+        MakeNewValidationRule("team_attack_allow_overlap", new TeamAttackAllowOverlapRule());
     }
     
     internal void InitActionRules()

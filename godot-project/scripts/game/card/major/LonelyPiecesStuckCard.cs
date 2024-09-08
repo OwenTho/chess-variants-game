@@ -3,6 +3,8 @@ using Godot;
 
 public partial class LonelyPiecesStuckCard : CardBase
 {
+    public const string RuleId = "lonely_piece_card";
+    
     public override void MakeListeners(GameEvents gameEvents)
     {
         AddListener(gameEvents, GameEvents.PreNewTurn, OnPreNewTurn);
@@ -10,7 +12,7 @@ public partial class LonelyPiecesStuckCard : CardBase
 
     public override void OnAddCard(GameState game)
     {
-        game.AddVerificationRule("lonely_piece_card");
+        game.AddVerificationRule(RuleId);
     }
 
     private readonly Vector2I[] _checkDirs =

@@ -5,6 +5,7 @@ var card_scene: CSharpScript = preload("res://scripts/game/card/major/SinglePiec
 func test_card() -> void:
 	
 	var card = card_scene.new()
+	card.cardId = "single_piece_army"
 	
 	# By default, armyPiece should be empty (or null)
 	assert_true(card.armyPiece == null or card.armyPiece.is_empty())
