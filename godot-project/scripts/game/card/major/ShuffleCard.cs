@@ -8,6 +8,12 @@ public partial class ShuffleCard : CardBase
     // TODO: Have a variable shared for the shuffle "seed", rather than relying on the current seed.
     public override void OnAddCard(GameState game)
     {
+        // If card isn't enabled, don't do anything.
+        if (!enabled)
+        {
+            return;
+        }
+        
         // TODO: While this works with matching pieces on both sides, this breaks when this is not the case.
         // Shuffle the positions of all pieces by making two identical arrays of the pieceIds,
         // and then randomising one of them.

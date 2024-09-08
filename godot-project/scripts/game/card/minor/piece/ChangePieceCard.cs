@@ -13,6 +13,11 @@ public partial class ChangePieceCard : CardBase
 
     public override void OnAddCard(GameState game)
     {
+        if (!enabled)
+        {
+            return;
+        }
+        
         // When card is added, emit that the card needs to be selected and
         // then pause the game's execution
         SendCardNotice(game, "change_piece");

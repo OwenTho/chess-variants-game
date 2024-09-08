@@ -6,6 +6,12 @@ public partial class BiggerBoardCard : CardBase
     private const int SizeIncrease = 2;
     public override void OnAddCard(GameState game)
     {
+        // If card isn't enabled, don't do anything.
+        if (!enabled)
+        {
+            return;
+        }
+        
         Vector2I sizeChange = new Vector2I(SizeIncrease, SizeIncrease);
         game.gridUpperCorner += sizeChange;
         game.gridLowerCorner -= sizeChange;

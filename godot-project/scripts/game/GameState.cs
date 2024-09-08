@@ -995,7 +995,41 @@ public partial class GameState : Node
             GD.PushError($"Could not add {card.GetType().Name} as it does not have a card id. Was it created through a Factory?");
             return;
         }
+        
+        // Add the card before anything.
+        // Doing it in this order allows card data to be accessed by the main thread before it's freed.
+        CallDeferred(Node.MethodName.AddChild, card);
+        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.CardAdded, card);
+        
+        // Before continuing, get all matching cards first and call the OnMatchingCard to see what
+        // needs to be done with the card.
+        foreach (var existingCard in GetExistingCards(card.cardId))
+        {
+            CardReturn result = existingCard.OnMatchingCard(card);
+            // If the card is combined, the card should be freed as it is no longer going to be used.
+            if (result.HasFlag(CardReturn.Combined))
+            {
+                card.CallDeferred(Node.MethodName.QueueFree);
+                return;
+            }
 
+            // If the card is disabled, set enabled to false. OnAddCard is still
+            // called, so the individual cards need to only do things if enabled is true.
+            var disableBoth = result.HasFlag(CardReturn.DisableBoth);
+            if (result.HasFlag(CardReturn.DisableNew) || disableBoth)
+            {
+                card.enabled = false;
+            }
+
+            // Disable the existing card if it returns that it should be.
+            if (result.HasFlag(CardReturn.DisableThis) || disableBoth)
+            {
+                existingCard.enabled = false;
+            }
+        }
+
+        // Immediate use cards don't need to add notices, or be included
+        // in the array as they will be gone immediately after.
         if (!card.immediateUse)
         {
             card.MakeNotices(this);
@@ -1021,11 +1055,8 @@ public partial class GameState : Node
 
         if (card.immediateUse)
         {
-            CallDeferred(Node.MethodName.QueueFree, card);
+            card.CallDeferred(Node.MethodName.QueueFree);
         }
-
-        CallDeferred(Node.MethodName.AddChild, card);
-        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.CardAdded, card);
     }
 
     public bool RemoveCard(CardBase card)

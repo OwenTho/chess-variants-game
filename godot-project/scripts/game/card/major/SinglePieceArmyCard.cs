@@ -9,6 +9,12 @@ public partial class SinglePieceArmyCard : CardBase
 
     public override void OnAddCard(GameState game)
     {
+        // If card isn't enabled, don't do anything.
+        if (!enabled)
+        {
+            return;
+        }
+        
         // Get all pieces, and change them into the selected piece
         if (!game.TryGetPieceInfo(armyPiece, out PieceInfo pieceInfo))
         {
