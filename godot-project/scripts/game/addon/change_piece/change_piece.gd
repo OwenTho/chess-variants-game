@@ -20,7 +20,8 @@ func _on_change_piece(card: Node) -> void:
 	change_piece_info_id = card.toPiece
 	cur_card = card
 	
-	_start_change_piece.rpc_id(Lobby.get_player_id_from_num(GameManager.unsafe_get_current_player()), change_piece_info_id)
+	# Send the selection to the owner of the card
+	_start_change_piece.rpc_id(Lobby.get_player_id_from_num(card.teamId), change_piece_info_id)
 
 @rpc("authority", "call_local", "reliable")
 func _start_change_piece(to_piece_id: String) -> void:

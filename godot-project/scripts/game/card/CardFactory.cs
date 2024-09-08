@@ -57,11 +57,7 @@ public abstract partial class CardFactory : Node
     protected virtual CardBase CreateFromDict(GameState game, Godot.Collections.Dictionary<string, string> cardData)
     {
         CardBase newCard = CreateBlankCard(game);
-        newCard.FromDict(game, cardData);
-        newCard.cardId = cardId;
-        newCard.serverOnly = serverOnly;
-        newCard.immediateUse = immediateUse;
-        _createdCards.Add(newCard);
+        newCard.ConvertFromDict(game, cardData);
         return newCard;
     }
 

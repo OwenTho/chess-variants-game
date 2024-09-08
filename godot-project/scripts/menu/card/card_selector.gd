@@ -3,9 +3,11 @@ extends Node
 
 class SelectionInfo:
 	var player_num: int = -1
+	var team_id: int = -1
 	
-	func _init(player_num: int) -> void:
+	func _init(player_num: int, team_id: int = -1) -> void:
 		self.player_num = player_num
+		self.team_id = team_id
 	
 	func _reset_next() -> void:
 		push_error("_reset_next not defined in SelectionInfo extended class.")
@@ -24,8 +26,8 @@ class DeckSelectionInfo extends SelectionInfo:
 	var _cur_taken: int = 0
 	var quantity: int
 	
-	func _init(player_num: int, deck, quantity: int) -> void:
-		super._init(player_num)
+	func _init(player_num: int, deck, quantity: int, team_id: int = -1) -> void:
+		super._init(player_num, team_id)
 		self.deck = deck
 		self.quantity = quantity
 	
@@ -157,15 +159,15 @@ signal all_selections_done()
 # Private signal called when select_card is called
 signal _select_card(card_num: int)
 
-func add_card_selection(player_num: int, deck, quantity) -> void:
+func add_card_selection(player_num: int, deck, quantity: int, team_id: int = -1) -> void:
 	if deck == null:
 		push_error("Can't select from an invalid deck.")
 		return
 	# Add to the selections to make
-	_selections.append(DeckSelectionInfo.new(player_num, deck, quantity))
+	_selections.append(DeckSelectionInfo.new(player_num, deck, quantity, team_id))
 
-func create_custom_selection(player_num: int) -> CustomSelectionInfo:
-	return CustomSelectionInfo.new(player_num)
+func create_custom_selection(player_num: int, team_id: int = -1) -> CustomSelectionInfo:
+	return CustomSelectionInfo.new(player_num, team_id)
 
 func add_custom_selection(custom_selection: CustomSelectionInfo) -> void:
 	if custom_selection == null:
@@ -203,6 +205,8 @@ func _next_select() -> void:
 		while new_card != null:
 			# Temporarily add as a child to avoid possible memory leak
 			add_child(new_card)
+			# Set its team
+			new_card.teamId = cur_selection.team_id
 			player_cards.append(new_card)
 			# Send the card to the player
 			var card_data: Dictionary = game_controller.ConvertCardToDict(new_card)

@@ -219,7 +219,7 @@ func start_game(game_seed: int) -> void:
 	
 	# Start the game by generating Major Cards that the players have to select
 	for player_num in range(Lobby.player_nums.size()):
-		card_selector.add_card_selection(player_num, game_controller.MajorCardDeck, MAJOR_SELECT_COUNT)
+		card_selector.add_card_selection(player_num, game_controller.MajorCardDeck, MAJOR_SELECT_COUNT, -1)
 	card_selector.select()
 
 func _on_before_new_selection() -> void:
@@ -258,6 +258,8 @@ func _on_invalid_selection(card_num: int) -> void:
 	invalid_card.rpc_id(send_id, card_num)
 
 func _on_card_selected(card) -> void:
+	if card == null:
+		return
 	add_card(card)
 	add_card_from_data.rpc(game_controller.ConvertCardToDict(card))
 	await game_controller.CardAdded
@@ -347,7 +349,7 @@ func add_card_from_data(card_data: Dictionary) -> void:
 		push_error("Received an invalid card from the server.")
 		return
 	add_card(card)
-	await GameManager.CardAdded
+	await game_controller.CardAdded
 
 func add_card(card) -> void:
 	game_controller.AddCard(card)
@@ -623,7 +625,7 @@ func send_minor_card_options(player_num: int) -> void:
 	card_selector.all_selections_done.connect(_on_minor_card_selection_done)
 	
 	# Start the game by generating Major Cards that the players have to select
-	var selection_info = card_selector.create_custom_selection(player_num)
+	var selection_info = card_selector.create_custom_selection(player_num, player_num)
 	# Rule Deck
 	selection_info.add_card_getter(CardSelector.CustomSelectionDeck.new(game_controller.MinorCardDeck, false))
 	# Piece Card Factory
@@ -818,12 +820,20 @@ func failed_action(reason: String = "") -> void:
 		return
 	action_was_failed.emit(reason)
 
+var cur_actions: Array = []
+
+func _free_actions() -> void:
+	for action in cur_actions:
+		action.queue_free()
+	cur_actions.clear()
+
 @rpc("authority", "call_local", "reliable")
 func start_actions() -> void:
 	# Only run if game is on
 	if not in_game:
 		return
 	starting_actions.emit()
+	_free_actions()
 
 @rpc("authority", "call_remote", "reliable")
 func take_action(action_dict: Dictionary, piece_id: int) -> void:
@@ -832,6 +842,8 @@ func take_action(action_dict: Dictionary, piece_id: int) -> void:
 		return
 	
 	var action = game_controller.ActionFromDict(action_dict)
+	add_child(action)
+	cur_actions.append(action)
 	var piece = await get_piece(piece_id)
 	taking_action.emit(action, piece)
 	game_controller.TakeAction(action, piece)
@@ -853,6 +865,7 @@ func to_next_turn(new_player_num: int) -> void:
 	if not in_game:
 		return
 	starting_next_turn.emit(new_player_num)
+	_free_actions()
 	game_controller.NextTurn(new_player_num)
 
 

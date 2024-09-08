@@ -5,7 +5,16 @@ using Godot.Collections;
 
 public abstract partial class CardBase : Node
 {
+    public const string CardIdKey = "card_id";
+    public const string TeamIdKey = "team_id";
+    
     public string cardId { get; internal set; }
+
+    /// <summary>
+    /// The team that owns this card. If it's -1, it's a Major Card and no team in
+    /// specific owns it.
+    /// </summary>
+    public int teamId = -1;
 
     internal GameEvents cardNotices;
 
@@ -71,17 +80,54 @@ public abstract partial class CardBase : Node
     
     protected abstract CardBase CloneCard();
 
+    private void EnsureBaseDictValue(Dictionary<string, string> cardDict, string id, string value)
+    {
+        if (cardDict.ContainsKey(id))
+        {
+            cardDict.Remove(id);
+            GD.PushWarning($"Card {cardId} attempted to give dictionary with {id} set.");
+        }
+        cardDict.Add(id, value);
+    }
+    
     internal Dictionary<string, string> ConvertToDict(GameState game)
     {
         Dictionary<string, string> cardData = ToDict(game);
-        if (cardData.ContainsKey("card_id"))
-        {
-            cardData.Remove("card_id");
-            GD.PushWarning($"Card {cardId} attempted to give dictionary with card_id set.");
-        }
-        cardData.Add("card_id", cardId);
+        EnsureBaseDictValue(cardData, CardIdKey, cardId);
+        EnsureBaseDictValue(cardData, TeamIdKey, teamId.ToString());
         return cardData;
     }
+    
+    // Used for server sharing card information
+    // card_id is automatically defined
+    protected virtual Dictionary<string, string> ToDict(GameState game)
+    {
+        return new Dictionary<string, string>();
+    }
+
+    internal void ConvertFromDict(GameState game, Dictionary<string, string> dataDict)
+    {
+        // Allow card to process
+        FromDict(game, dataDict);
+        // But then process by itself
+        if (dataDict.TryGetValue(TeamIdKey, out string teamIdValue))
+        {
+            if (!int.TryParse(teamIdValue, out teamId))
+            {
+                GD.PushError($"{TeamIdKey} should be an integer.");
+            }
+        }
+        else
+        {
+            GD.PushError($"{TeamIdKey} not found in card data.");
+        }
+    }
+
+    public virtual void FromDict(GameState game, Dictionary<string, string> dataDict)
+    {
+        
+    }
+
 
     // By default, matching cards are ignored
     public virtual CardReturn OnMatchingCard(CardBase card)
@@ -98,19 +144,6 @@ public abstract partial class CardBase : Node
     {
         game.EndEventsWait();
     }
-
-    // Used for server sharing card information
-    // card_id is automatically defined
-    protected virtual Dictionary<string, string> ToDict(GameState game)
-    {
-        return new Dictionary<string, string>();
-    }
-
-    public virtual void FromDict(GameState game, Dictionary<string, string> dataDict)
-    {
-        
-    }
-
     public virtual String GetCardName()
     {
         return StringUtil.ToTitleCase(cardId);

@@ -31,8 +31,8 @@ func _on_promotion(card: Node) -> void:
 	
 	cur_promoting_piece = card.promotingPiece
 	
-	# Send the options to the current player
-	var player_id = Lobby.get_player_id_from_num(GameManager.game_controller.UnsafeGetCurrentPlayer())
+	# Send the options to the owner of the promotingPiece
+	var player_id = Lobby.get_player_id_from_num(cur_promoting_piece.teamId)
 	_give_promotion_options.rpc_id(player_id, cur_promoting_piece.id, cur_selection)
 
 @rpc("authority", "call_local", "reliable")

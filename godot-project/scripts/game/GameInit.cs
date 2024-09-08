@@ -159,11 +159,11 @@ public partial class GameController
         
         // Register Card Factories
         AddNewCardFactory("major_shapeshift", new SimpleCardFactory<ShapeshiftCard>());
-        AddNewCardFactory("major_single_piece_army", new SinglePieceArmyCardFactory(), true);
-        AddNewCardFactory("major_shuffle", new SimpleCardFactory<ShuffleCard>(), true);
+        AddNewCardFactory("major_single_piece_army", new SinglePieceArmyCardFactory());
+        AddNewCardFactory("major_shuffle", new SimpleCardFactory<ShuffleCard>());
         AddNewCardFactory("major_lonely_pieces_stuck", new SimpleCardFactory<LonelyPiecesStuckCard>(), true);
-        AddNewCardFactory("major_friendly_fire", new SimpleCardFactory<FriendlyFireCard>());
-        AddNewCardFactory("major_bigger_board", new SimpleCardFactory<BiggerBoardCard>(), true);
+        AddNewCardFactory("major_friendly_fire", new SimpleCardFactory<FriendlyFireCard>(), true);
+        AddNewCardFactory("major_bigger_board", new SimpleCardFactory<BiggerBoardCard>());
         
         // Minor Cards
         // Rules
