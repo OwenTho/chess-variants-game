@@ -104,6 +104,7 @@ func update_selection() -> void:
 		var new_highlight: Node2D = highlight_scene.instantiate()
 		
 		new_highlight.board = board
+		new_highlight.scale = Vector2(.85, .85)
 		new_highlight.set_pos(action.x, action.y)
 		action_highlights.add_child.call_deferred(new_highlight)
 
