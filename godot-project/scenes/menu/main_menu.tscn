@@ -12,6 +12,7 @@ server_port_entry = NodePath("ServerControls/AdvancedSettings/ServerPort")
 code_entry = NodePath("ServerControls/VBoxContainer/CodeEntry")
 
 [node name="AdvancedLabel" type="RichTextLabel" parent="."]
+visible = false
 layout_mode = 2
 offset_left = 730.0
 offset_top = 613.0
@@ -36,7 +37,6 @@ layout_mode = 2
 text = "Create Server"
 
 [node name="AdvancedSettings" type="VBoxContainer" parent="ServerControls"]
-visible = false
 layout_mode = 2
 
 [node name="MarginContainer2" type="MarginContainer" parent="ServerControls/AdvancedSettings"]
@@ -78,13 +78,14 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="CodeEntry" type="LineEdit" parent="ServerControls/VBoxContainer"]
+visible = false
 layout_mode = 2
 placeholder_text = "Lobby Code"
 alignment = 1
 
 [node name="BtnJoin" type="Button" parent="ServerControls/VBoxContainer"]
 layout_mode = 2
-text = "Join Lobby"
+text = "Join Server"
 
 [node name="BtnPlay" type="Button" parent="."]
 layout_mode = 0
