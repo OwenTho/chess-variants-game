@@ -51,11 +51,25 @@ func _select_change_piece(piece_id: int) -> void:
 		return
 	
 	if change_piece_info_id == null or cur_card == null:
+		GameManager.receive_notice.rpc_id(multiplayer.get_remote_sender_id(), "There is no Change Piece selection active.")
+		return
+	
+	# Make sure it's the right player selecting
+	var selector_id: int = Lobby.get_player_id_from_num(cur_card.teamId)
+	if selector_id != multiplayer.get_remote_sender_id():
+		# Send no response, as 
+		push_warning("Player %s tried to select for the Change Piece card when they are not the owner.")
 		return
 	
 	# Try to get the piece
 	var piece: Node = GameManager.unsafe_get_piece(piece_id)
 	if piece == null:
+		GameManager.receive_notice.rpc_id(multiplayer.get_remote_sender_id(), "ERROR: There is no piece with id %s." % [piece_id])
+		return
+	
+	# Only allow if the piece will change
+	if piece.GetPieceInfoId() == change_piece_info_id:
+		GameManager.receive_notice.rpc_id(multiplayer.get_remote_sender_id(), "This piece can't be changed.")
 		return
 	
 	# Tell everyone to change the piece
