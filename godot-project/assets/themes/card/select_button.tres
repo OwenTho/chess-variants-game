@@ -50,6 +50,14 @@ corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x8uu1"]
 bg_color = Color(0.566838, 0.707872, 0.817225, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="SystemFont" id="SystemFont_oa2r3"]
 font_names = PackedStringArray("Impact")
