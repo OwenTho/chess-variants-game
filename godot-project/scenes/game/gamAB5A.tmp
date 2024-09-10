@@ -40,7 +40,7 @@ offset_bottom = 649.0
 [node name="GameNotices" type="VBoxContainer" parent="GameUI"]
 layout_mode = 0
 offset_left = 397.0
-offset_top = 21.0
+offset_top = 19.0
 offset_right = 759.0
 offset_bottom = 632.0
 alignment = 2

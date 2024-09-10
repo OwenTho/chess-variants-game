@@ -82,7 +82,7 @@ custom_minimum_size = Vector2(0, 110)
 layout_mode = 2
 mouse_filter = 2
 bbcode_enabled = true
-text = "No description. [i]Test[/i]"
+text = "No description."
 
 [connection signal="mouse_entered" from="CardOffset/CardPanel" to="." method="_on_panel_container_mouse_entered"]
 [connection signal="mouse_exited" from="CardOffset/CardPanel" to="." method="_on_panel_container_mouse_exited"]

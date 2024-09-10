@@ -15,6 +15,7 @@ signal display_card(card_data: Dictionary)
 signal clear_cards()
 signal show_cards()
 signal card_selected(card_id: int)
+signal card_score_changed(player_num: int, new_score: int)
 
 # Game signals
 signal starting_next_turn(player_num: int)
@@ -567,11 +568,35 @@ func swap_piece_to(piece_id: int, id: String) -> void:
 ### Card Score
 
 func add_card_score(player_num: int, score: int) -> void:
+	# Ignore if not in game
+	if not in_game:
+		return
+	# Ignore if not server
+	if not is_multiplayer_authority():
+		return
 	# Make sure player_num is valid
 	if player_num < 0 or player_num >= PLAYER_COUNT:
 		push_error("Failed to add score to player num %s, as there is only %s players. (0-%s)" % [player_num, PLAYER_COUNT, PLAYER_COUNT-1])
 		return
-	card_score[player_num] += score
+	_update_card_score_server(player_num, card_score[player_num] + score)
+
+func _update_card_score_server(player_num: int, score: int) -> void:
+	card_score[player_num] = score
+	_update_card_score.rpc(player_num, card_score[player_num])
+	card_score_changed.emit(player_num, card_score[player_num])
+
+@rpc("authority", "call_remote", "reliable", 1)
+func _update_card_score(player_num: int, score: int) -> void:
+	if not in_game:
+		return
+	if player_num < 0 or player_num >= PLAYER_COUNT:
+		push_error("Server tried to set card score of player %s, when there is no player with that number." % [player_num])
+		return
+	card_score[player_num] = score
+	card_score_changed.emit(player_num, score)
+
+
+
 
 ### Events
 
@@ -614,6 +639,7 @@ func send_minor_card_options(player_num: int) -> void:
 		return
 	
 	card_score[player_num] -= CARD_SCORE_FOR_MINOR_CARD
+	_update_card_score_server(player_num, card_score[player_num])
 	
 	# Connect signals to the card selector
 	card_selector.before_new_selection.connect(_on_before_new_selection)
@@ -631,6 +657,7 @@ func send_minor_card_options(player_num: int) -> void:
 	# Piece Card Factory
 	selection_info.add_card_getter(CardSelector.CustomSelectionFactory.new(game_controller.ChangePieceFactory))
 	# Space Card Factory
+	# selection_info.add_card_getter(CardSelector.CustomSelectionFactory.new(game_controller.SpaceFactory))
 	
 	card_selector.add_custom_selection(selection_info)
 	card_selector.select()

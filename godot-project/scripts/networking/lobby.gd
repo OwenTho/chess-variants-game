@@ -209,7 +209,7 @@ func _update_player(id: int, new_player_info: Dictionary):
 	players[id] = PlayerInfo.from_dictionary(new_player_info, id)
 	player_data_received.emit(players[id])
 
-func get_player_info(id: int):
+func get_player_info(id: int) -> Lobby.PlayerInfo:
 	if players.has(id):
 		return players[id]
 	return null

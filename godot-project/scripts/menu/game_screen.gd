@@ -12,6 +12,9 @@ class_name Game
 
 @export var notices: VBoxContainer
 
+@export var player1_info: Control
+@export var player2_info: Control
+
 var selected_piece: Piece2D
 
 var game_active: bool = false
@@ -27,6 +30,7 @@ func _ready() -> void:
 	GameManager.clear_cards.connect(_on_clear_cards)
 	GameManager.display_card.connect(card_selection.add_card)
 	GameManager.show_cards.connect(_on_show_cards)
+	GameManager.card_score_changed.connect(_on_card_score_changed)
 	
 	GameManager.has_init.connect(_on_init)
 	GameManager.turn_started.connect(_on_next_turn)
@@ -49,9 +53,15 @@ func _ready() -> void:
 	
 	GameManager.piece_taken.connect(_on_piece_taken)
 	
+	
 	GameManager.notice_received.connect(_on_notice_received)
 	
 	cursor.cell_selected.connect(select_cell)
+	
+	player1_info.set_player(0)
+	player1_info.max_progress = GameManager.CARD_SCORE_FOR_MINOR_CARD
+	player2_info.set_player(1)
+	player2_info.max_progress = GameManager.CARD_SCORE_FOR_MINOR_CARD
 	
 	var my_num = Lobby.get_player_num(multiplayer.get_unique_id())
 	# If it's player 2, flip the board
@@ -66,7 +76,6 @@ func _on_init() -> void:
 	cursor.board = GameManager.board
 	
 	Debug.stats.add_property(GameManager.game_controller.currentGameState, "currentPlayerNum")
-	Debug.stats.add_property(GameManager, "card_score")
 
 func _process(delta) -> void:
 	if Input.is_action_pressed("mouse_right"):
@@ -203,6 +212,15 @@ func _on_card_selected(card_num: int) -> void:
 	card_selection.put_card(cur_selected_card, false)
 	cur_selected_card = card_num
 
+
+
+func _on_card_score_changed(player_num: int, new_score: int) -> void:
+	if player_num == 0:
+		player1_info.add_next_progress(new_score)
+	else:
+		player2_info.add_next_progress(new_score)
+
+
 func _on_btn_use_pressed() -> void:
 	GameManager.select_card.rpc(cur_selected_card)
 
@@ -266,6 +284,9 @@ func _on_piece_taken(taken_piece, attacker) -> void:
 		return
 	GameManager.remove_piece(remove_piece)
 	remove_piece.queue_free()
+
+
+
 
 func _end_game_message(title: String, message: String) -> void:
 	var pop_up: AcceptDialog = AcceptDialog.new()
