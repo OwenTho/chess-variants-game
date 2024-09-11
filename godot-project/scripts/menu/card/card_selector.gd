@@ -12,11 +12,11 @@ class SelectionInfo:
 	func _reset_next() -> void:
 		push_error("_reset_next not defined in SelectionInfo extended class.")
 	
-	func _get_next() -> Node:
+	func _get_next() -> CardBase:
 		push_error("_get_next not defined in SelectionInfo extended class.")
 		return null
 	
-	func _return_card(card: Node) -> void:
+	func _return_card(card: CardBase) -> void:
 		card.queue_free()
 		push_error("_return_card not defined in SelectionInfo extended class.")
 	
@@ -34,20 +34,20 @@ class DeckSelectionInfo extends SelectionInfo:
 	func _reset_next() -> void:
 		_cur_taken = 0
 	
-	func _get_next() -> Node:
+	func _get_next() -> CardBase:
 		if _cur_taken >= quantity:
 			return null
 		_cur_taken += 1
 		return GameManager.game_controller.PullCardFromDeck(deck)
 	
-	func _return_card(card: Node) -> void:
+	func _return_card(card: CardBase) -> void:
 		# Return to deck and free card
 		card.queue_free()
 		GameManager.game_controller.ReturnCardToDeck(card, deck)
 
 class CustomSelectionCardGetter:
 	
-	func _get_card() -> Node:
+	func _get_card() -> CardBase:
 		return null
 	
 	func _return_card(card) -> bool:
@@ -63,14 +63,14 @@ class CustomSelectionDeck extends CustomSelectionCardGetter:
 		self.deck = deck
 		self.remove_card = remove_card
 	
-	func _get_card() -> Node:
+	func _get_card() -> CardBase:
 		var card = GameManager.game_controller.PullCardFromDeck(deck)
 		# If not removing card, re-add it to the deck
 		if card != null and not remove_card:
 			GameManager.game_controller.ReturnCardToDeck(card, deck)
 		return card
 	
-	func _return_card(card) -> bool:
+	func _return_card(card: CardBase) -> bool:
 		# If remove_card is enabled, it has already
 		# been returned
 		card.queue_free()
@@ -83,10 +83,10 @@ class CustomSelectionFactory extends CustomSelectionCardGetter:
 	func _init(factory) -> void:
 		self.factory = factory
 	
-	func _get_card() -> Node:
+	func _get_card() -> CardBase:
 		return GameManager.game_controller.MakeCardUsingFactory(factory)
 	
-	func _return_card(card) -> bool:
+	func _return_card(card: CardBase) -> bool:
 		card.queue_free()
 		return factory.ReturnCard(card)
 
@@ -102,11 +102,11 @@ class CustomSelectionInfo extends SelectionInfo:
 		_cur = 0
 		_cur_cards.clear()
 	
-	func _get_next() -> Node:
+	func _get_next() -> CardBase:
 		if _cur < 0 or _cur >= card_getters.size():
 			return null
 		
-		var card: Node = null
+		var card: CardBase = null
 		while card == null:
 			card = card_getters[_cur]._get_card()
 			_cur += 1
@@ -114,7 +114,7 @@ class CustomSelectionInfo extends SelectionInfo:
 			_cur_cards.append(card)
 		return card
 	
-	func _return_card(card: Node) -> void:
+	func _return_card(card: CardBase) -> void:
 		# Free card
 		card.queue_free()
 		for i in range(0,_cur_cards.size()):
@@ -196,11 +196,11 @@ func _next_select() -> void:
 			push_error("Tried to have an invalid player select a card.")
 			continue
 		before_new_selection.emit()
-		var player_cards: Array[Node] = []
+		var player_cards: Array[CardBase] = []
 		cur_selection._reset_next()
 		var cur_card_num: int = 0
 		# Pull the first
-		var new_card = await cur_selection._get_next()
+		var new_card: CardBase = await cur_selection._get_next()
 		# If new card is null, break as it has reached the end of the card list
 		while new_card != null:
 			# Temporarily add as a child to avoid possible memory leak

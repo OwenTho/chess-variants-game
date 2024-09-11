@@ -1,6 +1,7 @@
 using Godot;
 using Godot.Collections;
 
+[GlobalClass]
 public partial class Piece : GridItem<Piece>
 {
     public int timesMoved = 0;

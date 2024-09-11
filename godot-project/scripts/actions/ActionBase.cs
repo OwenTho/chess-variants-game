@@ -3,6 +3,7 @@ using Godot;
 using System.Collections.Generic;
 using Godot.Collections;
 
+[GlobalClass]
 public abstract partial class ActionBase : GridItem<ActionBase>
 {
     public int id = -1;

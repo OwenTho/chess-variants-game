@@ -1,6 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 
+[GlobalClass]
 public partial class PieceInfo : Node
 {
     internal List<PieceRule> rules;

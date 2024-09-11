@@ -7,7 +7,7 @@ class_name Piece2D
 
 signal actions_updated(piece: Piece2D)
 
-var piece_data
+var piece_data: Piece
 var _cur_move_tween: Tween
 var _cur_info_tween: Tween
 

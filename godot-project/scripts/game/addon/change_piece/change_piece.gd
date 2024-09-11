@@ -4,12 +4,12 @@ const START_NOTICE = "change_piece"
 const FIN_NOTICE = "piece_changed"
 
 var change_piece_info_id
-var cur_card: Node
+var cur_card: CardBase
 
 func _init() -> void:
 	add_card_notice("minor_change_piece", START_NOTICE, _on_change_piece)
 
-func _on_change_piece(card: Node) -> void:
+func _on_change_piece(card: CardBase) -> void:
 	if not GameManager.in_game:
 		send_card_notice(card, FIN_NOTICE)
 		return
@@ -38,7 +38,7 @@ func _start_change_piece(to_piece_id: String) -> void:
 
 func _on_cursor_select(pos: Vector2i) -> void:
 	# Get the piece at that space
-	var piece: Node = GameManager.unsafe_get_first_piece_at(pos.x, pos.y)
+	var piece: Piece = GameManager.unsafe_get_first_piece_at(pos.x, pos.y)
 	if piece == null:
 		return
 	_select_change_piece.rpc(piece.id)
@@ -62,7 +62,7 @@ func _select_change_piece(piece_id: int) -> void:
 		return
 	
 	# Try to get the piece
-	var piece: Node = GameManager.unsafe_get_piece(piece_id)
+	var piece = GameManager.unsafe_get_piece(piece_id)
 	if piece == null:
 		GameManager.receive_notice.rpc_id(multiplayer.get_remote_sender_id(), "ERROR: There is no piece with id %s." % [piece_id])
 		return

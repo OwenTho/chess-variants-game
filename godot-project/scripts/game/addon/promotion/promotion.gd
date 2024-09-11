@@ -9,13 +9,13 @@ func _init() -> void:
 
 var promotion_selector_scene: PackedScene = preload("res://scenes/game/addons/promotion/promotion_selector.tscn")
 
-var cur_card: Node
-var cur_promoting_piece: Node
-var cur_selection: Array = []
+var cur_card: CardBase
+var cur_promoting_piece: Piece
+var cur_selection: Array[String] = []
 
 var cur_selection_node: Node2D
 
-func _on_promotion(card: Node) -> void:
+func _on_promotion(card: CardBase) -> void:
 	if not GameManager.in_game:
 		send_card_notice(card, FIN_NOTICE)
 		return
@@ -56,7 +56,7 @@ func _give_promotion_options(piece_id: int, options: Array) -> void:
 	cur_selection_node.selection_made.connect(_on_selection_made)
 	
 	# Get the piece by the id
-	var piece: Piece2D = GameManager.get_piece_id(piece_id)
+	var piece: Piece2D = GameManager.get_piece_2d(piece_id)
 	# Add the selector as a child
 	piece.sprite_transform_node.add_child(cur_selection_node)
 

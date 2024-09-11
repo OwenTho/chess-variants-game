@@ -77,7 +77,7 @@ func _on_init() -> void:
 	
 	Debug.stats.add_property(GameManager.game_controller.currentGameState, "currentPlayerNum")
 
-func _process(delta) -> void:
+func _process(delta: float) -> void:
 	if Input.is_action_pressed("mouse_right"):
 		$BoardHolder.rotation = $BoardHolder.rotation + deg_to_rad(45) * delta
 
@@ -159,7 +159,7 @@ func select_cell(cell_pos: Vector2i) -> void:
 		return
 	
 	# Get the first piece
-	var piece = await GameManager.get_first_piece_at(cell_pos.x, cell_pos.y)
+	var piece: Piece = await GameManager.get_first_piece_at(cell_pos.x, cell_pos.y)
 	# Unlock the mutex as it's not needed anymore
 	GameManager.game_mutex.unlock()
 	if piece == null:
@@ -167,7 +167,7 @@ func select_cell(cell_pos: Vector2i) -> void:
 		remove_selection()
 		return
 	
-	var item_node: Piece2D = GameManager.get_piece_id(piece.id)
+	var item_node: Piece2D = GameManager.get_piece_2d(piece.id)
 	set_selection(item_node)
 
 
@@ -251,17 +251,17 @@ func _reset_on_starting() -> void:
 		for cur_piece in all_pieces:
 			cur_piece.reset_actions()
 
-func _on_taking_action(action: Node, piece: Node) -> void:
+func _on_taking_action(action: ActionBase, piece: Piece) -> void:
 	_reset_on_starting()
 	allow_quit = false
 
-func _on_taking_actions_at(action_location: Vector2i, piece: Node) -> void:
+func _on_taking_actions_at(action_location: Vector2i, piece: Piece) -> void:
 	allow_quit = false
 
-func _on_action_processed(action: Node, piece: Node) -> void:
+func _on_action_processed(action: ActionBase, piece: Piece) -> void:
 	_reset_on_starting()
 
-func _on_actions_processed(success: bool, action_location: Vector2i, piece: Node) -> void:
+func _on_actions_processed(success: bool, action_location: Vector2i, piece: Piece) -> void:
 	if not is_multiplayer_authority():
 		allow_quit = true
 		return
@@ -278,11 +278,11 @@ func _on_action_failed(reason: String) -> void:
 	disabled_selection = false
 	allow_quit = true
 
-func _on_piece_taken(taken_piece, attacker) -> void:
-	var remove_piece: Piece2D = GameManager.get_piece_id(taken_piece.id)
+func _on_piece_taken(taken_piece: Piece, attacker: Piece) -> void:
+	var remove_piece: Piece2D = GameManager.get_piece_2d(taken_piece.id)
 	if remove_piece == null:
 		return
-	GameManager.remove_piece(remove_piece)
+	GameManager.remove_piece_2d(remove_piece)
 	remove_piece.queue_free()
 
 

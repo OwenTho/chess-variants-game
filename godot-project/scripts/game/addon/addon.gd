@@ -30,13 +30,13 @@ func add_card_notice(card_ids, notice: String, function: Callable) -> void:
 func add_any_card_notice(notice: String, function: Callable) -> void:
 	add_card_notice(null, notice, function)
 
-func send_card_notice(card: Node, notice: String) -> void:
+func send_card_notice(card: CardBase, notice: String) -> void:
 	GameManager.send_card_notice(card, notice)
 
 func get_cs_scripts() -> Array[CSharpScript]:
 	return []
 
-func _handle_card_notice(card: Node, notice: String) -> void:
+func _handle_card_notice(card: CardBase, notice: String) -> void:
 	if notice not in _card_notices:
 		return
 	var listeners: Array = _card_notices[notice]

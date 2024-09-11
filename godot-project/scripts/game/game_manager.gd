@@ -26,10 +26,10 @@ signal piece_added(piece: Piece2D)
 signal piece_removed(piece: Piece2D)
 
 signal starting_actions()
-signal taking_action(action: Node, piece: Node)
-signal taking_actions_at(action_location: Vector2i, piece: Node)
-signal action_processed(action: Node, piece: Node)
-signal actions_processed_at(success: bool, action_location: Vector2i, piece: Node)
+signal taking_action(action: ActionBase, piece: Piece)
+signal taking_actions_at(action_location: Vector2i, piece: Piece)
+signal action_processed(action: ActionBase, piece: Piece)
+signal actions_processed_at(success: bool, action_location: Vector2i, piece: Piece)
 signal action_was_failed(reason: String)
 
 signal player_has_won(player_num: int)
@@ -37,7 +37,7 @@ signal player_lost(player_num: int)
 
 signal game_stalemate(stalemate_player: int)
 
-signal piece_taken(taken_piece: Node, attacker: Node)
+signal piece_taken(taken_piece: Piece, attacker: Piece)
 
 signal notice_received(message: String)
 
@@ -67,7 +67,7 @@ var currently_selecting: int = -1
 
 var card_score: Array[int] = []
 
-var current_given_cards: Array = []
+var current_given_cards: Array[CardBase] = []
 
 # Addons
 var addons: Array[GameAddon]
@@ -258,7 +258,7 @@ func _on_invalid_selection(card_num: int) -> void:
 		return
 	invalid_card.rpc_id(send_id, card_num)
 
-func _on_card_selected(card) -> void:
+func _on_card_selected(card: CardBase) -> void:
 	if card == null:
 		return
 	add_card(card)
@@ -345,14 +345,15 @@ func select_card(card_number: int) -> void:
 func add_card_from_data(card_data: Dictionary) -> void:
 	if not in_game:
 		return
-	var card = game_controller.MakeCardFromDict(card_data)
+	var card: CardBase = game_controller.MakeCardFromDict(card_data)
 	if card == null:
 		push_error("Received an invalid card from the server.")
 		return
 	add_card(card)
 	await game_controller.CardAdded
 
-func add_card(card) -> void:
+func add_card(card: CardBase) -> void:
+	# Add to the game
 	game_controller.AddCard(card)
 
 @rpc("authority", "call_local", "reliable")
@@ -407,10 +408,6 @@ func board_to_array() -> Array:
 		var cell_pos: Vector2i = cell.pos
 		for item in cell.items:
 			var this_item: Array = []
-			# TODO: Update GridItem to have its own ID, which
-			# id is saved to instead of pieceId for Pieces. This would be
-			# for custom spaces.
-			# This works for now, however, as there are only pieces.
 			# Add the ID first
 			if item.info != null:
 				this_item.append(item.info.pieceId)
@@ -435,7 +432,7 @@ func load_board(board_data: Array) -> void:
 
 func place_piece(piece_id: String, link_id: int, team: int, x: int, y: int, id: int = -1) -> bool:
 	# Request the game controller to make the piece
-	var new_piece_data = await game_controller.PlacePiece(piece_id, link_id, team, x, y, id)
+	var new_piece_data: Piece = await game_controller.PlacePiece(piece_id, link_id, team, x, y, id)
 	
 	# If it failed to place the piece, return false
 	if new_piece_data == null:
@@ -459,14 +456,14 @@ func place_piece(piece_id: String, link_id: int, team: int, x: int, y: int, id: 
 	
 	return true
 
-func remove_piece(piece: Piece2D) -> void:
+func remove_piece_2d(piece: Piece2D) -> void:
 	if piece == null:
 		return
 	piece.queue_free()
 	piece_removed.emit(piece)
 
-func remove_piece_by_id(id: int) -> void:
-	remove_piece(get_piece_id(id))
+func remove_piece_2d_by_id(id: int) -> void:
+	remove_piece_2d(get_piece_2d(id))
 
 func place_matching(piece_id: String, link_id: int, x: int, y: int) -> void:
 	place_piece(piece_id, link_id, 0, x, y)
@@ -475,7 +472,7 @@ func place_matching(piece_id: String, link_id: int, x: int, y: int) -> void:
 
 
 
-func get_piece_id(id: int) -> Piece2D:
+func get_piece_2d(id: int) -> Piece2D:
 	for piece in get_tree().get_nodes_in_group("piece"):
 		if piece.piece_data != null and piece.piece_data.id == id:
 			return piece
@@ -521,29 +518,29 @@ func unsafe_get_current_player() -> int:
 	return game_controller.UnsafeGetCurrentPlayer()
 
 
-func get_piece_info(info_id: String) -> Node:
+func get_piece_info(info_id: String) -> PieceInfo:
 	if not game_controller_valid():
 		return null
 	return game_controller.GetPieceInfo(info_id)
 
 
-func get_piece(id: int) -> Node:
+func get_piece(id: int) -> Piece:
 	if not game_controller_valid():
 		return null
 	return await game_controller.GetPiece(id)
 
-func unsafe_get_piece(id: int) -> Node:
+func unsafe_get_piece(id: int) -> Piece:
 	if not game_controller_valid():
 		return null
 	return game_controller.UnsafeGetPiece(id)
 
 
-func get_first_piece_at(x: int, y: int) -> Object:
+func get_first_piece_at(x: int, y: int) -> Piece:
 	if not game_controller_valid():
 		return null
 	return await game_controller.GetFirstPieceAt(x,y)
 
-func unsafe_get_first_piece_at(x: int, y: int) -> Object:
+func unsafe_get_first_piece_at(x: int, y: int) -> Piece:
 	if not game_controller_valid():
 		return null
 	return game_controller.UnsafeGetFirstPieceAt(x,y)
@@ -689,7 +686,7 @@ func _send_valid_actions() -> void:
 		_send_piece_actions(piece)
 	game_mutex.unlock()
 
-func _send_piece_actions(piece: Node) -> void:
+func _send_piece_actions(piece: Piece) -> void:
 	if piece == null:
 		push_error("Tried to send actions of null piece.")
 		return
@@ -708,16 +705,16 @@ func _send_piece_actions(piece: Node) -> void:
 @rpc("authority", "call_local", "reliable")
 func _receive_piece_actions(piece_id: int, piece_actions: Array[Vector2i]) -> void:
 	# Get the related Piece2D
-	var piece: Piece2D = get_piece_id(piece_id)
+	var piece: Piece2D = get_piece_2d(piece_id)
 	piece.set_actions(piece_actions)
 
-func _on_action_processed(action: Node, piece) -> void:
+func _on_action_processed(action: ActionBase, piece: Piece) -> void:
 	action_processed.emit(action, piece)
 	if not is_multiplayer_authority():
 		return
 	take_action.rpc(game_controller.ActionToDict(action), piece.id)
 
-func _on_actions_processed_at(success: bool, action_location: Vector2i, piece) -> void:
+func _on_actions_processed_at(success: bool, action_location: Vector2i, piece: Piece) -> void:
 	actions_processed_at.emit(success, action_location, piece)
 	if not is_multiplayer_authority():
 		return
@@ -729,17 +726,17 @@ func _on_actions_processed_at(success: bool, action_location: Vector2i, piece) -
 	# End the current turn
 	game_controller.EndTurn()
 
-func _on_card_notice(card: Node, notice: String) -> void:
+func _on_card_notice(card: CardBase, notice: String) -> void:
 	print("%s Card has sent notice '%s'" % [card.GetCardName(), notice])
 	for addon in addons:
 		addon._handle_card_notice(card, notice)
 
-func send_card_notice(card: Node, notice: String) -> void:
+func send_card_notice(card: CardBase, notice: String) -> void:
 	game_controller.SendCardNotice(card, notice)
 
 
 
-func _on_piece_taken(taken_piece, attacker) -> void:
+func _on_piece_taken(taken_piece: Piece, attacker: Piece) -> void:
 	piece_taken.emit(taken_piece, attacker)
 	# Add card score to the player that lost the piece
 	# It is this way, as they lose a piece but can get a card sooner.

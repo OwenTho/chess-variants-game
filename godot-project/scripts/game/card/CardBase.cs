@@ -1,8 +1,8 @@
 using System;
-using System.Threading.Tasks;
 using Godot;
 using Godot.Collections;
 
+[GlobalClass]
 public abstract partial class CardBase : Node
 {
     public const string CardIdKey = "card_id";
