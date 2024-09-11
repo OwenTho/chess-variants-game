@@ -11,7 +11,7 @@ var promotion_selector_scene: PackedScene = preload("res://scenes/game/addons/pr
 
 var cur_card: CardBase
 var cur_promoting_piece: Piece
-var cur_selection: Array[String] = []
+var cur_selection: Array = []
 
 var cur_selection_node: Node2D
 
