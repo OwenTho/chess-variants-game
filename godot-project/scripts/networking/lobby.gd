@@ -16,6 +16,7 @@ var doing_init: bool = false
 var players_loaded: int = 0
 
 var is_player: bool = false
+var is_local: bool = false
 var close_on_noone: bool = false
 
 
@@ -98,6 +99,7 @@ func join_game(address: String = "", port: int = DEFAULT_PORT):
 	var error = peer.create_client(address, port)
 	if error:
 		return error
+	is_local = false
 	doing_init = false
 	players.clear()
 	player_info.is_admin = false
@@ -113,8 +115,10 @@ func create_game(online: bool = true, port: int = DEFAULT_PORT):
 		var error = peer.create_server(port, MAX_CONNECTIONS)
 		if error:
 			return error
+		is_local = false
 	else:
 		peer = OfflineMultiplayerPeer.new()
+		is_local = true
 	# Initialise both player_nums to -1
 	for i in range(player_nums.size()):
 		player_nums[i] = -1
