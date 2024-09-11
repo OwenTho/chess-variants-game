@@ -16,6 +16,9 @@ var next_progress: Array[int] = []
 var max_progress: float = 0
 var progress: float = 0
 
+func _ready() -> void:
+	_update_visual()
+
 func _process(delta: float) -> void:
 	if next_progress.is_empty():
 		return
@@ -53,6 +56,15 @@ func _update_visual() -> void:
 		return
 	progress_bar.material.set_shader_parameter("fill_right", fill_direction == FILL_DIRECTION.RIGHT)
 	progress_bar.material.set_shader_parameter("progress", clampf(progress / max_progress, 0.0, 1.0))
+	
+	var horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	match fill_direction:
+		FILL_DIRECTION.RIGHT:
+			horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		FILL_DIRECTION.LEFT:
+			horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	$PlayerLabel.horizontal_alignment = horizontal_alignment
+	$NameLabel.horizontal_alignment = horizontal_alignment
 
 func _next_goal() -> void:
 	next_progress.remove_at(0)

@@ -28,7 +28,7 @@ offset_bottom = 86.0
 layout_mode = 2
 offset_left = 8.0
 offset_top = 8.0
-offset_right = 269.0
+offset_right = 379.0
 offset_bottom = 38.0
 text = "Player X"
 
@@ -36,7 +36,7 @@ text = "Player X"
 layout_mode = 0
 offset_left = 8.0
 offset_top = 38.0
-offset_right = 269.0
+offset_right = 378.0
 offset_bottom = 68.0
 text = "Name"
 
