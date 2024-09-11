@@ -357,6 +357,12 @@ func request_start_game():
 		send_error("You must be the lobby admin to start the game.", player_id)
 		return
 	
+	# Make sure the player ids are valid
+	for cur_id in player_nums:
+		if not players.has(cur_id):
+			send_error("Not all players have been set.", player_id)
+			return
+	
 	# If player is an admin, start game
 	setup_game()
 
