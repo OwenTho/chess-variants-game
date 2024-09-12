@@ -42,7 +42,7 @@ func set_player(player_num: int) -> void:
 	var player_id: int = Lobby.get_player_id_from_num(player_num)
 	var info: Lobby.PlayerInfo = Lobby.get_player_info(player_id)
 	
-	$PlayerLabel.text = "Player %s" % [player_num + 1]
+	$PlayerLabel.text = str(player_num + 1)
 	if not Lobby.is_local and info != null:
 		_set_name(info.name)
 	else:

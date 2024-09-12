@@ -8,6 +8,7 @@ public abstract partial class CardFactory : Node
     public string cardId { get; internal set; }
     public bool serverOnly { get; internal set; }
     public bool immediateUse { get; internal set; }
+    public bool displayCard { get; internal set; }
     
     private List<CardBase> _createdCards = new();
     internal CardBase CreateNewCard(GameState game)
@@ -16,6 +17,7 @@ public abstract partial class CardFactory : Node
         newCard.cardId = cardId;
         newCard.serverOnly = serverOnly;
         newCard.immediateUse = immediateUse;
+        newCard.displayCard = displayCard;
         _createdCards.Add(newCard);
         return newCard;
     }
@@ -25,6 +27,7 @@ public abstract partial class CardFactory : Node
         newCard.cardId = cardId;
         newCard.serverOnly = serverOnly;
         newCard.immediateUse = immediateUse;
+        newCard.displayCard = displayCard;
         _createdCards.Add(newCard);
         return newCard;
     }
@@ -45,6 +48,7 @@ public abstract partial class CardFactory : Node
         newCard.cardId = cardId;
         newCard.serverOnly = serverOnly;
         newCard.immediateUse = immediateUse;
+        newCard.displayCard = displayCard;
         _createdCards.Add(newCard);
         return newCard;
     }

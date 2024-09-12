@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=4 uid="uid://cssq752gr7m3k"]
+[gd_scene load_steps=13 format=4 uid="uid://cssq752gr7m3k"]
 
 [ext_resource type="Script" path="res://scripts/menu/game_screen.gd" id="1_s3pe2"]
 [ext_resource type="PackedScene" uid="uid://isv1sog82mq8" path="res://scenes/game/highlight.tscn" id="2_c2xco"]
@@ -11,8 +11,9 @@
 [ext_resource type="Theme" uid="uid://cg4q1rutkhkn7" path="res://assets/themes/card/select_button.tres" id="5_wnk5t"]
 [ext_resource type="PackedScene" uid="uid://bjpv55bvyut4l" path="res://scenes/game/card/card_selection.tscn" id="8_2rxrq"]
 [ext_resource type="PackedScene" uid="uid://dddlxpsqq0pnn" path="res://scenes/game/player_info.tscn" id="8_i3by4"]
+[ext_resource type="Script" path="res://scripts/menu/card/card_display.gd" id="8_o3faa"]
 
-[node name="GameScreen" type="Node2D" node_paths=PackedStringArray("board", "cursor", "card_selection", "action_highlights", "notices", "player1_info", "player2_info") groups=["game_screen"]]
+[node name="GameScreen" type="Node2D" node_paths=PackedStringArray("board", "cursor", "card_selection", "action_highlights", "notices", "major_card_display", "player1_info", "player1_card_display", "player2_info", "player2_card_display") groups=["game_screen"]]
 script = ExtResource("1_s3pe2")
 board = NodePath("BoardHolder/Board2D")
 cursor = NodePath("BoardHolder/Board2D/CursorHighlight")
@@ -20,8 +21,11 @@ card_selection = NodePath("GameUI/CardSelection")
 action_highlights = NodePath("BoardHolder/Board2D/CellHighlights")
 highlight_scene = ExtResource("2_c2xco")
 notices = NodePath("GameUI/GameNotices")
+major_card_display = NodePath("GameUI/MajorCardsDisplay")
 player1_info = NodePath("GameUI/Player1Info")
+player1_card_display = NodePath("GameUI/MinorCardsDisplayP1")
 player2_info = NodePath("GameUI/Player2Info")
+player2_card_display = NodePath("GameUI/MinorCardsDisplayP2")
 
 [node name="DebugOverlay" parent="." instance=ExtResource("2_o62sx")]
 offset_left = 47.0
@@ -45,6 +49,35 @@ offset_right = 759.0
 offset_bottom = 632.0
 alignment = 2
 script = ExtResource("4_q6ob5")
+
+[node name="MajorCardsDisplay" type="Control" parent="GameUI"]
+anchors_preset = 0
+offset_left = 392.0
+offset_top = 2.0
+offset_right = 777.0
+offset_bottom = 117.0
+mouse_filter = 1
+script = ExtResource("8_o3faa")
+length = 500.0
+
+[node name="MinorCardsDisplayP1" type="Control" parent="GameUI"]
+layout_mode = 3
+anchors_preset = 0
+offset_top = 504.0
+offset_right = 385.0
+offset_bottom = 624.0
+mouse_filter = 1
+script = ExtResource("8_o3faa")
+
+[node name="MinorCardsDisplayP2" type="Control" parent="GameUI"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 766.0
+offset_top = 505.0
+offset_right = 1151.0
+offset_bottom = 625.0
+mouse_filter = 1
+script = ExtResource("8_o3faa")
 
 [node name="CardSelection" parent="GameUI" instance=ExtResource("8_2rxrq")]
 visible = false
@@ -86,18 +119,6 @@ offset_top = 28.0
 offset_right = -869.0
 offset_bottom = -579.0
 
-[node name="MajorCardsDisplay" type="Control" parent="GameUI"]
-anchors_preset = 0
-offset_left = 401.0
-offset_top = 14.0
-offset_right = 441.0
-offset_bottom = 54.0
-
-[node name="MinorCardsDisplayP1" type="Control" parent="GameUI"]
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
 [node name="Player1Info" parent="GameUI" instance=ExtResource("8_i3by4")]
 layout_mode = 0
 offset_left = 2.0
@@ -113,7 +134,7 @@ offset_bottom = 647.0
 
 [node name="BoardHolder" type="Node2D" parent="."]
 position = Vector2(584, 332)
-scale = Vector2(0.42, 0.42)
+scale = Vector2(0.35, 0.35)
 
 [node name="BoardTiles" type="TileMapLayer" parent="BoardHolder"]
 use_parent_material = true

@@ -12,8 +12,13 @@ class_name Game
 
 @export var notices: VBoxContainer
 
+@export var major_card_display: Control
+
 @export var player1_info: Control
+@export var player1_card_display : Control
 @export var player2_info: Control
+@export var player2_card_display : Control
+
 
 var selected_piece: Piece2D
 
@@ -30,6 +35,7 @@ func _ready() -> void:
 	GameManager.clear_cards.connect(_on_clear_cards)
 	GameManager.display_card.connect(card_selection.add_card)
 	GameManager.show_cards.connect(_on_show_cards)
+	GameManager.add_active_display_card.connect(_on_add_active_display_card)
 	GameManager.card_score_changed.connect(_on_card_score_changed)
 	
 	GameManager.has_init.connect(_on_init)
@@ -212,7 +218,49 @@ func _on_card_selected(card_num: int) -> void:
 	card_selection.put_card(cur_selected_card, false)
 	cur_selected_card = card_num
 
-
+func _on_add_active_display_card(card: CardBase) -> void:
+	var card_scene: PackedScene = preload("res://scenes/game/card/card.tscn")
+	var new_card: Node = card_scene.instantiate()
+	
+	new_card.set_enabled(false)
+	new_card.global_position = Vector2(-100,150)
+	new_card.scale = Vector2(0.6, 0.6)
+	
+	# Add the information to the card
+	new_card.set_card_name(card.GetCardName())
+	new_card.set_card_description(card.GetCardDescription())
+	new_card.set_card_image(card.GetCardImageLoc())
+	
+	add_child(new_card)
+	
+	var team_owner: int = card.teamId
+	
+	# Tween the card so it appears, and moves onto the screen
+	var tween: Tween = create_tween()
+	
+	# Move the card on to the screen
+	tween.set_ease(Tween.EASE_OUT)
+	tween.set_trans(Tween.TRANS_CUBIC)
+	tween.tween_property(new_card, "global_position", Vector2(100, new_card.global_position.y), 0.5)
+	tween.tween_interval(1)
+	
+	# If card is immediate use, hide the card off screen and delete
+	if not card.displayCard:
+		tween.tween_property(new_card, "global_position", Vector2(-100, new_card.global_position.y), 0.6)
+		tween.tween_callback(new_card.queue_free)
+		return
+	var display: Node = major_card_display
+	# Depending on team id, place differently on the board
+	match team_owner:
+		0:
+			display = player1_card_display
+		1:
+	
+			display = player2_card_display
+	
+	# After showing the card, add it to the display
+	tween.tween_callback(display.add_card.bind(new_card))
+	tween.tween_callback(display.move_cards)
 
 func _on_card_score_changed(player_num: int, new_score: int) -> void:
 	if player_num == 0:

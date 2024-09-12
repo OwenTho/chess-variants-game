@@ -15,6 +15,7 @@ signal display_card(card_data: Dictionary)
 signal clear_cards()
 signal show_cards()
 signal card_selected(card_id: int)
+signal add_active_display_card(card: CardBase)
 signal card_score_changed(player_num: int, new_score: int)
 
 # Game signals
@@ -353,6 +354,9 @@ func add_card_from_data(card_data: Dictionary) -> void:
 	await game_controller.CardAdded
 
 func add_card(card: CardBase) -> void:
+	# Add visually to the game
+	add_active_display_card.emit(card)
+	
 	# Add to the game
 	game_controller.AddCard(card)
 
@@ -381,9 +385,6 @@ func start_chess_game() -> void:
 
 func init_board() -> void:
 	# Add all of the pieces
-	#place_matching("king", 0, -5, 0)
-	#place_matching("pawn", 1, 4, 5)
-	#return
 	place_matching("pawn", 0, 0, 1)
 	place_matching("pawn", 1, 1, 1)
 	place_matching("pawn", 2, 2, 1)

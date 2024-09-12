@@ -1,13 +1,15 @@
-[gd_scene load_steps=4 format=3 uid="uid://dddlxpsqq0pnn"]
+[gd_scene load_steps=6 format=3 uid="uid://dddlxpsqq0pnn"]
 
 [ext_resource type="Shader" path="res://assets/shaders/progress.gdshader" id="1_8l2xv"]
 [ext_resource type="Script" path="res://scripts/game/visual/player_info.gd" id="1_vlhwa"]
+[ext_resource type="Theme" uid="uid://blj4se2cee0wv" path="res://assets/themes/player_info/player_num.tres" id="2_b7o1w"]
+[ext_resource type="Theme" uid="uid://dapyedfiltbge" path="res://assets/themes/player_info/player_name.tres" id="3_l51qn"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_aeonv"]
 resource_local_to_scene = true
 shader = ExtResource("1_8l2xv")
 shader_parameter/progress = 0.0
-shader_parameter/angle = 5.0
+shader_parameter/angle = 10.0
 shader_parameter/fill_right = true
 shader_parameter/unfinish_mix = null
 
@@ -16,28 +18,30 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 386.0
 offset_bottom = 86.0
+mouse_filter = 2
 script = ExtResource("1_vlhwa")
 progress_bar = NodePath("ColorRect")
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
+[node name="Panel" type="Panel" parent="."]
 layout_mode = 0
 offset_right = 385.0
 offset_bottom = 86.0
 
 [node name="PlayerLabel" type="Label" parent="."]
 layout_mode = 2
-offset_left = 8.0
-offset_top = 8.0
-offset_right = 379.0
-offset_bottom = 38.0
-text = "Player X"
+offset_left = 9.0
+offset_right = 378.0
+offset_bottom = 44.0
+theme = ExtResource("2_b7o1w")
+text = "X"
 
 [node name="NameLabel" type="Label" parent="."]
 layout_mode = 0
-offset_left = 8.0
-offset_top = 38.0
-offset_right = 378.0
-offset_bottom = 68.0
+offset_left = 18.0
+offset_top = 42.0
+offset_right = 366.0
+offset_bottom = 65.0
+theme = ExtResource("3_l51qn")
 text = "Name"
 
 [node name="ColorRect" type="ColorRect" parent="."]

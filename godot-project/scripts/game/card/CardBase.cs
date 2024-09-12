@@ -31,6 +31,12 @@ public abstract partial class CardBase : Node
     /// Immediate use Cards will break the game if they require any Waits.
     /// </summary>
     public bool immediateUse { get; internal set;}
+    
+    /// <summary>
+    /// If true, the card will be added visually to the game.
+    /// The placement is dependent on teamId.
+    /// </summary>
+    public bool displayCard { get; internal set; }
 
     [Signal]
     public delegate void CardInfoUpdatedEventHandler();
