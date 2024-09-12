@@ -1,6 +1,5 @@
 ﻿
 using System.Collections.Generic;
-using Godot;
 using Godot.Collections;
 
 public partial class ChangePieceCardFactory : CardFactory
@@ -16,7 +15,7 @@ public partial class ChangePieceCardFactory : CardFactory
         string invalidId = allPieces[0].GetPieceInfoId();
         for (var i = 1; i < allPieces.Count; i++)
         {
-            if (allPieces[i].GetPieceInfoId() == invalidId)
+            if (allPieces[i].GetPieceInfoId() != invalidId)
             {
                 return null;
             }
@@ -76,9 +75,64 @@ public partial class ChangePieceCardFactory : CardFactory
         {
             return false;
         }
+        
+        // Secondly, if there are only kings, and only one king on all teams,
+        // then the Change Piece will always fail
+        string invalidId = FindInvalidId(game);
+        List<int> teams = new List<int>();
+        List<int> validTeams = new List<int>();
+        Array<Piece> kings = game.GetKingPieces();
+        foreach (var piece in game.allPieces)
+        {
+            // If team already validated, skip
+            if (validTeams.Contains(piece.teamId))
+            {
+                continue;
+            }
+
+            // If team isn't added, ignore
+            if (!teams.Contains(piece.teamId))
+            {
+                teams.Add(piece.teamId);
+            }
+            
+            // If this piece is not a king...
+            if (piece.GetPieceInfoId() == game.KingId)
+            {
+                continue;
+            }
+            
+            foreach (var king in kings)
+            {
+                // Only other kings
+                if (piece == king)
+                {
+                    continue;
+                }
+
+                // Only if the link id is different
+                if (piece.linkId == king.linkId)
+                {
+                    continue;
+                }
+
+                // If criteria above is matched, the team can have one of its kings
+                // swapped to something else
+                validTeams.Add(king.teamId);
+            }
+        }
+        
+        // If there are not an equal number of teams to valid teams, then
+        // it can't change pieces
+        if (teams.Count != validTeams.Count)
+        {
+            return false;
+        }
+
+
         // If there is more than 1 piece info, it's possible to change the piece's info.
         // If there is only 1 piece info, there's a chance to change it from null.
         int numOfPieceInfo = game.GetAllPieceIds().Length;
-        return numOfPieceInfo > 1 || (numOfPieceInfo == 1 && FindInvalidId(game) == null);
+        return numOfPieceInfo > 1 || (numOfPieceInfo == 1 && invalidId == null);
     }
 }

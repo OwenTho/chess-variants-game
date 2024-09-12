@@ -170,7 +170,7 @@ public partial class GameController
         AddNewCardFactory("minor_promotion", new PomotionCardFactory());
         
         // Piece
-        ChangePieceFactory = AddNewCardFactory("minor_change_piece", new ChangePieceCardFactory(), true);
+        ChangePieceFactory = AddNewCardFactory("minor_change_piece", new ChangePieceCardFactory(), true, false);
         
         // Space
     }
@@ -276,11 +276,12 @@ public partial class GameController
         return newInfo;
     }
 
-    private CardFactory AddNewCardFactory(string id, CardFactory newFactory, bool serverOnly = false, bool immediateUse = false)
+    private CardFactory AddNewCardFactory(string id, CardFactory newFactory, bool serverOnly = false, bool displayCard = true, bool immediateUse = false)
     {
         newFactory.cardId = id;
         newFactory.serverOnly = serverOnly;
         newFactory.immediateUse = immediateUse;
+        newFactory.displayCard = displayCard;
         cardFactoryRegistry.Register(id, newFactory);
         return newFactory;
     }

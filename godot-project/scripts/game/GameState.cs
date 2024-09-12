@@ -335,6 +335,21 @@ public partial class GameState : Node
         return piece != null;
     }
 
+    public Array<Piece> GetKingPieces()
+    {
+        Array<Piece> kingPieces = new Array<Piece>();
+        foreach (var piece in allPieces)
+        {
+            if (piece.info != null && piece.info.pieceId == KingId)
+            {
+                kingPieces.Add(piece);
+            }
+        }
+
+        return kingPieces;
+    }
+    
+
     public Array<Piece> GetPiecesAt(int x, int y)
     {
         Array<Piece> pieces = new Array<Piece>();

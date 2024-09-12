@@ -107,7 +107,7 @@ class CustomSelectionInfo extends SelectionInfo:
 			return null
 		
 		var card: CardBase = null
-		while card == null:
+		while card == null and _cur < card_getters.size():
 			card = card_getters[_cur]._get_card()
 			_cur += 1
 		if card != null:

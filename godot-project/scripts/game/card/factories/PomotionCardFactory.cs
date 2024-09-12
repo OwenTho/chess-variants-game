@@ -11,11 +11,12 @@ public partial class PomotionCardFactory : CardFactory
         // Get the id of the pieces currently in the game
         foreach (var piece in game.allPieces)
         {
-            if (piece.info == null || existingPieceIds.Contains(piece.info.pieceId))
+            string infoId = piece.GetPieceInfoId();
+            if (existingPieceIds.Contains(infoId))
             {
                 continue;
             }
-            existingPieceIds.Add(piece.info.pieceId); 
+            existingPieceIds.Add(infoId);
         }
 
         return existingPieceIds;
@@ -42,22 +43,17 @@ public partial class PomotionCardFactory : CardFactory
             }
         }
         
-        // If there is only one possible promotion, there has to be at least one differing piece
-        if (possiblePromotions.Count == 1)
+        // If all pieces have a matching piece info id, remove it from the options
+        var pieceInfoIds = GetPieceIdsOnBoard(game);
+        if (pieceInfoIds.Count == 1)
         {
-            var validPromotion = true;
-            foreach (var piece in game.allPieces)
-            {
-                if (piece.info?.pieceId == possiblePromotions[0])
-                {
-                    validPromotion = false;
-                }
-            }
-
-            if (!validPromotion)
-            {
-                return new List<string>();
-            }
+            possiblePromotions.Remove(pieceInfoIds[0]);
+        }
+        // If there are no piece ids on the board, return an empty array.
+        // It needs a "fromPiece" to function, but there's no valid "fromPiece" in this instance.
+        else
+        {
+            return new List<string>();
         }
 
         // Finally, return the list of promotions that haven't been taken yet.
@@ -84,8 +80,18 @@ public partial class PomotionCardFactory : CardFactory
         
         // Now pick what piece will promote into it
         List<string> validPieceIds = GetPieceIdsOnBoard(game);
+        if (validPieceIds.Count == 0)
+        {
+            GD.PushError("Tried to make a PromotionCard, but it found no piece ids on the board.");
+            return null;
+        }
         // Remove the promotion piece from the list, if it's in there
         validPieceIds.Remove(promotion);
+        if (validPieceIds.Count == 0)
+        {
+            GD.PushError("Tried to make a PromotionCard, but it found no piece ids on the board that didn't match the promotion id.");
+            return null;
+        }
 
         newCard.fromPiece = validPieceIds[game.gameRandom.RandiRange(0, validPieceIds.Count - 1)];
         newCard.toPiece.Add(promotion);

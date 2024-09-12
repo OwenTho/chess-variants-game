@@ -138,7 +138,12 @@ public partial class GameController : Node
     public CardBase MakeCardUsingFactory(CardFactory cardFactory)
     {
         gameMutex.Lock();
-        CardBase newCard = cardFactory.CreateNewCard(currentGameState);
+        CardBase newCard = null;
+        if (cardFactory.CanMakeNewCard(currentGameState))
+        {
+            newCard = cardFactory.CreateNewCard(currentGameState);
+        }
+
         gameMutex.Unlock();
 
         return newCard;
@@ -339,6 +344,19 @@ public partial class GameController : Node
     {
         gameMutex.Lock();
         Piece returnValue = UnsafeGetPiece(pieceId);
+        gameMutex.Unlock();
+        return returnValue;
+    }
+
+    public Array<Piece> UnsafeGetKingPieces()
+    {
+        return currentGameState.GetKingPieces();
+    }
+
+    public Array<Piece> GetKingPieces()
+    {
+        gameMutex.Lock();
+        Array<Piece> returnValue = UnsafeGetKingPieces();
         gameMutex.Unlock();
         return returnValue;
     }

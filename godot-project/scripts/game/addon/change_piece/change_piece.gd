@@ -72,6 +72,27 @@ func _select_change_piece(piece_id: int) -> void:
 		GameManager.receive_notice.rpc_id(multiplayer.get_remote_sender_id(), "This piece can't be changed.")
 		return
 	
+	# Check if changing this piece results in no kings on any side
+	var kings = GameManager.unsafe_get_king_pieces()
+	# Then for all of the pieces
+	var teams: Array[int] = []
+	var valid_teams: Array[int] = []
+	
+	for king in kings:
+		if valid_teams.has(king.teamId):
+			continue
+		if not teams.has(king.teamId):
+			teams.append(king.teamId)
+		# If the link Id is different, the team is valid
+		if king.linkId != piece.linkId:
+			valid_teams.append(king.teamId)
+	
+	# If the teams array and valid teams array sizes do not match, the change
+	# is invalid.
+	if teams.size() != valid_teams.size():
+		GameManager.receive_notice.rpc_id(multiplayer.get_remote_sender_id(), "This piece can't be changed.")
+		return
+	
 	# Tell everyone to change the piece
 	_change_piece.rpc(piece.linkId, change_piece_info_id)
 	

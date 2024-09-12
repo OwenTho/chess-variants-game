@@ -536,6 +536,16 @@ func unsafe_get_piece(id: int) -> Piece:
 	return game_controller.UnsafeGetPiece(id)
 
 
+func get_king_pieces() -> Array:
+	if not game_controller_valid():
+		return []
+	return await game_controller.GetKingPieces()
+
+func unsafe_get_king_pieces() -> Array:
+	if not game_controller_valid():
+		return []
+	return game_controller.UnsafeGetKingPieces()
+
 func get_first_piece_at(x: int, y: int) -> Piece:
 	if not game_controller_valid():
 		return null
@@ -658,8 +668,8 @@ func send_minor_card_options(player_num: int) -> void:
 	# selection_info.add_card_getter(CardSelector.CustomSelectionFactory.new(game_controller.SpaceFactory))
 	
 	card_selector.add_custom_selection(selection_info)
-	card_selector.select()
-	await _minor_card_selection_is_finished
+	
+	await card_selector.select()
 
 func _on_minor_card_selection_done() -> void:
 	card_selector.before_new_selection.disconnect(_on_before_new_selection)
