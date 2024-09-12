@@ -491,13 +491,19 @@ public partial class GameState : Node
         // Loop through all actions, and find the ones at x, y.
         if (actionGrid.TryGetCellAt(actionLocation, out GridCell<ActionBase> actionCell))
         {
+            List<ActionBase> actions = new List<ActionBase>();
             foreach (var actionGridItem in actionCell.items)
             {
                 ActionBase action = (ActionBase)actionGridItem;
-                if (action.owner.id == piece.id)
+                if (action.owner != null && action.owner.id == piece.id)
                 {
-                    didAct |= TakeAction(action, piece);
+                    actions.Add(action);
                 }
+            }
+            
+            foreach (var action in actions)
+            {
+                didAct |= TakeAction(action, piece);
             }
         }
         else
