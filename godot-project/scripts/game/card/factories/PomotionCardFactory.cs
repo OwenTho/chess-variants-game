@@ -4,10 +4,27 @@ using Godot;
 
 public partial class PomotionCardFactory : CardFactory
 {
+    private List<string> GetPieceIdsOnBoard(GameState game)
+    {
+        List<string> existingPieceIds = new List<string>();
+        
+        // Get the id of the pieces currently in the game
+        foreach (var piece in game.allPieces)
+        {
+            if (piece.info == null || existingPieceIds.Contains(piece.info.pieceId))
+            {
+                continue;
+            }
+            existingPieceIds.Add(piece.info.pieceId); 
+        }
+
+        return existingPieceIds;
+    }
+    
     private List<string> GetPossiblePromotions(GameState game)
     {
         List<CardBase> existingCards = GetExistingCards(game);
-        List<string> possiblePromotions = new List<string>();
+        List<string> possiblePromotions = GetPieceIdsOnBoard(game);
         // First, fill the possible promotions with all piece info IDs.
         possiblePromotions.AddRange(game.GetAllPieceIds());
         foreach (var card in existingCards)
@@ -22,6 +39,24 @@ public partial class PomotionCardFactory : CardFactory
             foreach (var promotion in promoCard.toPiece)
             {
                 possiblePromotions.Remove(promotion);
+            }
+        }
+        
+        // If there is only one possible promotion, there has to be at least one differing piece
+        if (possiblePromotions.Count == 1)
+        {
+            var validPromotion = true;
+            foreach (var piece in game.allPieces)
+            {
+                if (piece.info?.pieceId == possiblePromotions[0])
+                {
+                    validPromotion = false;
+                }
+            }
+
+            if (!validPromotion)
+            {
+                return new List<string>();
             }
         }
 
@@ -48,9 +83,8 @@ public partial class PomotionCardFactory : CardFactory
         PromotionCard newCard = new PromotionCard();
         
         // Now pick what piece will promote into it
-        List<string> validPieceIds = new List<string>();
-        validPieceIds.AddRange(game.GetAllPieceIds());
-        // Remove the promotion piece from the list
+        List<string> validPieceIds = GetPieceIdsOnBoard(game);
+        // Remove the promotion piece from the list, if it's in there
         validPieceIds.Remove(promotion);
 
         newCard.fromPiece = validPieceIds[game.gameRandom.RandiRange(0, validPieceIds.Count - 1)];
@@ -71,6 +105,7 @@ public partial class PomotionCardFactory : CardFactory
         {
             return false;
         }
+        // If there is at least one promotion option, then it can promote
         return GetPossiblePromotions(game).Count > 0;
     }
 }
