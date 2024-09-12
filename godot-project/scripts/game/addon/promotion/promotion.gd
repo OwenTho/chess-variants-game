@@ -47,6 +47,9 @@ func _give_promotion_options(piece_id: int, options: Array) -> void:
 	# Make a new selection
 	cur_selection_node = promotion_selector_scene.instantiate()
 	
+	# Get the piece by the id
+	var piece: Piece2D = GameManager.get_piece_2d(piece_id)
+	cur_selection_node.set_option_material(piece.sprite.material)
 	# Add all of the options
 	for i in range(options.size()):
 		var option_info = GameManager.game_controller.GetPieceInfo(options[i])
@@ -55,8 +58,6 @@ func _give_promotion_options(piece_id: int, options: Array) -> void:
 	# Add the signal
 	cur_selection_node.selection_made.connect(_on_selection_made)
 	
-	# Get the piece by the id
-	var piece: Piece2D = GameManager.get_piece_2d(piece_id)
 	# Add the selector as a child
 	piece.sprite_transform_node.add_child(cur_selection_node)
 

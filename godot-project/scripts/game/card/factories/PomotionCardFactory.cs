@@ -24,8 +24,8 @@ public partial class PomotionCardFactory : CardFactory
     private List<string> GetPossiblePromotions(GameState game)
     {
         List<CardBase> existingCards = GetExistingCards(game);
-        List<string> possiblePromotions = GetPieceIdsOnBoard(game);
         // First, fill the possible promotions with all piece info IDs.
+        List<string> possiblePromotions = new List<string>();
         possiblePromotions.AddRange(game.GetAllPieceIds());
         foreach (var card in existingCards)
         {
