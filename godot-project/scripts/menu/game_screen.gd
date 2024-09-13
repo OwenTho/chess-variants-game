@@ -29,6 +29,10 @@ var allow_quit: bool = true
 
 var cur_selected_card: int = -1
 
+var cur_display_cards_display: Node
+var cur_display_card_tween: Tween
+var cur_display_card: Node
+
 var all_pieces: Array[Piece2D]
 
 func _ready() -> void:
@@ -64,10 +68,13 @@ func _ready() -> void:
 	
 	cursor.cell_selected.connect(select_cell)
 	
+	major_card_display.card_selected.connect(_on_display_card_selected.bind(major_card_display))
 	player1_info.set_player(0)
 	player1_info.max_progress = GameManager.CARD_SCORE_FOR_MINOR_CARD
+	player1_card_display.card_selected.connect(_on_display_card_selected.bind(player1_card_display))
 	player2_info.set_player(1)
 	player2_info.max_progress = GameManager.CARD_SCORE_FOR_MINOR_CARD
+	player2_card_display.card_selected.connect(_on_display_card_selected.bind(player2_card_display))
 	
 	var my_num = Lobby.get_player_num(multiplayer.get_unique_id())
 	# If it's player 2, flip the board
@@ -217,6 +224,44 @@ func _on_card_selected(card_num: int) -> void:
 	card_selection.put_card(card_num, true)
 	card_selection.put_card(cur_selected_card, false)
 	cur_selected_card = card_num
+
+
+
+# Display card
+
+func _on_display_card_selected(card: Node, display: Node) -> void:
+	# If the selected card is the current one, reset
+	if card == cur_display_card:
+		reset_display_card()
+		return
+	set_display_card(card, display)
+
+func reset_display_card() -> void:
+	if cur_display_card == null or cur_display_cards_display == null:
+		return
+	
+	cur_display_card_tween.kill()
+	
+	cur_display_cards_display.move_card(cur_display_card.card_id)
+	cur_display_card.hover_enabled = true
+	
+	cur_display_cards_display = null
+	cur_display_card_tween = null
+	cur_display_card = null
+
+func set_display_card(card: Node, display: Node) -> void:
+	reset_display_card()
+	cur_display_card = card
+	cur_display_cards_display = display
+	
+	cur_display_card.hover_enabled = false
+	
+	cur_display_card_tween = create_tween()
+	cur_display_card_tween.set_ease(Tween.EASE_OUT)
+	cur_display_card_tween.set_trans(Tween.TRANS_CUBIC)
+	cur_display_card_tween.tween_property(card, "global_position", Vector2(192, 320), 0.5)
+	cur_display_card_tween.parallel().tween_property(card, "scale", Vector2(1, 1), 0.5)
+	
 
 func _on_add_active_display_card(card: CardBase) -> void:
 	var card_scene: PackedScene = preload("res://scenes/game/card/card.tscn")

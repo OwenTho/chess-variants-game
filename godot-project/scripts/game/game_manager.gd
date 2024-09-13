@@ -669,7 +669,8 @@ func send_minor_card_options(player_num: int) -> void:
 	
 	card_selector.add_custom_selection(selection_info)
 	
-	await card_selector.select()
+	card_selector.select()
+	await _minor_card_selection_is_finished
 
 func _on_minor_card_selection_done() -> void:
 	card_selector.before_new_selection.disconnect(_on_before_new_selection)

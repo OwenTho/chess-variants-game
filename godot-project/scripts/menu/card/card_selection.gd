@@ -116,11 +116,11 @@ func _process(delta: float) -> void:
 		if last_hovered != -1:
 			card_selected.emit(last_hovered)
 
-func _hovered(card_id: int) -> void:
-	last_hovered = card_id
+func _hovered(card: Node) -> void:
+	last_hovered = card.card_id
 
-func _unhovered(card_id: int) -> void:
-	if last_hovered == card_id:
+func _unhovered(card: Node) -> void:
+	if last_hovered == card.card_id:
 		last_hovered = -1
 
 func _notification(what: int) -> void:

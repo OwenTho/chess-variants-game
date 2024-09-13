@@ -1,5 +1,9 @@
 extends Control
 
+signal input(card: Node, event: InputEvent)
+signal hover(card: Node)
+signal unhover(card: Node)
+
 @export var hover_time: float = 0.3
 @export var hover_offset: float = -20
 @export_range(1,30,1,"or_greater") var default_font_size: int = 24
@@ -11,10 +15,9 @@ var card_id: int = -1
 var _hold_up: bool = false
 var _hover: bool = false
 var currently_up: bool = false
+var hover_enabled: bool = true
 @onready var card_panel: PanelContainer = $CardOffset/CardPanel
 
-signal hover(card_id: int)
-signal unhover(card_id: int)
 
 
 func set_enabled(enable: bool) -> void:
@@ -102,13 +105,18 @@ func move_down() -> void:
 	currently_up = false
 
 func _on_panel_container_mouse_entered() -> void:
-	hover.emit(card_id)
+	hover.emit(self)
+	if not hover_enabled:
+		return
 
 	move_up()
 	_hover = true
 
 func _on_panel_container_mouse_exited() -> void:
-	unhover.emit(card_id)
+	unhover.emit(self)
 	
 	move_down()
 	_hover = false
+
+func _on_card_panel_gui_input(event: InputEvent) -> void:
+	input.emit(self, event)
