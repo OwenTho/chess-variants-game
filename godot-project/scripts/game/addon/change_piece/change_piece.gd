@@ -79,10 +79,10 @@ func _select_change_piece(piece_id: int) -> void:
 	var valid_teams: Array[int] = []
 	
 	for king in kings:
-		if valid_teams.has(king.teamId):
-			continue
 		if not teams.has(king.teamId):
 			teams.append(king.teamId)
+		if valid_teams.has(king.teamId):
+			continue
 		# If the link Id is different, the team is valid
 		if king.linkId != piece.linkId:
 			valid_teams.append(king.teamId)

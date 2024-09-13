@@ -1,5 +1,6 @@
 ﻿
 using System.Collections.Generic;
+using Godot;
 using Godot.Collections;
 
 public partial class ChangePieceCardFactory : CardFactory
@@ -84,16 +85,16 @@ public partial class ChangePieceCardFactory : CardFactory
         Array<Piece> kings = game.GetKingPieces();
         foreach (var piece in game.allPieces)
         {
-            // If team already validated, skip
-            if (validTeams.Contains(piece.teamId))
-            {
-                continue;
-            }
-
             // If team isn't added, ignore
             if (!teams.Contains(piece.teamId))
             {
                 teams.Add(piece.teamId);
+            }
+            
+            // If team already validated, skip
+            if (validTeams.Contains(piece.teamId))
+            {
+                continue;
             }
             
             // If this piece is not a king...
@@ -104,7 +105,7 @@ public partial class ChangePieceCardFactory : CardFactory
             
             foreach (var king in kings)
             {
-                // Only other kings
+                // Only check other pieces
                 if (piece == king)
                 {
                     continue;
