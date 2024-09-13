@@ -175,13 +175,15 @@ func add_custom_selection(custom_selection: CustomSelectionInfo) -> void:
 		return
 	_selections.append(custom_selection)
 
-func select() -> void:
+func select() -> bool:
 	if _selecting:
 		push_error("Can't start a new selection when already selecting.")
-		return
-	_next_select()
+		return false
+	return await _next_select()
 
-func _next_select() -> void:
+func _next_select() -> bool:
+	if _selections.is_empty():
+		return false
 	_selecting = true
 	var selections = _selections
 	_selections = []
@@ -245,7 +247,9 @@ func _next_select() -> void:
 		_cur = -1
 	_selecting = false
 	# Now that cards have been added, emit the signal
-	all_selections_done.emit()
+	# Call deferred to allow the bool to return
+	all_selections_done.emit.call_deferred()
+	return true
 
 func select_card(card_num: int) -> void:
 	_select_card.emit(card_num)

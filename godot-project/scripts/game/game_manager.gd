@@ -620,6 +620,9 @@ func _on_turn_started(player_num: int) -> void:
 
 
 func _on_turn_ended(old_player_num: int, new_player_num: int) -> void:
+	# Only continue if game is still active
+	if not in_game:
+		return
 	# Add score to the player
 	add_card_score(old_player_num, CARD_SCORE_PER_TURN)
 	turn_ended.emit()
@@ -669,8 +672,8 @@ func send_minor_card_options(player_num: int) -> void:
 	
 	card_selector.add_custom_selection(selection_info)
 	
-	card_selector.select()
-	await _minor_card_selection_is_finished
+	if await card_selector.select():
+		await _minor_card_selection_is_finished
 
 func _on_minor_card_selection_done() -> void:
 	card_selector.before_new_selection.disconnect(_on_before_new_selection)
