@@ -13,7 +13,7 @@ public partial class PieceInfo : Node
     public string textureLoc { get; internal set; }
 
     // Level for all pieces of this type
-    public int level { get; internal set; } = 1;
+    public int level { get; internal set; } = 0;
 
     internal PieceInfo(string id, string displayName = null, int initialLevel = 1, List<PieceRule> initialRules = null, List<ValidationRuleBase> initialValidationRules = null)
     {
