@@ -44,15 +44,28 @@ func show_cards() -> void:
 	for card in cards:
 		# If card is already at y 0, ignore
 		card._hold_up = false
+		card.hover_enabled = false
+		card.set_enabled(false)
+		card.card_panel.visible = false
 		
 		var tween: Tween = create_tween()
 		active_tweens.append(tween)
-		tween.tween_callback(func(): card.position.y = 500)
+		tween.tween_callback(func():
+			card.position.y = 500
+		)
 		tween.tween_interval(0.5 * (child_num+1))
+		tween.tween_callback(func():
+			card.position.y = 500
+			card.card_panel.visible = true
+		)
 		tween.set_ease(Tween.EASE_OUT)
 		tween.set_trans(Tween.TRANS_CUBIC)
 		tween.tween_property(card, "position:y", 0.0, 0.8)
-		tween.tween_callback(func(): active_tweens.erase(tween))
+		tween.tween_callback(func():
+			card.hover_enabled = true
+			card.set_enabled(true)
+			active_tweens.erase(tween)
+		)
 		last_tween = tween
 		child_num += 1
 	
