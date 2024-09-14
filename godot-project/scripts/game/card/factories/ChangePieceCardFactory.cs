@@ -116,6 +116,12 @@ public partial class ChangePieceCardFactory : CardFactory
                 {
                     continue;
                 }
+                
+                // If team already validated, skip
+                if (validTeams.Contains(king.teamId))
+                {
+                    continue;
+                }
 
                 // If criteria above is matched, the team can have one of its kings
                 // swapped to something else
