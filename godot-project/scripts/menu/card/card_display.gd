@@ -89,7 +89,7 @@ func move_card(card_id: int) -> void:
 	var tween = _move_card(card, target_final_pos, Vector2(card_scale, card_scale))
 	_tweens.append([card, tween])
 
-func move_cards() -> void:
+func move_cards(exceptions: Array[Node] = []) -> void:
 	# Reset existing tweens
 	for tween in _tweens:
 		tween[1].kill()
@@ -102,6 +102,8 @@ func move_cards() -> void:
 	var mid_ind: float = _cards.size() / 2.0
 	for card_ind in range(_cards.size()):
 		var card: Node = _cards[card_ind]
+		if exceptions.has(card):
+			continue
 		var target_final_pos: Vector2 = _calc_card_pos(card_ind, card_distance, card_scale)
 		var tween = _move_card(card, target_final_pos, Vector2(card_scale, card_scale))
 		_tweens.append([card, tween])

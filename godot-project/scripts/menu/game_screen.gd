@@ -32,6 +32,7 @@ var cur_selected_card: int = -1
 var cur_display_cards_display: Node
 var cur_display_card_tween: Tween
 var cur_display_card: Node
+var cur_display_card_exceptions: Array[Node]
 
 var all_pieces: Array[Piece2D]
 
@@ -242,6 +243,8 @@ func reset_display_card() -> void:
 	
 	cur_display_card_tween.kill()
 	
+	cur_display_card_exceptions.erase(cur_display_card)
+	
 	cur_display_cards_display.move_card(cur_display_card.card_id)
 	cur_display_card.hover_enabled = true
 	
@@ -261,6 +264,8 @@ func set_display_card(card: Node, display: Node) -> void:
 	cur_display_card_tween.set_trans(Tween.TRANS_CUBIC)
 	cur_display_card_tween.tween_property(card, "global_position", Vector2(192, 320), 0.5)
 	cur_display_card_tween.parallel().tween_property(card, "scale", Vector2(1, 1), 0.5)
+	
+	cur_display_card_exceptions.append(cur_display_card)
 	
 
 func _on_add_active_display_card(card: CardBase) -> void:
@@ -305,7 +310,7 @@ func _on_add_active_display_card(card: CardBase) -> void:
 	
 	# After showing the card, add it to the display
 	tween.tween_callback(display.add_card.bind(new_card))
-	tween.tween_callback(display.move_cards)
+	tween.tween_callback(display.move_cards.bind(cur_display_card_exceptions))
 
 func _on_card_score_changed(player_num: int, new_score: int) -> void:
 	if player_num == 0:
