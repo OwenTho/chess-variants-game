@@ -13,6 +13,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 220.0
 offset_bottom = 362.0
+mouse_filter = 2
 theme = ExtResource("1_p5pv8")
 script = ExtResource("1_qgcjn")
 
@@ -22,6 +23,7 @@ offset_left = -110.0
 offset_top = -181.0
 offset_right = 111.0
 offset_bottom = 181.0
+mouse_filter = 2
 
 [node name="CardPanel" type="PanelContainer" parent="CardOffset"]
 layout_mode = 0

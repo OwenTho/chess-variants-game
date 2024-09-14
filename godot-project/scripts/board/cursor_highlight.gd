@@ -17,18 +17,6 @@ func _update_cell(new_cell: Vector2i):
 		cell_updated.emit(new_cell)
 		set_pos(new_cell.x, new_cell.y)
 
-func _process(_delta):
-	if not active:
-		return
-	# For mouse, do every frame (as that's what the player will see)
-	if input_mouse:
-		# Find the cell the mouse is hovering
-		check_mouse()
-		return
-	
-	# For Controller, check on each input + with a small
-	# delay to allow more control
-
 func check_mouse() -> void:
 	# Find the cell the mouse is hovering
 	var mouse_pos: Vector2 = get_global_mouse_position()
@@ -36,9 +24,14 @@ func check_mouse() -> void:
 	
 	_update_cell(mouse_cell)
 
-func _input(event: InputEvent) -> void:
+func _process_input(event: InputEvent) -> void:
 	if not active:
+		return
+	if event is InputEventMouseMotion:
+		if input_mouse:
+			check_mouse()
 		return
 	if event is InputEventMouseButton:
 		if event.is_action_pressed("mouse_left"):
 			cell_selected.emit(last_cell)
+		return

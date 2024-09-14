@@ -23,6 +23,8 @@ class_name Game
 var selected_piece: Piece2D
 
 var game_active: bool = false
+
+var cursor_over_game: bool = false
 var disabled_selection: bool = false
 
 var allow_quit: bool = true
@@ -97,8 +99,11 @@ func _process(delta: float) -> void:
 		$BoardHolder.rotation = $BoardHolder.rotation + deg_to_rad(45) * delta
 
 func _on_cursor_highlight_cell_updated(new_cell: Vector2i) -> void:
+	_update_cursor_visibility()
+
+func _update_cursor_visibility() -> void:
 	# If cursor is outside range, then hide it
-	cursor.visible = (GameManager.spaces_off_board(cursor.last_cell.x, cursor.last_cell.y) == 0) and cursor.active and cursor.visible_on_active
+	cursor.visible = (GameManager.spaces_off_board(cursor.last_cell.x, cursor.last_cell.y) == 0) and cursor.active and cursor.visible_on_active and cursor_over_game
 
 func delete_selection() -> void:
 	for child in action_highlights.get_children():
@@ -188,7 +193,7 @@ func select_cell(cell_pos: Vector2i) -> void:
 
 func show_cursor() -> void:
 	cursor.visible_on_active = true
-	_on_cursor_highlight_cell_updated(cursor.pos)
+	_update_cursor_visibility()
 
 func hide_cursor() -> void:
 	cursor.visible_on_active = false
@@ -214,6 +219,7 @@ func _on_clear_cards() -> void:
 	card_selection.clear_cards()
 
 func _on_show_cards() -> void:
+	reset_display_card()
 	card_selection.visible = true
 	cur_selected_card = -1
 	card_selection.show_cards()
@@ -454,3 +460,17 @@ func _on_resign_btn_pressed() -> void:
 	
 	# TODO: Add a warning that the player has to accept.
 	GameManager.resign_game.rpc()
+
+
+func _on_game_input_mouse_entered() -> void:
+	cursor_over_game = true
+	_update_cursor_visibility()
+
+
+func _on_game_input_mouse_exited() -> void:
+	cursor_over_game = false
+	_update_cursor_visibility()
+
+
+func _on_game_input_gui_input(event: InputEvent) -> void:
+	cursor._process_input(event)
