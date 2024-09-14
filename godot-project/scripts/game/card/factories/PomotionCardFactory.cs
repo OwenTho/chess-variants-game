@@ -49,9 +49,10 @@ public partial class PomotionCardFactory : CardFactory
         {
             possiblePromotions.Remove(pieceInfoIds[0]);
         }
+        
         // If there are no piece ids on the board, return an empty array.
         // It needs a "fromPiece" to function, but there's no valid "fromPiece" in this instance.
-        else
+        if (pieceInfoIds.Count == 0)
         {
             return new List<string>();
         }
@@ -111,6 +112,7 @@ public partial class PomotionCardFactory : CardFactory
         {
             return false;
         }
+
         // If there is at least one promotion option, then it can promote
         return GetPossiblePromotions(game).Count > 0;
     }
