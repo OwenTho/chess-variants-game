@@ -297,11 +297,18 @@ func _update_player_num(id: int, player_num: int) -> void:
 	player_nums[player_num] = id
 	player_num_updated.emit(id, player_num)
 
-func get_player_num(id: int) -> int:
+func get_first_player_num(id: int) -> int:
 	for i in range(player_nums.size()):
 		if player_nums[i] == id:
 			return i
 	return -1
+
+func get_player_nums(id: int) -> Array[int]:
+	var return_vals: Array[int] = []
+	for i in range(player_nums.size()):
+		if player_nums[i] == id:
+			return_vals.append(i)
+	return return_vals
 
 func get_player_id_from_num(num: int) -> int:
 	if num < 0 or num >= player_nums.size():

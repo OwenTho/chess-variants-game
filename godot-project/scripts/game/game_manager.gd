@@ -33,6 +33,7 @@ signal action_processed(action: ActionBase, piece: Piece)
 signal actions_processed_at(success: bool, action_location: Vector2i, piece: Piece)
 signal action_was_failed(reason: String)
 
+signal player_resigned(player_num: int)
 signal player_has_won(player_num: int)
 signal player_lost(player_num: int)
 
@@ -56,6 +57,7 @@ var piece_grid
 var grid_upper_corner: Vector2i
 var grid_lower_corner: Vector2i
 var board: Board2D
+var current_player_num: int = -1
 
 # Mutex
 var task_mutex: Mutex
@@ -93,6 +95,7 @@ func reset_game() -> void:
 	board = null
 	game = null
 	piece_grid = null
+	current_player_num = -1
 	task_mutex = null
 	game_mutex = null
 	thread_mutex = null
@@ -125,6 +128,7 @@ func init() -> void:
 	
 	# Initialise the game
 	game_controller.FullInit(is_multiplayer_authority(), PLAYER_COUNT)
+	current_player_num = 0
 	piece_grid = game_controller.pieceGrid
 	
 	grid_upper_corner = game_controller.gridUpperCorner
@@ -326,11 +330,6 @@ func select_card(card_number: int) -> void:
 		return
 	
 	var player_id: int = multiplayer.get_remote_sender_id()
-	var player_num: int = Lobby.get_player_num(player_id)
-	
-	# Ignore non-players
-	if player_num == -1:
-		return
 	
 	# Ignore if it's not the right player
 	if Lobby.get_player_id_from_num(card_selector.currently_selecting) != player_id:
@@ -609,6 +608,7 @@ func _update_card_score(player_num: int, score: int) -> void:
 ### Events
 
 func _on_turn_started(player_num: int) -> void:
+	current_player_num = player_num
 	turn_started.emit(player_num)
 	
 	# Then send actions
@@ -626,6 +626,9 @@ func _on_turn_ended(old_player_num: int, new_player_num: int) -> void:
 	# Add score to the player
 	add_card_score(old_player_num, CARD_SCORE_PER_TURN)
 	turn_ended.emit()
+	
+	current_player_num = new_player_num
+	send_notice(-1, "Player %s's turn." % [new_player_num + 1])
 	
 	# Before moving to next turn, if the NEW player has
 	# enough card score, give them a choice of card.
@@ -769,6 +772,7 @@ func _on_player_lost(player_num: int) -> void:
 	if not is_multiplayer_authority():
 		return
 	
+	player_lost.emit(player_num)
 	player_won.rpc(2 - player_num)
 
 func _on_game_stalemate(stalemate_player: int) -> void:
@@ -817,7 +821,7 @@ func request_action(action_location: Vector2i, piece_id: int) -> void:
 		return
 	
 	# Get the player number of this player
-	var player_num: int = Lobby.get_player_num(sender_id)
+	var player_num: int = Lobby.get_first_player_num(sender_id)
 	# If it's -1, ignore
 	if (player_num == -1):
 		failed_action.rpc_id(sender_id)
@@ -908,31 +912,77 @@ func to_next_turn(new_player_num: int) -> void:
 	game_controller.NextTurn(new_player_num)
 
 
-@rpc("authority", "call_local", "reliable")
-func player_won(winner: int) -> void:
+@rpc("any_peer", "call_local", "reliable")
+func resign_game() -> void:
 	# Only run if game is on
 	if not in_game:
 		return
+	# Only run if the server
+	if not is_multiplayer_authority():
+		return
+	
+	var requester_id: int = multiplayer.get_remote_sender_id()
+	var nums = Lobby.get_player_nums(requester_id)
+	
+	# If the id doesn't match any player nums, ignore
+	if nums.size() == 0:
+		return
+	
+	# If current player num is -1, the player can't resign yet
+	if current_player_num == -1:
+		receive_notice.rpc_id(requester_id, "Can't resign yet.")
+		return
+	
+	# By default, use the first number
+	var lose_player_id: int = nums[0]
+	
+	# If there is more than one player num, check if one is the current player.
+	if nums.size() > 1:
+		if not nums.has(current_player_num):
+			# If it's not the current player, tell them to resign on their turn
+			receive_notice.rpc_id(requester_id, "Can only resign on one of your turns.")
+			return
+		lose_player_id = current_player_num
+	
+	if lose_player_id <= -1:
+		receive_notice.rpc_id(requester_id, "Could not get a valid player number to resign. (This should not happen)")
+		return
+	
+	resign_player.rpc(lose_player_id)
+
+func _game_end() -> bool:
 	# Reset game data, given that it's not needed anymore.
 	reset_game()
 	if not Lobby.is_player:
 		# Dedicated servers unload the game scene
 		get_tree().unload_current_scene()
+		return false
+	return true
+
+@rpc("authority", "call_local", "reliable")
+func resign_player(player_num: int) -> void:
+	# Only run if game is on
+	if not in_game:
 		return
-	player_has_won.emit(winner)
+	receive_notice("Player %s has resigned." % [player_num+1])
+	if _game_end():
+		player_resigned.emit(player_num)
+
+@rpc("authority", "call_local", "reliable")
+func player_won(winner: int) -> void:
+	# Only run if game is on
+	if not in_game:
+		return
+	if _game_end():
+		player_has_won.emit(winner)
 
 
 @rpc("authority", "call_local", "reliable")
 func game_statemate(stalemate_player: int) -> void:
 	if not in_game:
 		return
-	# Reset game data, given that it's not needed anymore.
-	reset_game()
-	if not Lobby.is_player:
-		# Dedicated servers unload the game scene
-		get_tree().unload_current_scene()
-		return
-	game_stalemate.emit(stalemate_player)
+	if _game_end():
+		game_stalemate.emit(stalemate_player)
 
 
 @rpc("authority", "call_local", "reliable", 2)

@@ -4,6 +4,7 @@
 
 [node name="Notice" type="Label" node_paths=PackedStringArray("removal_timer")]
 horizontal_alignment = 1
+autowrap_mode = 2
 script = ExtResource("1_a6elu")
 removal_timer = NodePath("RemoveTimer")
 

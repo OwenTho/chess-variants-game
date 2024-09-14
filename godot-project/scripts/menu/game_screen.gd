@@ -57,6 +57,7 @@ func _ready() -> void:
 	GameManager.action_processed.connect(_on_action_processed)
 	GameManager.action_was_failed.connect(_on_action_failed)
 	
+	GameManager.player_resigned.connect(_on_player_resigned)
 	GameManager.player_has_won.connect(_on_player_won)
 	GameManager.player_lost.connect(_on_player_lost)
 	
@@ -77,7 +78,7 @@ func _ready() -> void:
 	player2_info.max_progress = GameManager.CARD_SCORE_FOR_MINOR_CARD
 	player2_card_display.card_selected.connect(_on_display_card_selected.bind(player2_card_display))
 	
-	var my_num = Lobby.get_player_num(multiplayer.get_unique_id())
+	var my_num = Lobby.get_first_player_num(multiplayer.get_unique_id())
 	# If it's player 2, flip the board
 	if my_num == 1:
 		$BoardHolder.rotation = deg_to_rad(180)
@@ -151,7 +152,7 @@ func select_cell(cell_pos: Vector2i) -> void:
 	# Ignore inputs from non-players
 	if not Lobby.is_player:
 		return
-	if not game_active:
+	if not GameManager.in_game:
 		return
 	# First check if the player is selecting an action
 	var actions_to_take: Array = []
@@ -397,7 +398,11 @@ func _end_game_message(title: String, message: String) -> void:
 	pop_up.confirmed.connect(to_lobby)
 	pop_up.confirmed.connect(pop_up.queue_free)
 	
+	
 	pop_up.popup_centered()
+
+func _on_player_resigned(player_num: int) -> void:
+	_end_game_message("Resigned", "Player %s has resigned, letting player %s win." % [player_num+1, 2-player_num])
 
 func _on_player_won(winner: int) -> void:
 	_end_game_message("Checkmate!", "Player %s has won." % [winner])
@@ -440,3 +445,12 @@ func _on_btn_quit_pressed() -> void:
 	GameManager._on_server_disconnect()
 	# Reconnect the signal
 	Lobby.server_disconnected.connect(GameManager._on_server_disconnect)
+
+
+func _on_resign_btn_pressed() -> void:
+	if not GameManager.in_game:
+		to_lobby()
+		return
+	
+	# TODO: Add a warning that the player has to accept.
+	GameManager.resign_game.rpc()
