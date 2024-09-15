@@ -111,6 +111,8 @@ public partial class GameController
         MakeNewActionRule(LineMoveId.Down, new DownLineMoveRule());
         MakeNewActionRule(LineMoveId.DownRight, new DownRightLineMoveRule());
         
+        MakeNewActionRule("nothing", new NothingMoveRule());
+        
         // Piece Specific
         MakeNewActionRule("pawn_move", new PawnMoveRule());
         MakeNewActionRule("knight_move", new KnightMoveRule());
@@ -128,6 +130,8 @@ public partial class GameController
         RegisterNewAction<AttackAction>(ActionIds.Attack);
         RegisterNewAction<MoveOther>(ActionIds.MoveOther);
         RegisterNewAction<PawnMoveAction>(ActionIds.PawnMove);
+
+        RegisterNewAction<NothingAction>(ActionIds.Nothing);
     }
 
     internal void InitPieceInfo()

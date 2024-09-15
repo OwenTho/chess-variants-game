@@ -1,6 +1,9 @@
 ﻿
 public static class ActionIds
 {
+    // Generic
+    public const string Nothing = "nothing";
+    
     // Movement
     public const string Move = "move";
     public const string MoveOther = "move_other";
