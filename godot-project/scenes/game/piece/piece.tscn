@@ -1,8 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://de3wktgc8oh51"]
+[gd_scene load_steps=3 format=3 uid="uid://de3wktgc8oh51"]
 
 [ext_resource type="Script" path="res://scripts/piece/visual/piece.gd" id="1_uexo4"]
 [ext_resource type="Texture2D" uid="uid://doewls0xy2qhi" path="res://assets/texture/piece/default.png" id="2_5orig"]
-[ext_resource type="Material" uid="uid://b0esrwnbscy4i" path="res://assets/shaders/piece_shader_resource.tres" id="2_r3mrw"]
 
 [node name="Piece" type="Node2D" node_paths=PackedStringArray("sprite", "sprite_transform_node") groups=["piece"]]
 script = ExtResource("1_uexo4")
@@ -14,7 +13,6 @@ top_level = true
 z_as_relative = false
 
 [node name="SprPiece" type="Sprite2D" parent="SprHolder"]
-material = ExtResource("2_r3mrw")
 scale = Vector2(2, 2)
 texture = ExtResource("2_5orig")
 
