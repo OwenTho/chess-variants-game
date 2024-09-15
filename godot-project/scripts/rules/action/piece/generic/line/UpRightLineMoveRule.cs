@@ -2,7 +2,7 @@
 
 public partial class UpRightLineMoveRule : LineMoveRule
 {
-    internal override Vector2I[] GetDirs()
+    public override Vector2I[] GetDirs(GameState game, Piece piece)
     {
         return new[] { GridVectors.UpRight };
     }

@@ -13,9 +13,9 @@ public abstract partial class LineMoveRule : ActionRuleBase
     {
         Vector2I thisPosition = new Vector2I(piece.cell.x, piece.cell.y);
 
-        foreach (Vector2I dir in GetDirs())
+        foreach (Vector2I dir in GetDirs(game, piece))
         {
-            ActionBase prevMove = null;
+            MoveAction prevMove = null;
             for (int i = 1; i <= maxForward; i++)
             {
                 Vector2I actionPos = thisPosition + (dir * i);
@@ -23,9 +23,15 @@ public abstract partial class LineMoveRule : ActionRuleBase
                 newAttack.moveAction.tags.Add("line_move");
 
                 prevMove = newAttack.moveAction;
+                OnNewLineAction(game, piece, prevMove, newAttack);
             }
         }
     }
 
-    internal abstract Vector2I[] GetDirs();
+    public virtual void OnNewLineAction(GameState game, Piece piece, MoveAction moveAction, AttackAction attackAction)
+    {
+        
+    }
+
+    public abstract Vector2I[] GetDirs(GameState game, Piece piece);
 }
