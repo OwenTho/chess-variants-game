@@ -33,10 +33,9 @@ public partial class MoveAction : ActionBase
         piece.timesMoved += 1;
     }
 
-    public override object Clone()
+    protected override ActionBase Clone()
     {
         MoveAction newMove = new MoveAction(null, actionLocation, moveLocation);
-        CloneTo(newMove);
         return newMove;
     }
 

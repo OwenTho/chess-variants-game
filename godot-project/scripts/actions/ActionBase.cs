@@ -361,11 +361,16 @@ public abstract partial class ActionBase : GridItem<ActionBase>
         // Assume the owner already has the action
     }
     
-    
+    public ActionBase CloneAction()
+    {
+        ActionBase clonedAction = Clone();
+        CloneTo(clonedAction);
+        return clonedAction;
+    }
 
-    public abstract object Clone();
+    protected abstract ActionBase Clone();
     
-    protected void CloneTo(ActionBase action)
+    private void CloneTo(ActionBase action)
     {
         // First clear the action
         action.verifyTags.Clear();

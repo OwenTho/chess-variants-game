@@ -16,10 +16,9 @@ internal partial class PawnMoveAction : MoveAction
         piece.tags.Add("pawn_initial");
     }
 
-    public override object Clone()
+    protected override ActionBase Clone()
     {
         PawnMoveAction newAction = new PawnMoveAction(null, actionLocation, moveLocation);
-        CloneTo(newAction);
         return newAction;
     }
 }

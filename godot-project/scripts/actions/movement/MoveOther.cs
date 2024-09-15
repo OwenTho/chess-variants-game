@@ -28,10 +28,9 @@ public partial class MoveOther : MoveAction
         }
     }
 
-    public override object Clone()
+    protected override ActionBase Clone()
     {
         MoveOther newMove = new MoveOther(null, actionLocation, moveLocation, -1);
-        CloneTo(newMove);
         return newMove;
     }
 

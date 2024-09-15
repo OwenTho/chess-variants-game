@@ -67,10 +67,9 @@ public partial class AttackAction : ActionBase
         return game.HasPieceAt(attackLocation.X, attackLocation.Y);
     }
 
-    public override object Clone()
+    protected override ActionBase Clone()
     {
         AttackAction newAttack = new AttackAction(null, actionLocation, attackLocation, null);
-        CloneTo(newAttack);
         return newAttack;
     }
 
