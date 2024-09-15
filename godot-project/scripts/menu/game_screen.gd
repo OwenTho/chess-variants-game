@@ -39,6 +39,7 @@ var cur_display_card_exceptions: Array[Node]
 var all_pieces: Array[Piece2D]
 
 func _ready() -> void:
+	GameManager.about_to_select_minor_card.connect(_on_about_to_select_minor_card)
 	GameManager.clear_cards.connect(_on_clear_cards)
 	GameManager.display_card.connect(card_selection.add_card)
 	GameManager.show_cards.connect(_on_show_cards)
@@ -199,6 +200,9 @@ func hide_cursor() -> void:
 	cursor.visible_on_active = false
 
 
+func update_arrow_visuals(player_num: int) -> void:
+	player1_info.update_arrow_visual(player_num)
+	player2_info.update_arrow_visual(player_num)
 
 # Piece signals
 
@@ -236,6 +240,9 @@ func _on_card_selected(card_num: int) -> void:
 
 
 # Display card
+
+func _on_about_to_select_minor_card(player_num: int) -> void:
+	update_arrow_visuals(player_num)
 
 func _on_display_card_selected(card: Node, display: Node) -> void:
 	# If the selected card is the current one, reset
@@ -337,9 +344,12 @@ func _on_next_turn(new_player_num: int) -> void:
 	# Re-enable the selection and quit
 	disabled_selection = false
 	allow_quit = true
+	# Update arrow visuals
+	update_arrow_visuals(new_player_num)
 
 func _on_end_turn() -> void:
-	pass
+	# Hide arrows between turns
+	update_arrow_visuals(-1)
 
 var just_started_actions: bool = false
 func _on_starting_actions() -> void:

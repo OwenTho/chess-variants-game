@@ -11,6 +11,7 @@ const CARD_SCORE_FOR_MINOR_CARD: int = 8
 signal has_init()
 
 # Card signals
+signal about_to_select_minor_card(player_num: int)
 signal display_card(card_data: Dictionary)
 signal clear_cards()
 signal show_cards()
@@ -654,6 +655,9 @@ func send_minor_card_options(player_num: int) -> void:
 	
 	card_score[player_num] -= CARD_SCORE_FOR_MINOR_CARD
 	_update_card_score_server(player_num, card_score[player_num])
+	# Tell clients to add the arrow visual
+	# (so that it's more obvious who's selecting the card)
+	_about_to_select_minor_card.rpc(player_num)
 	
 	# Connect signals to the card selector
 	card_selector.before_new_selection.connect(_on_before_new_selection)
@@ -677,6 +681,10 @@ func send_minor_card_options(player_num: int) -> void:
 	
 	if await card_selector.select():
 		await _minor_card_selection_is_finished
+
+@rpc("authority", "call_local", "reliable")
+func _about_to_select_minor_card(player_num: int) -> void:
+	about_to_select_minor_card.emit(player_num)
 
 func _on_minor_card_selection_done() -> void:
 	card_selector.before_new_selection.disconnect(_on_before_new_selection)
