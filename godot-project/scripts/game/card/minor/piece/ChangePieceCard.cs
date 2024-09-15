@@ -58,6 +58,6 @@ public partial class ChangePieceCard : CardBase
 
     public override string GetCardDescription()
     {
-        return $"Change a selected piece and its linked pieces into a {toPiece}.";
+        return $"Change a selected piece and its linked pieces into a [color={PieceNameColour}]{toPiece}[/color].";
     }
 }

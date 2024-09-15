@@ -7,6 +7,10 @@ public abstract partial class CardBase : Node
 {
     public const string CardIdKey = "card_id";
     public const string TeamIdKey = "team_id";
+
+    public const string PieceNameColour = "aqua";
+    public const string EmphasisColour = "red";
+    public const string WarningColour = "salmon";
     
     public string cardId { get; internal set; }
 

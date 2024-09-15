@@ -28,6 +28,6 @@ public partial class ShapeshiftCard : CardBase
 
     public override string GetCardDescription()
     {
-        return "Upon taking a piece, changes the [color=red]Attacking piece[/color] into the piece that was taken.";
+        return $"Upon taking a piece, changes the [color={EmphasisColour}]Attacking piece[/color] into the piece that was taken.";
     }
 }

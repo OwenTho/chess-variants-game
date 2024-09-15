@@ -21,6 +21,6 @@ public partial class FriendlyFireCard : CardBase
 
     public override string GetCardDescription()
     {
-        return "All pieces can now take [i]any[/i] piece on the same team.";
+        return "All pieces can now take, but not check, pieces on the same team.";
     }
 }

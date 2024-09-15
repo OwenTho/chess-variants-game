@@ -1,4 +1,5 @@
 ﻿
+using System.Linq;
 using Godot;
 using Godot.Collections;
 
@@ -179,6 +180,6 @@ public partial class PromotionCard : CardBase
 
     public override string GetCardDescription()
     {
-        return $"{fromPiece} can promote into {toPiece} when they reach the opposite side of the board.";
+        return $"[color={PieceNameColour}]{fromPiece}[/color] can promote into [color={PieceNameColour}]{toPiece.FirstOrDefault()}[/color] when they reach the opposite side of the board.";
     }
 }

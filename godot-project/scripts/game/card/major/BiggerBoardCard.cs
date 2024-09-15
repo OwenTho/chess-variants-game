@@ -53,6 +53,6 @@ public partial class BiggerBoardCard : CardBase
 
     public override string GetCardDescription()
     {
-        return "Makes the board bigger by 2 spaces in all directions.";
+        return $"Makes the board bigger by [color={EmphasisColour}][b]{_sizeIncrease}[/b][/color] spaces in all directions.";
     }
 }
