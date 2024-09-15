@@ -60,6 +60,8 @@ var grid_lower_corner: Vector2i
 var board: Board2D
 var current_player_num: int = -1
 
+var team_materials: Dictionary
+
 # Mutex
 var task_mutex: Mutex
 var game_mutex: Mutex
@@ -79,6 +81,33 @@ var addons: Array[GameAddon]
 
 func _ready() -> void:
 	Lobby.server_disconnected.connect(_on_server_disconnect)
+	
+	add_team_material(0, [
+			Color.from_string("#656565", Color.WHITE),
+			Color.from_string("#9d9d9d", Color.WHITE),
+			Color.from_string("#ffffff", Color.WHITE)
+	])
+	add_team_material(1, [
+			Color.from_string("#1e1e1e", Color.WHITE),
+			Color.from_string("#515151", Color.WHITE),
+			Color.from_string("#747474", Color.WHITE)
+	])
+
+func add_team_material(team_id: int, team_color: Array[Color]) -> void:
+	var team_material: ShaderMaterial = preload("res://assets/shaders/piece_shader_resource.tres").duplicate(true)
+	team_material.set_shader_parameter("palette_colours", team_color)
+	team_materials[team_id] = team_material
+
+func get_team_material(team_id: int) -> Material:
+	if team_id not in team_materials:
+		return null
+	return team_materials[team_id]
+
+func get_new_team_material(team_id: int) -> Material:
+	if team_id not in team_materials:
+		return null
+	var team_material: ShaderMaterial = team_materials[team_id]
+	return team_material.duplicate(true)
 
 func _on_server_disconnect() -> void:
 	if game != null:

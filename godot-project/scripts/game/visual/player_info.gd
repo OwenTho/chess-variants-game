@@ -51,6 +51,8 @@ func set_player(player_num: int) -> void:
 	var info: Lobby.PlayerInfo = Lobby.get_player_info(player_id)
 	_player_num = player_num
 	
+	turn_arrow.material = GameManager.get_team_material(player_num)
+	
 	$PlayerLabel.text = str(player_num + 1)
 	if not Lobby.is_local and info != null:
 		_set_name(info.name)

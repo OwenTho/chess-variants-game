@@ -71,20 +71,10 @@ func update_sprite() -> void:
 	set_sprite(GameResources.get_piece_texture_from_piece(piece_data))
 	
 	if piece_data == null:
+		sprite.material = null
 		return
 	
-	if piece_data.teamId == 0:
-		sprite.material.set_shader_parameter("palette_colours", [
-			Color.from_string("#656565", Color.WHITE),
-			Color.from_string("#9d9d9d", Color.WHITE),
-			Color.from_string("#ffffff", Color.WHITE)
-		])
-	else:
-		sprite.material.set_shader_parameter("palette_colours", [
-			Color.from_string("#1e1e1e", Color.WHITE),
-			Color.from_string("#515151", Color.WHITE),
-			Color.from_string("#747474", Color.WHITE)
-		])
+	sprite.material = GameManager.get_new_team_material(piece_data.teamId)
 
 func set_selected(selected: bool) -> void:
 	sprite.material.set_shader_parameter("outline_enabled", selected)
