@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Godot;
@@ -131,6 +132,11 @@ public partial class GameState : Node
     public bool TryGetPieceInfo(string pieceInfoId, out PieceInfo info)
     {
         return gameController.TryGetPieceInfo(pieceInfoId, out info);
+    }
+    
+    public PieceInfo[] GetAllPieceInfo()
+    {
+        return gameController.pieceInfoRegistry.GetValues();
     }
 
     public string GetActionId(ActionBase action)
@@ -1205,4 +1211,5 @@ public partial class GameState : Node
         
         return newState;
     }
+    
 }

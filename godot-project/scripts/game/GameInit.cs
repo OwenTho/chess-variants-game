@@ -164,6 +164,7 @@ public partial class GameController
         AddNewCardFactory("major_lonely_pieces_stuck", new SimpleCardFactory<LonelyPiecesStuckCard>(), true);
         AddNewCardFactory("major_friendly_fire", new SimpleCardFactory<FriendlyFireCard>(), true);
         AddNewCardFactory("major_bigger_board", new SimpleCardFactory<BiggerBoardCard>());
+        AddNewCardFactory("major_level_up", new SimpleCardFactory<LevelUpCard>());
         
         // Minor Cards
         // Rules
@@ -206,6 +207,7 @@ public partial class GameController
         MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_lonely_pieces_stuck"));
         MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_friendly_fire"));
         MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_bigger_board"));
+        MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_level_up"));
         
         // Set up the Decks
         MinorCardDeck = new CardDeck();
