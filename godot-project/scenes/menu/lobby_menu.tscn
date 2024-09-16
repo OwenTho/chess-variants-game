@@ -5,7 +5,7 @@
 
 [sub_resource type="LabelSettings" id="LabelSettings_nl78v"]
 font_size = 21
-outline_size = 5
+outline_size = 10
 outline_color = Color(0, 0, 0, 1)
 
 [node name="LobbyMenu" type="Control" node_paths=PackedStringArray("name_container", "name_edit", "name_timer", "message_holder", "message_entry", "scroll_container")]
@@ -24,15 +24,6 @@ message_holder = NodePath("Control/VSplitContainer/MessagesMargin/ScrollContaine
 message_entry = NodePath("Control/VSplitContainer/InputMargin/PanelContainer/VBoxContainer/TextEdit")
 scroll_container = NodePath("Control/VSplitContainer/MessagesMargin/ScrollContainer")
 
-[node name="BtnLeave" type="Button" parent="."]
-layout_mode = 0
-offset_left = 417.0
-offset_top = 325.0
-offset_right = 667.0
-offset_bottom = 365.0
-text = "Leave Lobby
-"
-
 [node name="BtnPlay" type="Button" parent="."]
 layout_mode = 0
 offset_left = 416.0
@@ -40,6 +31,15 @@ offset_top = 279.0
 offset_right = 666.0
 offset_bottom = 319.0
 text = "Play Game
+"
+
+[node name="BtnLeave" type="Button" parent="."]
+layout_mode = 0
+offset_left = 416.0
+offset_top = 325.0
+offset_right = 666.0
+offset_bottom = 365.0
+text = "Leave Lobby
 "
 
 [node name="VSplitContainer" type="VBoxContainer" parent="."]
@@ -51,11 +51,12 @@ offset_bottom = 415.0
 
 [node name="HSplitContainer" type="HSplitContainer" parent="VSplitContainer"]
 layout_mode = 2
+split_offset = 120
 dragger_visibility = 1
 
 [node name="NameLabel" type="Label" parent="VSplitContainer/HSplitContainer"]
 layout_mode = 2
-text = "Player names"
+text = "    Players"
 label_settings = SubResource("LabelSettings_nl78v")
 
 [node name="NameEdit" type="LineEdit" parent="VSplitContainer/HSplitContainer"]
@@ -131,8 +132,8 @@ text = "Send Message"
 layout_mode = 2
 text = "Clear Messages"
 
-[connection signal="pressed" from="BtnLeave" to="." method="_on_btn_leave_pressed"]
 [connection signal="pressed" from="BtnPlay" to="." method="_on_btn_play_pressed"]
+[connection signal="pressed" from="BtnLeave" to="." method="_on_btn_leave_pressed"]
 [connection signal="focus_exited" from="VSplitContainer/HSplitContainer/NameEdit" to="." method="_on_name_edit_focus_exited"]
 [connection signal="text_changed" from="VSplitContainer/HSplitContainer/NameEdit" to="." method="_on_name_edit_text_changed"]
 [connection signal="timeout" from="NameChangeTimer" to="." method="_on_name_change_timer_timeout"]
