@@ -360,7 +360,12 @@ public abstract partial class ActionBase : GridItem<ActionBase>
         
         // Assume the owner already has the action
     }
-    
+
+    public override string ToString()
+    {
+        return GetType().Name;
+    }
+
     public ActionBase CloneAction()
     {
         ActionBase clonedAction = Clone();

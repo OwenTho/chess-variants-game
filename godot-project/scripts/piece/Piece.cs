@@ -66,9 +66,11 @@ public partial class Piece : GridItem<Piece>
         }
     }
 
-    private ActionsToTake actionsToTake = new ActionsToTake();
+    private ActionsToTake actionsToTake = new();
 
-    public Array<ActionBase> currentPossibleActions { get { return actionsToTake.possibleActions; } }
+    public Array<ActionBase> currentPossibleActions => actionsToTake.possibleActions;
+    
+    internal bool Taken = false;
 
     internal void SetInfoWithoutSignal(PieceInfo newInfo)
     {

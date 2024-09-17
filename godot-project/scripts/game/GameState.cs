@@ -156,6 +156,7 @@ public partial class GameState : Node
 
         
         Piece newPiece = new Piece();
+        newPiece.Taken = false;
         allPieces.Add(newPiece);
         newPiece.SetInfoWithoutSignal(info);
         if (id != -1)
@@ -221,11 +222,15 @@ public partial class GameState : Node
         
         // Emit signal
         CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.PieceRemoved, piece, attacker);
+
+        // Mark the piece as taken. This stops all following actions if the Piece is currently taking
+        // actions, as the piece is no longer there to take them.
+        piece.Taken = true;
         
-        // Free the item. This also frees the action data
+        // Free the Piece.
         piece.CallDeferred(Node.MethodName.QueueFree);
         
-        // Remove the actions from the grid
+        // Remove the actions from the grid, and free them
         foreach (var action in piece.currentPossibleActions)
         {
             if (piece == action.owner)
@@ -522,8 +527,17 @@ public partial class GameState : Node
                 }
             }
             
-            foreach (var action in actions)
+            for (int i = 0 ; i < actions.Count ; i++)
             {
+                // If the piece is taken (or invalid due to running on a thread), break from the loop.
+                if (!IsInstanceValid(piece) || piece.Taken)
+                {
+                    GD.PushWarning(
+                        "A Piece had more Actions to take, even after having taken itself out from the game: " +
+                        $"[{string.Join(", ", actions.GetRange(i, actions.Count - i))}]");
+                    break;
+                }
+                ActionBase action = actions[i];
                 didAct |= TakeAction(action, piece);
             }
         }

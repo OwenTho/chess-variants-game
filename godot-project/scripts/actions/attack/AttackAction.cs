@@ -52,6 +52,12 @@ public partial class AttackAction : ActionBase
         Array<Piece> targetedPieces = GetTargetedPieces(game);
         foreach (Piece victim in targetedPieces)
         {
+            // If it's the piece acting, don't take it to avoid errors.
+            // To do this, the specific victim should be set to the acting piece.
+            if (piece == victim)
+            {
+                continue;
+            }
             // Take the piece
             game.TakePiece(victim, piece);
         }
