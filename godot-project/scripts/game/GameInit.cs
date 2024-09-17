@@ -163,7 +163,8 @@ public partial class GameController
         
         // Register Card Factories
         AddNewCardFactory("major_shapeshift", new SimpleCardFactory<ShapeshiftCard>());
-        AddNewCardFactory("major_single_piece_army", new SinglePieceArmyCardFactory());
+        // AddNewCardFactory("major_single_piece_army", new SinglePieceArmyCardFactory());
+        AddNewCardFactory("major_pawn_army", new SimpleCardFactory<PawnArmyCard>());
         AddNewCardFactory("major_shuffle", new SimpleCardFactory<ShuffleCard>());
         AddNewCardFactory("major_lonely_pieces_stuck", new SimpleCardFactory<LonelyPiecesStuckCard>(), true);
         AddNewCardFactory("major_friendly_fire", new SimpleCardFactory<FriendlyFireCard>(), true);
@@ -206,7 +207,7 @@ public partial class GameController
         AddChild(MajorCardDeck);
         
         MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_shapeshift"));
-        MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_single_piece_army"));
+        MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_pawn_army"));
         MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_shuffle"));
         MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_lonely_pieces_stuck"));
         MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_friendly_fire"));

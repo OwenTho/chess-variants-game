@@ -1,7 +1,4 @@
 ﻿
-
-using System.Collections.Generic;
-
 public partial class SinglePieceArmyCardFactory : CardFactory
 {
     protected override CardBase CreateCard(GameState game)
