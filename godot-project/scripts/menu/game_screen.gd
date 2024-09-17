@@ -261,6 +261,7 @@ func reset_display_card() -> void:
 	
 	cur_display_cards_display.move_card(cur_display_card.card_id)
 	cur_display_card.hover_enabled = true
+	cur_display_card.enable_desc_scroll(false)
 	
 	cur_display_cards_display = null
 	cur_display_card_tween = null
@@ -272,6 +273,7 @@ func set_display_card(card: Node, display: Node) -> void:
 	cur_display_cards_display = display
 	
 	cur_display_card.hover_enabled = false
+	cur_display_card.enable_desc_scroll(true)
 	
 	cur_display_card_tween = create_tween()
 	cur_display_card_tween.set_ease(Tween.EASE_OUT)
@@ -293,6 +295,7 @@ func _on_add_active_display_card(card: CardBase) -> void:
 	# Add the information to the card
 	new_card.set_card_name(card.GetCardName())
 	new_card.set_card_description(card.GetCardDescription())
+	new_card.enable_desc_scroll(false)
 	new_card.set_card_image(card.GetCardImageLoc())
 	
 	add_child(new_card)

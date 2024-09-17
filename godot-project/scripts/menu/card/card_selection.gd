@@ -86,15 +86,16 @@ func clear_cards() -> void:
 
 func add_card(card_data: Dictionary) -> void:
 	var card = card_scene.instantiate()
+	%CardContainer.add_child(card)
 	if card_data.has("name"):
 		card.set_card_name(card_data["name"])
 	if card_data.has("image_loc"):
 		card.set_card_image(card_data["image_loc"])
 	if card_data.has("description"):
 		card.set_card_description(card_data["description"])
+		card._update_desc_scroll()
 	if card_data.has("card_id"):
 		card.card_id = card_data["card_id"]
-	%CardContainer.add_child(card)
 	card.hover.connect(_hovered)
 	card.unhover.connect(_unhovered)
 	cards.append(card)

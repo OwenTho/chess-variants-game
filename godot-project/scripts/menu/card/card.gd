@@ -18,8 +18,6 @@ var currently_up: bool = false
 var hover_enabled: bool = true
 @onready var card_panel: PanelContainer = $CardOffset/CardPanel
 
-
-
 func set_enabled(enable: bool) -> void:
 	if enable:
 		$CardOffset/CardPanel.mouse_filter = MOUSE_FILTER_PASS
@@ -58,6 +56,36 @@ func set_card_image(image_loc: String) -> void:
 		card_texture = load("res://assets/texture/card/missing.png")
 	
 	(%CardImage as TextureRect).texture = card_texture
+
+var desc_scroll_tween: Tween = null
+func _update_desc_scroll() -> void:
+	
+	if desc_scroll_tween != null:
+		desc_scroll_tween.kill()
+		desc_scroll_tween = null
+	
+	# If there's a scroll bar, disable it and make it automated
+	var scroll: VScrollBar = %DescriptionLabel.get_v_scroll_bar()
+	var line_count: int = %DescriptionLabel.get_line_count()
+	if scroll != null:
+		scroll.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		if line_count < 7:
+			return
+		await get_tree().process_frame
+		var scroll_time: float = (line_count-6.)*0.5
+		scroll.step = 0.01
+		desc_scroll_tween = create_tween().set_loops()
+		desc_scroll_tween.tween_interval(2)
+		desc_scroll_tween.tween_property(scroll, "value", %DescriptionLabel.get_content_height()-%DescriptionLabel.size.y, scroll_time)
+		desc_scroll_tween.tween_interval(2)
+		desc_scroll_tween.tween_property(scroll, "value", 0.0, scroll_time)
+
+func enable_desc_scroll(enabled: bool = true):
+	var scroll: VScrollBar = %DescriptionLabel.get_v_scroll_bar()
+	if enabled:
+		scroll.mouse_filter = Control.MOUSE_FILTER_PASS
+	else:
+		scroll.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func set_card_description(description: String) -> void:
 	%DescriptionLabel.text = description
