@@ -97,12 +97,6 @@ public partial class ChangePieceCardFactory : CardFactory
                 continue;
             }
             
-            // If this piece is not a king...
-            if (piece.GetPieceInfoId() == game.KingId)
-            {
-                continue;
-            }
-            
             foreach (var king in kings)
             {
                 // Only check other pieces
@@ -122,7 +116,7 @@ public partial class ChangePieceCardFactory : CardFactory
                 {
                     continue;
                 }
-
+                
                 // If criteria above is matched, the team can have one of its kings
                 // swapped to something else
                 validTeams.Add(king.teamId);
@@ -133,6 +127,7 @@ public partial class ChangePieceCardFactory : CardFactory
         // it can't change pieces
         if (teams.Count != validTeams.Count)
         {
+            //GD.Print($"Can't create ChangePieceCard as there are invalid teams: [{string.Join(",", teams)}] vs. [{string.Join(",", validTeams)}]");
             return false;
         }
 
