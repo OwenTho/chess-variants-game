@@ -44,7 +44,7 @@ internal partial class PawnMoveRule : ActionRuleBase
             
             
             // If there is at least one more attack to place, create a new slide action
-            if (i <= maxForward)
+            if (i < maxForward)
             {
                 prevRight = new SlideAction(piece, newRightAttack.moveAction.moveLocation);
                 prevLeft = new SlideAction(piece, newLeftAttack.moveAction.moveLocation);
