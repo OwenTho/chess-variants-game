@@ -136,6 +136,7 @@ offset_bottom = 59.0
 text = "Resign"
 
 [node name="RequestDrawBtn" type="Button" parent="GameUI"]
+visible = false
 layout_mode = 0
 offset_left = 1013.0
 offset_top = 65.0
