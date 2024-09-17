@@ -922,6 +922,9 @@ func take_action(action_dict: Dictionary, piece_id: int) -> void:
 		return
 	
 	var action = game_controller.ActionFromDict(action_dict)
+	if action == null:
+		push_error("Invalid action!\nPiece id: %s\naction data: %s" % [piece_id, action_dict])
+		return
 	add_child(action)
 	cur_actions.append(action)
 	var piece = await get_piece(piece_id)
