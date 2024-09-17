@@ -35,12 +35,22 @@ internal partial class PawnMoveRule : ActionRuleBase
 
         
         // Attacking is possible at diagonals
-        MoveAction prevRight = null;
-        MoveAction prevLeft = null;
+        SlideAction prevRight = null;
+        SlideAction prevLeft = null;
         for (int i = 1; i <= maxForward; i++)
         {
-            prevRight = Attack(piece, thisPosition + ((piece.forwardDirection.AsVector() + GridVectors.Right) * i), AttackType.MoveIf, prevRight).moveAction;
-            prevLeft = Attack(piece, thisPosition + ((piece.forwardDirection.AsVector() + GridVectors.Left) * i), AttackType.MoveIf, prevLeft).moveAction;
+            AttackAction newRightAttack = Attack(piece, thisPosition + ((piece.forwardDirection.AsVector() + GridVectors.Right) * i), AttackType.MoveIf, prevRight);
+            AttackAction newLeftAttack = Attack(piece, thisPosition + ((piece.forwardDirection.AsVector() + GridVectors.Left) * i), AttackType.MoveIf, prevLeft);
+            
+            
+            // If there is at least one more attack to place, create a new slide action
+            if (i <= maxForward)
+            {
+                prevRight = new SlideAction(piece, newRightAttack.moveAction.moveLocation);
+                prevLeft = new SlideAction(piece, newLeftAttack.moveAction.moveLocation);
+                piece.AddAction(prevRight);
+                piece.AddAction(prevLeft);
+            }
         }
 
         // If next to a piece that moved twice, allow En passant

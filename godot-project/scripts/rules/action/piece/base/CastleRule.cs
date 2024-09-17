@@ -1,5 +1,4 @@
 ﻿
-using ChessVariantsGame.scripts.actions.movement;
 using Godot;
 using Godot.Collections;
 
@@ -69,7 +68,7 @@ public partial class CastleRule : ActionRuleBase
                     for (int j = i - 1; j > 0 ; j--)
                     {
                         Vector2I loc = actionLocation - direction * j;
-                        SlideAction newSlide = new SlideAction(piece, actionLocation, checkLocation - direction * j);
+                        SlideAction newSlide = new SlideAction(piece, checkLocation - direction * j);
                         prevMove.AddDependency(newSlide);
                         piece.AddAction(newSlide);
                         prevMove = newSlide;

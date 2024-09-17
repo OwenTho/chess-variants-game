@@ -1,10 +1,8 @@
 ﻿using Godot;
 
-namespace ChessVariantsGame.scripts.actions.movement;
-
 public partial class SlideAction : MoveAction
 {
-    public SlideAction(Piece owner, Vector2I actionLocation, Vector2I moveLocation) : base(owner, actionLocation, moveLocation)
+    public SlideAction(Piece owner, Vector2I slideLocation) : base(owner, slideLocation, slideLocation)
     {
         acting = false;
     }
