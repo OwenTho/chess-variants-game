@@ -154,19 +154,35 @@ public abstract partial class CardBase : Node
     {
         game.EndEventsWait();
     }
+
     public virtual String GetCardName()
     {
         return StringUtil.ToTitleCase(cardId);
     }
+    
+    public virtual String GetCardName(GameState game)
+    {
+        return GetCardName();
+    }
 
     public virtual String GetCardImageLoc()
     {
-        return "";
+        return "missing.png";
+    }
+
+    public virtual String GetCardImageLoc(GameState game)
+    {
+        return GetCardImageLoc();
     }
 
     public virtual String GetCardDescription()
     {
         return "No description provided.";
+    }
+
+    public virtual String GetCardDescription(GameState game)
+    {
+        return GetCardDescription();
     }
 
     public void MakeNotices(GameState game)

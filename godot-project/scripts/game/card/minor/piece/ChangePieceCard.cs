@@ -56,8 +56,8 @@ public partial class ChangePieceCard : CardBase
         return "Change Piece";
     }
 
-    public override string GetCardDescription()
+    public override string GetCardDescription(GameState game)
     {
-        return $"Change a selected piece and its linked pieces into a [color={PieceNameColour}]{toPiece}[/color].";
+        return $"Change a selected piece and its linked pieces into a [color={PieceNameColour}]{game.GetPieceName(toPiece)}[/color].";
     }
 }

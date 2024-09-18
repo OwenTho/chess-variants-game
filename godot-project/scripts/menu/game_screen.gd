@@ -294,10 +294,10 @@ func _on_add_active_display_card(card: CardBase) -> void:
 	new_card.scale = Vector2(0.6, 0.6)
 	
 	# Add the information to the card
-	new_card.set_card_name(card.GetCardName())
-	new_card.set_card_description(card.GetCardDescription())
+	new_card.set_card_name(GameManager.game_controller.GetCardName(card))
+	new_card.set_card_description(GameManager.game_controller.GetCardDescription(card))
 	new_card.enable_desc_scroll(false)
-	new_card.set_card_image(card.GetCardImageLoc())
+	new_card.set_card_image(GameManager.game_controller.GetCardImageLoc(card))
 	
 	add_child(new_card)
 	

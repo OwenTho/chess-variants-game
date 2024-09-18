@@ -52,6 +52,16 @@ public partial class GameController : Node
         return info != null;
     }
 
+    public string GetPieceName(string key)
+    {
+        if (TryGetPieceInfo(key, out PieceInfo info))
+        {
+            return info.displayName;
+        }
+
+        return "Invalid Piece ID";
+    }
+
     public RuleBase GetRule(string key)
     {
         return actionRuleRegistry.GetValue(key);
@@ -176,6 +186,21 @@ public partial class GameController : Node
         return newCard;
     }
 
+    public string GetCardName(CardBase card)
+    {
+        return card.GetCardName(currentGameState);
+    }
+
+    public string GetCardImageLoc(CardBase card)
+    {
+        return card.GetCardImageLoc(currentGameState);
+    }
+    
+    public string GetCardDescription(CardBase card)
+    {
+        return card.GetCardDescription(currentGameState);
+    }
+    
     public Godot.Collections.Dictionary<string, string> ConvertCardToDict(CardBase card)
     {
         if (card == null)

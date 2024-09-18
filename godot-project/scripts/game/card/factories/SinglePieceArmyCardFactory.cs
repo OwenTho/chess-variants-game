@@ -11,10 +11,6 @@ public partial class SinglePieceArmyCardFactory : CardFactory
         int randomId = game.gameRandom.RandiRange(0, pieceIds.Length - 1);
         // Set the army piece to be the randomly selected piece
         newCard.armyPiece = pieceIds[randomId];
-        if (game.TryGetPieceInfo(newCard.armyPiece, out PieceInfo info))
-        {
-            newCard.pieceName = info.displayName;
-        }
         return newCard;
     }
 

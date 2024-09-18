@@ -178,8 +178,8 @@ public partial class PromotionCard : CardBase
         return "Promotion";
     }
 
-    public override string GetCardDescription()
+    public override string GetCardDescription(GameState game)
     {
-        return $"[color={PieceNameColour}]{fromPiece}[/color] can promote into [color={PieceNameColour}]{toPiece.FirstOrDefault()}[/color] when they reach the opposite side of the board.";
+        return $"[color={PieceNameColour}]{game.GetPieceName(fromPiece)}[/color] can promote into [color={PieceNameColour}]{game.GetPieceName(toPiece.FirstOrDefault())}[/color] when they reach the opposite side of the board.";
     }
 }

@@ -133,6 +133,11 @@ public partial class GameState : Node
     {
         return gameController.TryGetPieceInfo(pieceInfoId, out info);
     }
+
+    public string GetPieceName(string pieceInfoId)
+    {
+        return gameController.GetPieceName(pieceInfoId);
+    }
     
     public PieceInfo[] GetAllPieceInfo()
     {

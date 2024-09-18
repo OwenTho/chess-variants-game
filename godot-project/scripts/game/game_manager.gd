@@ -342,9 +342,9 @@ func receive_card(card_data: Dictionary) -> void:
 	# If it's not, get the data to display
 	display_card.emit({
 		"card_id": card_data.card_num,
-		"name": card.GetCardName(),
-		"image_loc": card.GetCardImageLoc(),
-		"description": card.GetCardDescription()
+		"name": game_controller.GetCardName(card),
+		"image_loc": game_controller.GetCardImageLoc(card),
+		"description": game_controller.GetCardDescription(card)
 	})
 	# Free the card from memory now that it's used
 	card.queue_free()
@@ -491,6 +491,12 @@ func place_piece(piece_id: String, link_id: int, team: int, x: int, y: int, id: 
 	
 	return true
 
+func get_piece_2d(id: int) -> Piece2D:
+	for piece in get_tree().get_nodes_in_group("piece"):
+		if piece.piece_data != null and piece.piece_data.id == id:
+			return piece
+	return null
+
 func remove_piece_2d(piece: Piece2D) -> void:
 	if piece == null:
 		return
@@ -506,12 +512,6 @@ func place_matching(piece_id: String, link_id: int, x: int, y: int) -> void:
 
 
 
-
-func get_piece_2d(id: int) -> Piece2D:
-	for piece in get_tree().get_nodes_in_group("piece"):
-		if piece.piece_data != null and piece.piece_data.id == id:
-			return piece
-	return null
 
 
 func spaces_off_board(x: int, y: int) -> int:
@@ -558,6 +558,10 @@ func get_piece_info(info_id: String) -> PieceInfo:
 		return null
 	return game_controller.GetPieceInfo(info_id)
 
+func get_piece_name(info_id: String) -> String:
+	if not game_controller_valid():
+		return "No GameController"
+	return game_controller.GetPieceName(info_id)
 
 func get_piece(id: int) -> Piece:
 	if not game_controller_valid():
@@ -787,7 +791,7 @@ func _on_actions_processed_at(success: bool, action_location: Vector2i, piece: P
 	game_controller.EndTurn()
 
 func _on_card_notice(card: CardBase, notice: String) -> void:
-	print("%s Card has sent notice '%s'" % [card.GetCardName(), notice])
+	print_debug("%s Card has sent notice '%s'" % [game_controller.GetCardName(card), notice])
 	for addon in addons:
 		addon._handle_card_notice(card, notice)
 
