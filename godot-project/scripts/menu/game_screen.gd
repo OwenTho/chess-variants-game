@@ -105,7 +105,7 @@ func _on_cursor_highlight_cell_updated(new_cell: Vector2i) -> void:
 
 func _update_cursor_visibility() -> void:
 	# If cursor is outside range, then hide it
-	cursor.visible = (GameManager.spaces_off_board(cursor.last_cell.x, cursor.last_cell.y) == 0) and cursor.active and cursor.visible_on_active and cursor_over_game
+	cursor.visible = (GameManager.spaces_off_board(cursor.last_cell.x, cursor.last_cell.y) == 0) and cursor.active and cursor.visible_on_active and cursor_over_game and GameManager.in_game
 
 func delete_selection() -> void:
 	for child in action_highlights.get_children():
