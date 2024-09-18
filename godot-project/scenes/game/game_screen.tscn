@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=4 uid="uid://cssq752gr7m3k"]
+[gd_scene load_steps=14 format=4 uid="uid://cssq752gr7m3k"]
 
 [ext_resource type="Script" path="res://scripts/menu/game_screen.gd" id="1_s3pe2"]
 [ext_resource type="PackedScene" uid="uid://isv1sog82mq8" path="res://scenes/game/highlight.tscn" id="2_c2xco"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://bjpv55bvyut4l" path="res://scenes/game/card/card_selection.tscn" id="8_2rxrq"]
 [ext_resource type="PackedScene" uid="uid://dddlxpsqq0pnn" path="res://scenes/game/player_info.tscn" id="8_i3by4"]
 [ext_resource type="Script" path="res://scripts/menu/card/card_display.gd" id="8_o3faa"]
+[ext_resource type="Material" uid="uid://bm4udh55f5dgk" path="res://assets/shaders/game_grid.tres" id="10_axqaj"]
 
 [node name="GameScreen" type="Node2D" node_paths=PackedStringArray("board", "cursor", "card_selection", "action_highlights", "notices", "major_card_display", "player1_info", "player1_card_display", "player2_info", "player2_card_display") groups=["game_screen"]]
 script = ExtResource("1_s3pe2")
@@ -163,7 +164,14 @@ scale = Vector2(0.35, 0.35)
 
 [node name="BoardTiles" type="TileMapLayer" parent="BoardHolder"]
 unique_name_in_owner = true
+material = ExtResource("10_axqaj")
+tile_set = ExtResource("3_fosrn")
+collision_enabled = false
+navigation_enabled = false
+
+[node name="BaseTiles" type="TileMapLayer" parent="BoardHolder"]
 use_parent_material = true
+scale = Vector2(1, 1)
 tile_map_data = PackedByteArray("AAD8/wMAAAAAAAAAAAD9/wIAAAAAAAAAAAD+/wEAAAAAAAAAAAD//wAAAAAAAAAAAAAAAP//AAAAAAAAAAABAP7/AAAAAAAAAAACAP3/AAAAAAAAAAADAPz/AAAAAAAAAAD+////AAAAAAAAAAD///7/AAAAAAAAAAD+//3/AAAAAAAAAAD8//3/AAAAAAAAAAD9//z/AAAAAAAAAAAAAP3/AAAAAAAAAAD///z/AAAAAAAAAAABAPz/AAAAAAAAAAADAP7/AAAAAAAAAAACAP//AAAAAAAAAAADAAAAAAAAAAAAAAABAAAAAAAAAAAAAAACAAEAAAAAAAAAAAAAAAEAAAAAAAAAAAABAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAD//wIAAAAAAAAAAAD+/wMAAAAAAAAAAAD8/wEAAAAAAAAAAAD9/wAAAAAAAAAAAAD8////AAAAAAAAAAACAAMAAAAAAAAAAAADAAIAAAAAAAAAAAD9/wMAAAABAAAAAAD8/wIAAAABAAAAAAD9/wEAAAABAAAAAAD8/wAAAAABAAAAAAD9////AAABAAAAAAD8//7/AAABAAAAAAD9//3/AAABAAAAAAD8//z/AAABAAAAAAD+//z/AAABAAAAAAAAAPz/AAABAAAAAAACAPz/AAABAAAAAAADAP3/AAABAAAAAAABAP3/AAABAAAAAAD///3/AAABAAAAAAD9//7/AAAAAAAAAAD+//7/AAABAAAAAAD+/wAAAAABAAAAAAD+/wIAAAABAAAAAAD//wEAAAABAAAAAAD//wMAAAABAAAAAAD/////AAABAAAAAAAAAAIAAAABAAAAAAAAAAAAAAABAAAAAAAAAP7/AAABAAAAAAABAP//AAABAAAAAAACAP7/AAABAAAAAAADAP//AAABAAAAAAACAAAAAAABAAAAAAABAAEAAAABAAAAAAACAAIAAAABAAAAAAABAAMAAAABAAAAAAADAAMAAAABAAAAAAADAAEAAAABAAAAAAA=")
 tile_set = ExtResource("3_fosrn")
 collision_enabled = false
