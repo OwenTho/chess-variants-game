@@ -171,6 +171,7 @@ public partial class GameController
         
         // Register custom Piece Info
         MakeNewPieceInfo("warp_bishop", "Warp Bishop", "warp_bishop.png").AddActionRule(GetActionRule("warp_bishop_move"), 7);
+        MakeNewPieceInfo("rock", "Rock", "rock.png").AddActionRule(GetActionRule("nothing"));
     }
 
     internal void InitCardFactories()
