@@ -418,7 +418,6 @@ func _add_cell_at(pos: Vector2i) -> void:
 	pos = _pos_to_cell_pos(pos)
 	var tile_pos: Vector2i = Vector2i(0,0)
 	if (abs(pos.x) % 2) == (abs(pos.y) % 2):
-		print("New black cell: %s" % [pos])
 		tile_pos = Vector2i(1,0)
 	
 	%BoardTiles.set_cell(pos, 0, tile_pos)
