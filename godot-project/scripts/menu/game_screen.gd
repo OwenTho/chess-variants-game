@@ -38,6 +38,9 @@ var cur_display_card_exceptions: Array[Node]
 
 var all_pieces: Array[Piece2D]
 
+var rotating_board: bool = false
+var rotate_start: Vector2
+
 func _ready() -> void:
 	GameManager.about_to_select_minor_card.connect(_on_about_to_select_minor_card)
 	GameManager.clear_cards.connect(_on_clear_cards)
@@ -95,10 +98,6 @@ func _on_init() -> void:
 	cursor.board = GameManager.board
 	
 	Debug.stats.add_property(GameManager.game_controller.currentGameState, "currentPlayerNum")
-
-func _process(delta: float) -> void:
-	if Input.is_action_pressed("mouse_right"):
-		$BoardHolder.rotation = $BoardHolder.rotation + deg_to_rad(45) * delta
 
 func _on_cursor_highlight_cell_updated(new_cell: Vector2i) -> void:
 	_update_cursor_visibility()
@@ -228,6 +227,7 @@ func _on_show_cards() -> void:
 	card_selection.visible = true
 	cur_selected_card = -1
 	card_selection.show_cards()
+	rotating_board = false
 
 func _on_card_selected(card_num: int) -> void:
 	# If the same, ignore
@@ -510,6 +510,9 @@ func _end_game_message(title: String, message: String) -> void:
 	
 	
 	pop_up.popup_centered()
+	
+	# Disable board rotation
+	rotating_board = false
 
 func _on_player_resigned(player_num: int) -> void:
 	_end_game_message("Resigned", "Player %s has resigned, letting player %s win." % [player_num+1, 2-player_num])
@@ -575,6 +578,29 @@ func _on_game_input_mouse_exited() -> void:
 	cursor_over_game = false
 	_update_cursor_visibility()
 
+func _process(delta: float) -> void:
+	if rotating_board:
+		# Get current mouse position
+		var cur_mouse_position: Vector2 = get_global_mouse_position()
+		# Get the angle of the two
+		var angle_from = $BoardHolder.global_position.angle_to_point(rotate_start)
+		var angle_to = $BoardHolder.global_position.angle_to_point(cur_mouse_position)
+		# Rotate so angle_from is 0
+		angle_to -= angle_from
+		angle_from -= angle_from
+		# Lerp the angle towards
+		var rotate_angle = lerp_angle(angle_from, angle_to, 1 - pow(0.2, delta))
+		# Update the rotation, and lerp rotate_start
+		rotate_start = lerp(rotate_start, cur_mouse_position, 1 - pow(0.2, delta))
+		$BoardHolder.rotation = $BoardHolder.rotation + rotate_angle
+
 
 func _on_game_input_gui_input(event: InputEvent) -> void:
+	if event.is_action_pressed("mouse_right"):
+		rotating_board = true
+		rotate_start = get_global_mouse_position()
+		return
+	elif event.is_action_released("mouse_right"):
+		rotating_board = false
+		return
 	cursor._process_input(event)
