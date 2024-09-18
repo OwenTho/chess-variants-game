@@ -4,6 +4,7 @@ using Godot;
 using Godot.Collections;
 using Mutex = Godot.Mutex;
 
+[GlobalClass]
 public partial class GameController : Node
 {
     // The current state of the game.

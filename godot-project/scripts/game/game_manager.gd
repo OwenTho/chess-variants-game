@@ -46,8 +46,7 @@ signal notice_received(message: String)
 
 signal grid_size_changed(old_lower_bound: Vector2i, old_upper_bound: Vector2i, new_lower_bound: Vector2i, new_upper_bound: Vector2i)
 
-var game_controller_script: CSharpScript = preload("res://scripts/game/GameController.cs")
-var game_controller: Object
+var game_controller: GameController
 
 var game_scene: PackedScene = preload("res://scenes/game/game_screen.tscn")
 var piece_scene: PackedScene = preload("res://scenes/game/piece/piece.tscn")
@@ -146,7 +145,7 @@ func init() -> void:
 	board = game.board
 	
 	# Initialise the game controller
-	game_controller = game_controller_script.new()
+	game_controller = GameController.new()
 	add_child(game_controller)
 	
 	# Initialise the card selector
