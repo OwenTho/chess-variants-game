@@ -44,6 +44,7 @@ signal piece_taken(taken_piece: Piece, attacker: Piece)
 
 signal notice_received(message: String)
 
+signal grid_size_changed(old_lower_bound: Vector2i, old_upper_bound: Vector2i, new_lower_bound: Vector2i, new_upper_bound: Vector2i)
 
 var game_controller_script: CSharpScript = preload("res://scripts/game/GameController.cs")
 var game_controller: Object
@@ -223,10 +224,14 @@ func setup_signals() -> void:
 	game_controller.LowerBoundChanged.connect(_on_lower_bound_changed)
 
 func _on_upper_bound_changed(new_bound: Vector2i) -> void:
+	var old_upper_bound: Vector2i = grid_upper_corner
 	grid_upper_corner = new_bound
+	grid_size_changed.emit(grid_lower_corner, old_upper_bound, grid_lower_corner, grid_upper_corner)
 
 func _on_lower_bound_changed(new_bound: Vector2i) -> void:
+	var old_lower_bound: Vector2i = grid_lower_corner
 	grid_lower_corner = new_bound
+	grid_size_changed.emit(old_lower_bound, grid_upper_corner, grid_lower_corner, grid_upper_corner)
 
 
 func start_game(game_seed: int) -> void:

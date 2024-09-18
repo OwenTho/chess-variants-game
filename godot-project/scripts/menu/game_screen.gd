@@ -68,6 +68,7 @@ func _ready() -> void:
 	
 	GameManager.piece_taken.connect(_on_piece_taken)
 	
+	GameManager.grid_size_changed.connect(_on_grid_size_changed)
 	
 	GameManager.notice_received.connect(_on_notice_received)
 	
@@ -405,6 +406,94 @@ func _on_piece_taken(taken_piece: Piece, attacker: Piece) -> void:
 
 
 
+func _pos_to_cell_pos(pos: Vector2i) -> Vector2i:
+	pos -= Vector2i(4,3)
+	pos *= Vector2i(1,-1)
+	return pos
+
+func _add_cell_at(pos: Vector2i) -> void:
+	pos = _pos_to_cell_pos(pos)
+	var tile_pos: Vector2i = Vector2i(0,0)
+	if (abs(pos.x) % 2) == (abs(pos.y) % 2):
+		print("New black cell: %s" % [pos])
+		tile_pos = Vector2i(1,0)
+	
+	%BoardTiles.set_cell(pos, 0, tile_pos)
+
+func _remove_cell_at(pos: Vector2i) -> void:
+	%BoardTiles.set_cell(_pos_to_cell_pos(pos))
+
+func _add_cells_to_range(pos1: Vector2i, pos2: Vector2i) -> void:
+	if pos2.x < pos1.x:
+		var temp = pos1.x
+		pos1.x = pos2.x
+		pos2.x = temp
+	if pos2.y < pos1.y:
+		var temp = pos1.y
+		pos1.y = pos2.y
+		pos2.y = temp
+	
+	for x in range(pos1.x, pos2.x+1):
+		for y in range(pos1.y, pos2.y+1):
+			_add_cell_at(Vector2i(x, y))
+	
+func _remove_cells_in_range(pos1: Vector2i, pos2: Vector2i) -> void:
+	if pos2.x < pos1.x:
+		var temp = pos1.x
+		pos1.x = pos2.x
+		pos2.x = temp
+	if pos2.y < pos1.y:
+		var temp = pos1.y
+		pos1.y = pos2.y
+		pos2.y = temp
+	
+	for x in range(pos1.x, pos2.x+1):
+		for y in range(pos1.y, pos2.y+1):
+			_remove_cell_at(Vector2i(x, y))
+
+
+func _on_grid_size_changed(old_lower_bound: Vector2i, old_upper_bound: Vector2i, new_lower_bound: Vector2i, new_upper_bound: Vector2i) -> void:
+	#        x
+	#  ------x
+	#  |    |x
+	#  |    |x
+	#  ------x
+	#        x
+	if new_upper_bound.x < old_upper_bound.x:
+		_remove_cells_in_range(Vector2i(new_upper_bound.x+1, old_lower_bound.y), Vector2i(old_upper_bound.x, old_upper_bound.y))
+	if new_upper_bound.x > old_upper_bound.x:
+		_add_cells_to_range(Vector2i(old_upper_bound.x+1, new_lower_bound.y), Vector2i(new_upper_bound.x, new_upper_bound.y))
+	# xxxxxxxx
+	#  ------
+	#  |    |
+	#  |    |
+	#  ------
+	#       
+	if new_upper_bound.y < old_upper_bound.y:
+		_remove_cells_in_range(Vector2i(new_lower_bound.x, new_upper_bound.y+1), Vector2i(old_upper_bound.x, old_upper_bound.y))
+	if new_upper_bound.y > old_upper_bound.y:
+		_add_cells_to_range(Vector2i(new_lower_bound.x, old_upper_bound.y+1), Vector2i(new_upper_bound.x, new_upper_bound.y))
+	## LOWER BOUND
+	# x
+	# x------
+	# x|    |
+	# x|    |
+	# x------
+	# x
+	if new_lower_bound.x > old_lower_bound.x:
+		_remove_cells_in_range(Vector2i(old_lower_bound.x, new_lower_bound.y), Vector2i(new_lower_bound.x-1, old_upper_bound.y))
+	if new_lower_bound.x < old_lower_bound.x:
+		_add_cells_to_range(Vector2i(new_lower_bound.x, new_lower_bound.y), Vector2i(old_lower_bound.x-1, new_upper_bound.y))
+	#  
+	#  ------
+	#  |    |
+	#  |    |
+	#  ------
+	# xxxxxxxx
+	if new_lower_bound.x > old_lower_bound.x:
+		_remove_cells_in_range(old_lower_bound, Vector2i(new_upper_bound.x, new_lower_bound.y-1))
+	if new_lower_bound.x < old_lower_bound.x:
+		_add_cells_to_range(new_lower_bound, Vector2i(new_upper_bound.x, old_lower_bound.y-1))
 
 func _end_game_message(title: String, message: String) -> void:
 	var pop_up: AcceptDialog = AcceptDialog.new()
