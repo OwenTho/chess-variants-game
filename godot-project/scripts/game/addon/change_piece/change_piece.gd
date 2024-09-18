@@ -27,7 +27,7 @@ func _on_change_piece(card: CardBase) -> void:
 func _start_change_piece(to_piece_id: String) -> void:
 	if not GameManager.in_game:
 		return
-	GameManager.receive_notice("Select a piece to change into a %s" % [to_piece_id])
+	GameManager.receive_notice("Select a piece to change into a %s" % [GameManager.get_piece_name(to_piece_id)])
 	
 	# Get the game screen's cursor
 	var cursor = GameManager.game.cursor
@@ -65,6 +65,11 @@ func _select_change_piece(piece_id: int) -> void:
 	var piece = GameManager.unsafe_get_piece(piece_id)
 	if piece == null:
 		GameManager.receive_notice.rpc_id(multiplayer.get_remote_sender_id(), "ERROR: There is no piece with id %s." % [piece_id])
+		return
+	
+	# Only allow if the piece is on this person's team
+	if piece.teamId != cur_card.teamId:
+		GameManager.receive_notice.rpc_id(multiplayer.get_remote_sender_id(), "You may only select pieces on your team.")
 		return
 	
 	# Only allow if the piece will change
