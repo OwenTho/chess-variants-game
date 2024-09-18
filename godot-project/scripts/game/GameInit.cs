@@ -118,6 +118,9 @@ public partial class GameController
         MakeNewActionRule("knight_move", new KnightMoveRule());
         MakeNewActionRule("king_move", new KingMoveRule());
         MakeNewActionRule("castle", new CastleRule());
+        
+        // Piece Specific - Custom
+        MakeNewActionRule("warp_bishop_move", new WarpBishopMoveRule());
     }
 
     internal void InitActionFactories()
@@ -141,13 +144,16 @@ public partial class GameController
 
         // Register Piece Info
         MakeNewPieceInfo("pawn", "Pawn", "pawn.png").AddActionRule(actionRuleRegistry.GetValue("pawn_move"));
+        
         PieceInfo rookInfo = MakeNewPieceInfo("rook", "Rook", "rook.png");
         rookInfo.AddActionRule(GetActionRule(LineMoveId.Left), 7).AddActionRule(GetActionRule(LineMoveId.Up), 7);
         rookInfo.AddActionRule(GetActionRule(LineMoveId.Right), 7).AddActionRule(GetActionRule(LineMoveId.Down), 7);
         MakeNewPieceInfo("knight", "Knight", "knight.png").AddActionRule(actionRuleRegistry.GetValue("knight_move"), 3);
+        
         PieceInfo bishopInfo = MakeNewPieceInfo("bishop", "Bishop", "bishop.png");
         bishopInfo.AddActionRule(GetActionRule(LineMoveId.UpLeft), 7).AddActionRule(GetActionRule(LineMoveId.UpRight), 7);
         bishopInfo.AddActionRule(GetActionRule(LineMoveId.DownLeft), 7).AddActionRule(GetActionRule(LineMoveId.DownRight), 7);
+        
         PieceInfo queenInfo = MakeNewPieceInfo("queen", "Queen", "queen.png");
         queenInfo.AddActionRule(GetActionRule(LineMoveId.Left), 7).AddActionRule(GetActionRule(LineMoveId.Up), 7);
         queenInfo.AddActionRule(GetActionRule(LineMoveId.Right), 7).AddActionRule(GetActionRule(LineMoveId.Down), 7);
@@ -162,6 +168,9 @@ public partial class GameController
         kingInfo.AddActionRule(GetActionRule(LineMoveId.DownLeft), 1, true)
             .AddActionRule(GetActionRule(LineMoveId.DownRight), 1, true);
         kingInfo.AddActionRule(actionRuleRegistry.GetValue("castle"));
+        
+        // Register custom Piece Info
+        MakeNewPieceInfo("warp_bishop", "Warp Bishop", "warp_bishop.png").AddActionRule(GetActionRule("warp_bishop_move"), 7);
     }
 
     internal void InitCardFactories()
