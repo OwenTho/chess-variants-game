@@ -420,10 +420,10 @@ func _add_cell_at(pos: Vector2i) -> void:
 	if (abs(pos.x) % 2) == (abs(pos.y) % 2):
 		tile_pos = Vector2i(1,0)
 	
-	%BoardTiles.set_cell(pos, 0, tile_pos)
+	%AdditionalTiles.set_cell(pos, 0, tile_pos)
 
 func _remove_cell_at(pos: Vector2i) -> void:
-	%BoardTiles.set_cell(_pos_to_cell_pos(pos))
+	%AdditionalTiles.set_cell(_pos_to_cell_pos(pos))
 
 func _add_cells_to_range(pos1: Vector2i, pos2: Vector2i) -> void:
 	if pos2.x < pos1.x:

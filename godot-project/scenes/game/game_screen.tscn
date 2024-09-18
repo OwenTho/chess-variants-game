@@ -164,7 +164,7 @@ offset_bottom = 647.0
 position = Vector2(576, 324)
 scale = Vector2(0.35, 0.35)
 
-[node name="BoardTiles" type="TileMapLayer" parent="BoardHolder"]
+[node name="AdditionalTiles" type="TileMapLayer" parent="BoardHolder"]
 unique_name_in_owner = true
 material = ExtResource("10_axqaj")
 tile_set = ExtResource("3_fosrn")
