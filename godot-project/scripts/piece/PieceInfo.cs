@@ -83,7 +83,7 @@ public partial class PieceInfo : Node
         return false;
     }
 
-    public PieceInfo AddActionRule(ActionRuleBase rule, int customLevel = -1)
+    public PieceInfo AddActionRule(ActionRuleBase rule, int customLevel = -1, bool enforceLevel = false)
     {
         if (rule == null)
         {
@@ -100,7 +100,7 @@ public partial class PieceInfo : Node
         }
 
         // If here, then add the rule
-        rules.Add(new PieceRule(rule, customLevel));
+        rules.Add(new PieceRule(rule, customLevel, enforceLevel));
         return this;
     }
 

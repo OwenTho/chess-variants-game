@@ -153,7 +153,15 @@ public partial class GameController
         queenInfo.AddActionRule(GetActionRule(LineMoveId.Right), 7).AddActionRule(GetActionRule(LineMoveId.Down), 7);
         queenInfo.AddActionRule(GetActionRule(LineMoveId.UpLeft), 7).AddActionRule(GetActionRule(LineMoveId.UpRight), 7);
         queenInfo.AddActionRule(GetActionRule(LineMoveId.DownLeft), 7).AddActionRule(GetActionRule(LineMoveId.DownRight), 7);
-        MakeNewPieceInfo("king", "King", "king.png").AddActionRule(actionRuleRegistry.GetValue("king_move")).AddActionRule(actionRuleRegistry.GetValue("castle"));
+
+        PieceInfo kingInfo = MakeNewPieceInfo("king", "King", "king.png");
+        kingInfo.AddActionRule(GetActionRule(LineMoveId.Left), 1).AddActionRule(GetActionRule(LineMoveId.Right), 1);
+        kingInfo.AddActionRule(GetActionRule(LineMoveId.Up), 1).AddActionRule(GetActionRule(LineMoveId.Down), 1);
+        kingInfo.AddActionRule(GetActionRule(LineMoveId.UpLeft), 1, true)
+            .AddActionRule(GetActionRule(LineMoveId.UpRight), 1, true);
+        kingInfo.AddActionRule(GetActionRule(LineMoveId.DownLeft), 1, true)
+            .AddActionRule(GetActionRule(LineMoveId.DownRight), 1, true);
+        kingInfo.AddActionRule(actionRuleRegistry.GetValue("castle"));
     }
 
     internal void InitCardFactories()

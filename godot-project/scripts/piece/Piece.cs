@@ -107,7 +107,8 @@ public partial class Piece : GridItem<Piece>
                 {
                     // Get all possible actions for this rule
                     // The level is the sum of this piece, the type's level and the rule's level.
-                    pieceRule.rule.AddPossibleActions(game, this, level + info.level + pieceRule.level);
+                    // However, if the rule has "enforceLevel" set to true, only use its level.
+                    pieceRule.rule.AddPossibleActions(game, this, pieceRule.level + (pieceRule.enforceLevel ? 0 : level + info.level));
                 }
             }
         }
