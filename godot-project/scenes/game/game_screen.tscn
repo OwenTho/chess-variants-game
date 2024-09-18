@@ -92,6 +92,8 @@ script = ExtResource("8_o3faa")
 visible = false
 layout_mode = 1
 
+[node name="TempCardHolder" type="Node" parent="GameUI/CardSelection"]
+
 [node name="CardSelectButtons" type="HBoxContainer" parent="GameUI/CardSelection"]
 layout_mode = 0
 offset_left = 283.0

@@ -42,17 +42,14 @@ func show_cards() -> void:
 	var last_tween: Tween
 	
 	for card in cards:
-		# If card is already at y 0, ignore
 		card._hold_up = false
 		card.hover_enabled = false
 		card.set_enabled(false)
 		card.card_panel.visible = false
-		
+
+		card.position.y = 500
 		var tween: Tween = create_tween()
 		active_tweens.append(tween)
-		tween.tween_callback(func():
-			card.position.y = 500
-		)
 		tween.tween_interval(0.5 * (child_num+1))
 		tween.tween_callback(func():
 			card.position.y = 500
@@ -81,6 +78,8 @@ func clear_cards() -> void:
 	active_tweens.clear()
 	# Free all children
 	for card in cards:
+		# While freeing, move to a separate node
+		card.reparent($TempCardHolder)
 		card.queue_free()
 	cards.clear()
 

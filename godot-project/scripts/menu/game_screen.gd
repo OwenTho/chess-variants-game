@@ -338,6 +338,9 @@ func _on_card_score_changed(player_num: int, new_score: int) -> void:
 
 
 func _on_btn_use_pressed() -> void:
+	# Only accept if all tweening is done
+	if not card_selection.active_tweens.is_empty():
+		return
 	GameManager.select_card.rpc(cur_selected_card)
 
 
