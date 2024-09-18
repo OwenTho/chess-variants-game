@@ -39,6 +39,6 @@ public partial class LevelUpCard : CardBase
 
     public override string GetCardDescription()
     {
-        return $"All pieces will level up on taking another piece. [color={WarningColour}]All current levels will lower.[/color]";
+        return $"All pieces will level up on taking another piece. [color={WarningColour}]All rules will be set to level 1.[/color]";
     }
 }
