@@ -790,7 +790,7 @@ func _on_actions_processed_at(success: bool, action_location: Vector2i, piece: P
 	game_controller.EndTurn()
 
 func _on_card_notice(card: CardBase, notice: String) -> void:
-	print_debug("%s Card has sent notice '%s'" % [game_controller.GetCardName(card), notice])
+	Util.debug_print("%s Card has sent notice '%s'" % [game_controller.GetCardName(card), notice])
 	for addon in addons:
 		addon._handle_card_notice(card, notice)
 
@@ -802,7 +802,6 @@ func send_card_notice(card: CardBase, notice: String) -> void:
 func _on_piece_taken(taken_piece: Piece, attacker: Piece) -> void:
 	piece_taken.emit(taken_piece, attacker)
 	# Add card score to the player that lost the piece
-	# It is this way, as they lose a piece but can get a card sooner.
 	# It is this way, rather than the person taking the piece, as otherwise
 	# people can aim to take pieces for their benefit, whereas this forces
 	# players to be more cautious about taking pieces.

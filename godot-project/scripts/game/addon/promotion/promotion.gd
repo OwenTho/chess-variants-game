@@ -74,7 +74,7 @@ func _pick_option(option_ind: int) -> void:
 	if cur_selection.is_empty():
 		return
 	if option_ind < 0 or option_ind >= cur_selection.size():
-		print("Invalid option index: %s, 0 <= x < %s" % [option_ind, cur_selection.size()])
+		Util.debug_print("Invalid option index: %s, 0 <= x < %s" % [option_ind, cur_selection.size()])
 		return
 	
 	# Get the variables to send
