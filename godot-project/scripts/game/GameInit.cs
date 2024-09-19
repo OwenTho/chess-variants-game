@@ -204,13 +204,19 @@ public partial class GameController
         // Dispose
         if (MajorCardDeck != null)
         {
-            MajorCardDeck.Free();
+            if (IsInstanceValid(MajorCardDeck))
+            {
+                MajorCardDeck.Free();
+            }
             MajorCardDeck = null;
         }
 
         if (MinorCardDeck != null)
         {
-            MinorCardDeck.Free();
+            if (IsInstanceValid(MinorCardDeck))
+            {
+                MinorCardDeck.Free();
+            }
             MinorCardDeck = null;
         }
         
