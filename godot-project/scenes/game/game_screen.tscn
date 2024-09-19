@@ -34,6 +34,37 @@ offset_top = 99.0
 offset_right = 315.0
 offset_bottom = 601.0
 
+[node name="BoardHolder" type="Node2D" parent="."]
+position = Vector2(576, 324)
+scale = Vector2(0.35, 0.35)
+
+[node name="AdditionalTiles" type="TileMapLayer" parent="BoardHolder"]
+unique_name_in_owner = true
+material = ExtResource("10_axqaj")
+tile_set = ExtResource("3_fosrn")
+collision_enabled = false
+navigation_enabled = false
+
+[node name="BaseTiles" type="TileMapLayer" parent="BoardHolder"]
+use_parent_material = true
+tile_map_data = PackedByteArray("AAD8/wMAAAAAAAAAAAD9/wIAAAAAAAAAAAD+/wEAAAAAAAAAAAD//wAAAAAAAAAAAAAAAP//AAAAAAAAAAABAP7/AAAAAAAAAAACAP3/AAAAAAAAAAADAPz/AAAAAAAAAAD+////AAAAAAAAAAD///7/AAAAAAAAAAD+//3/AAAAAAAAAAD8//3/AAAAAAAAAAD9//z/AAAAAAAAAAAAAP3/AAAAAAAAAAD///z/AAAAAAAAAAABAPz/AAAAAAAAAAADAP7/AAAAAAAAAAACAP//AAAAAAAAAAADAAAAAAAAAAAAAAABAAAAAAAAAAAAAAACAAEAAAAAAAAAAAAAAAEAAAAAAAAAAAABAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAD//wIAAAAAAAAAAAD+/wMAAAAAAAAAAAD8/wEAAAAAAAAAAAD9/wAAAAAAAAAAAAD8////AAAAAAAAAAACAAMAAAAAAAAAAAADAAIAAAAAAAAAAAD9/wMAAAABAAAAAAD8/wIAAAABAAAAAAD9/wEAAAABAAAAAAD8/wAAAAABAAAAAAD9////AAABAAAAAAD8//7/AAABAAAAAAD9//3/AAABAAAAAAD8//z/AAABAAAAAAD+//z/AAABAAAAAAAAAPz/AAABAAAAAAACAPz/AAABAAAAAAADAP3/AAABAAAAAAABAP3/AAABAAAAAAD///3/AAABAAAAAAD9//7/AAAAAAAAAAD+//7/AAABAAAAAAD+/wAAAAABAAAAAAD+/wIAAAABAAAAAAD//wEAAAABAAAAAAD//wMAAAABAAAAAAD/////AAABAAAAAAAAAAIAAAABAAAAAAAAAAAAAAABAAAAAAAAAP7/AAABAAAAAAABAP//AAABAAAAAAACAP7/AAABAAAAAAADAP//AAABAAAAAAACAAAAAAABAAAAAAABAAEAAAABAAAAAAACAAIAAAABAAAAAAABAAMAAAABAAAAAAADAAMAAAABAAAAAAADAAEAAAABAAAAAAA=")
+tile_set = ExtResource("3_fosrn")
+collision_enabled = false
+navigation_enabled = false
+
+[node name="Board2D" type="Node2D" parent="BoardHolder"]
+position = Vector2(-512, 512)
+script = ExtResource("4_03kst")
+
+[node name="Pieces" type="Node2D" parent="BoardHolder/Board2D" groups=["piece_holder"]]
+
+[node name="CellHighlights" type="Node2D" parent="BoardHolder/Board2D"]
+z_index = 1
+
+[node name="CursorHighlight" parent="BoardHolder/Board2D" instance=ExtResource("5_w7pci")]
+visible = false
+z_index = 2
+
 [node name="GameUI" type="Control" parent="."]
 top_level = true
 z_index = 3000
@@ -160,38 +191,7 @@ offset_top = 561.0
 offset_right = 1151.0
 offset_bottom = 648.0
 
-[node name="BoardHolder" type="Node2D" parent="."]
-position = Vector2(576, 324)
-scale = Vector2(0.35, 0.35)
-
-[node name="AdditionalTiles" type="TileMapLayer" parent="BoardHolder"]
-unique_name_in_owner = true
-material = ExtResource("10_axqaj")
-tile_set = ExtResource("3_fosrn")
-collision_enabled = false
-navigation_enabled = false
-
-[node name="BaseTiles" type="TileMapLayer" parent="BoardHolder"]
-use_parent_material = true
-scale = Vector2(1, 1)
-tile_map_data = PackedByteArray("AAD8/wMAAAAAAAAAAAD9/wIAAAAAAAAAAAD+/wEAAAAAAAAAAAD//wAAAAAAAAAAAAAAAP//AAAAAAAAAAABAP7/AAAAAAAAAAACAP3/AAAAAAAAAAADAPz/AAAAAAAAAAD+////AAAAAAAAAAD///7/AAAAAAAAAAD+//3/AAAAAAAAAAD8//3/AAAAAAAAAAD9//z/AAAAAAAAAAAAAP3/AAAAAAAAAAD///z/AAAAAAAAAAABAPz/AAAAAAAAAAADAP7/AAAAAAAAAAACAP//AAAAAAAAAAADAAAAAAAAAAAAAAABAAAAAAAAAAAAAAACAAEAAAAAAAAAAAAAAAEAAAAAAAAAAAABAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAD//wIAAAAAAAAAAAD+/wMAAAAAAAAAAAD8/wEAAAAAAAAAAAD9/wAAAAAAAAAAAAD8////AAAAAAAAAAACAAMAAAAAAAAAAAADAAIAAAAAAAAAAAD9/wMAAAABAAAAAAD8/wIAAAABAAAAAAD9/wEAAAABAAAAAAD8/wAAAAABAAAAAAD9////AAABAAAAAAD8//7/AAABAAAAAAD9//3/AAABAAAAAAD8//z/AAABAAAAAAD+//z/AAABAAAAAAAAAPz/AAABAAAAAAACAPz/AAABAAAAAAADAP3/AAABAAAAAAABAP3/AAABAAAAAAD///3/AAABAAAAAAD9//7/AAAAAAAAAAD+//7/AAABAAAAAAD+/wAAAAABAAAAAAD+/wIAAAABAAAAAAD//wEAAAABAAAAAAD//wMAAAABAAAAAAD/////AAABAAAAAAAAAAIAAAABAAAAAAAAAAAAAAABAAAAAAAAAP7/AAABAAAAAAABAP//AAABAAAAAAACAP7/AAABAAAAAAADAP//AAABAAAAAAACAAAAAAABAAAAAAABAAEAAAABAAAAAAACAAIAAAABAAAAAAABAAMAAAABAAAAAAADAAMAAAABAAAAAAADAAEAAAABAAAAAAA=")
-tile_set = ExtResource("3_fosrn")
-collision_enabled = false
-navigation_enabled = false
-
-[node name="Board2D" type="Node2D" parent="BoardHolder"]
-position = Vector2(-512, 512)
-script = ExtResource("4_03kst")
-
-[node name="Pieces" type="Node2D" parent="BoardHolder/Board2D" groups=["piece_holder"]]
-
-[node name="CellHighlights" type="Node2D" parent="BoardHolder/Board2D"]
-z_index = 1
-
-[node name="CursorHighlight" parent="BoardHolder/Board2D" instance=ExtResource("5_w7pci")]
-visible = false
-z_index = 2
-
+[connection signal="cell_updated" from="BoardHolder/Board2D/CursorHighlight" to="." method="_on_cursor_highlight_cell_updated"]
 [connection signal="gui_input" from="GameUI/GameInput" to="." method="_on_game_input_gui_input"]
 [connection signal="mouse_entered" from="GameUI/GameInput" to="." method="_on_game_input_mouse_entered"]
 [connection signal="mouse_exited" from="GameUI/GameInput" to="." method="_on_game_input_mouse_exited"]
@@ -199,6 +199,5 @@ z_index = 2
 [connection signal="pressed" from="GameUI/CardSelection/CardSelectButtons/BtnUse" to="." method="_on_btn_use_pressed"]
 [connection signal="pressed" from="GameUI/BtnQuit" to="." method="_on_btn_quit_pressed"]
 [connection signal="pressed" from="GameUI/ResignBtn" to="." method="_on_resign_btn_pressed"]
-[connection signal="cell_updated" from="BoardHolder/Board2D/CursorHighlight" to="." method="_on_cursor_highlight_cell_updated"]
 
 [editable path="DebugOverlay"]
