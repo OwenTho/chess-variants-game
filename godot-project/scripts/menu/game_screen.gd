@@ -497,6 +497,7 @@ func _on_grid_size_changed(old_lower_bound: Vector2i, old_upper_bound: Vector2i,
 	if new_lower_bound.x < old_lower_bound.x:
 		_add_cells_to_range(new_lower_bound, Vector2i(new_upper_bound.x, old_lower_bound.y-1))
 
+
 func _end_game_message(title: String, message: String) -> void:
 	var pop_up: AcceptDialog = AcceptDialog.new()
 	pop_up.title = title
