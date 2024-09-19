@@ -18,6 +18,7 @@ public partial class CardDeck : Node
     private Dictionary<string, CardInfo> _cards = new();
     private RandomNumberGenerator _random = new();
     public bool WeightCards = false;
+    public bool RemoveCards = true;
 
     public void AddCard(string cardId, int count = 1)
     {
@@ -131,9 +132,13 @@ public partial class CardDeck : Node
             selectedCard = _random.RandiRange(0, validCards.Count - 1);
         }
         
-        // Remove 1 instance of the card, and 
+        // Remove 1 instance of the card, and return the new card.
         CardInfo cardInfo = validCards[selectedCard];
-        cardInfo.CardsLeft -= 1;
+        if (RemoveCards)
+        {
+            cardInfo.CardsLeft -= 1;
+        }
+
         return cardInfo.Factory.CreateNewCard(game);
     }
 }
