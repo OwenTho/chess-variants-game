@@ -180,21 +180,21 @@ public partial class GameController
         cardFactoryRegistry.Clear();
         
         // Register Card Factories
-        AddNewCardFactory("major_shapeshift", new SimpleCardFactory<ShapeshiftCard>());
-        // AddNewCardFactory("major_single_piece_army", new SinglePieceArmyCardFactory());
-        AddNewCardFactory("major_pawn_army", new SimpleCardFactory<PawnArmyCard>());
-        AddNewCardFactory("major_shuffle", new SimpleCardFactory<ShuffleCard>());
-        AddNewCardFactory("major_lonely_pieces_stuck", new SimpleCardFactory<LonelyPiecesStuckCard>(), true);
-        AddNewCardFactory("major_friendly_fire", new SimpleCardFactory<FriendlyFireCard>(), true);
-        AddNewCardFactory("major_bigger_board", new SimpleCardFactory<BiggerBoardCard>());
-        AddNewCardFactory("major_level_up", new SimpleCardFactory<LevelUpCard>());
+        AddNewCardFactory(CardIds.Shapeshift, new SimpleCardFactory<ShapeshiftCard>());
+        // AddNewCardFactory(CardIds.SinglePieceArmy, new SinglePieceArmyCardFactory());
+        AddNewCardFactory(CardIds.PawnArmy, new SimpleCardFactory<PawnArmyCard>());
+        AddNewCardFactory(CardIds.Shuffle, new SimpleCardFactory<ShuffleCard>());
+        AddNewCardFactory(CardIds.LonelyPieces, new SimpleCardFactory<LonelyPiecesStuckCard>(), true);
+        AddNewCardFactory(CardIds.FriendlyFire, new SimpleCardFactory<FriendlyFireCard>(), true);
+        AddNewCardFactory(CardIds.BiggerBoard, new SimpleCardFactory<BiggerBoardCard>());
+        AddNewCardFactory(CardIds.LevelUp, new SimpleCardFactory<LevelUpCard>());
         
         // Minor Cards
         // Rules
-        AddNewCardFactory("minor_promotion", new PomotionCardFactory());
+        AddNewCardFactory(CardIds.Promotion, new PomotionCardFactory());
         
         // Piece
-        ChangePieceFactory = AddNewCardFactory("minor_change_piece", new ChangePieceCardFactory(), true, false);
+        ChangePieceFactory = AddNewCardFactory(CardIds.ChangePiece, new ChangePieceCardFactory(), true, false);
         
         // Space
     }
@@ -224,17 +224,17 @@ public partial class GameController
         MajorCardDeck = new CardDeck();
         AddChild(MajorCardDeck);
         
-        MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_shapeshift"));
-        MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_pawn_army"));
-        MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_shuffle"));
-        MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_lonely_pieces_stuck"));
-        MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_friendly_fire"));
-        MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_bigger_board"));
-        MajorCardDeck.AddCard(cardFactoryRegistry.GetValue("major_level_up"));
+        MajorCardDeck.AddCard(GetCardFactory(CardIds.Shapeshift));
+        MajorCardDeck.AddCard(GetCardFactory(CardIds.PawnArmy));
+        MajorCardDeck.AddCard(GetCardFactory(CardIds.Shuffle));
+        MajorCardDeck.AddCard(GetCardFactory(CardIds.LonelyPieces));
+        MajorCardDeck.AddCard(GetCardFactory(CardIds.FriendlyFire));
+        MajorCardDeck.AddCard(GetCardFactory(CardIds.BiggerBoard));
+        MajorCardDeck.AddCard(GetCardFactory(CardIds.LevelUp));
         
         // Set up the Decks
         MinorCardDeck = new CardDeck();
-        MinorCardDeck.AddCard(cardFactoryRegistry.GetValue("minor_promotion"), pieceInfoRegistry.GetKeys().Length);
+        MinorCardDeck.AddCard(GetCardFactory(CardIds.Promotion), pieceInfoRegistry.GetKeys().Length);
         AddChild(MinorCardDeck);
     }
 
@@ -309,5 +309,15 @@ public partial class GameController
         newFactory.displayCard = displayCard;
         cardFactoryRegistry.Register(id, newFactory);
         return newFactory;
+    }
+
+    public CardFactory GetCardFactory(string id)
+    {
+        return cardFactoryRegistry.GetValue(id);
+    }
+
+    public bool TryGetCardFactory(string id, out CardFactory factory)
+    {
+        return cardFactoryRegistry.TryGetValue(id, out factory);
     }
 }
