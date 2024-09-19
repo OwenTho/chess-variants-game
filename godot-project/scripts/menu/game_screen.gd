@@ -590,6 +590,8 @@ func _process(delta: float) -> void:
 		angle_from -= angle_from
 		# Lerp the angle towards
 		var rotate_angle = lerp_angle(angle_from, angle_to, 1 - pow(0.2, delta))
+		# Clamp, so that it can't spin too quickly
+		rotate_angle = clampf(rotate_angle, deg_to_rad(-45), deg_to_rad(45))
 		# Update the rotation, and lerp rotate_start
 		rotate_start = lerp(rotate_start, cur_mouse_position, 1 - pow(0.2, delta))
 		$BoardHolder.rotation = $BoardHolder.rotation + rotate_angle
