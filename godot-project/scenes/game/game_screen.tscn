@@ -156,9 +156,9 @@ fill_direction = 1
 
 [node name="Player2Info" parent="GameUI" instance=ExtResource("8_i3by4")]
 offset_left = 765.0
-offset_top = 560.0
+offset_top = 561.0
 offset_right = 1151.0
-offset_bottom = 647.0
+offset_bottom = 648.0
 
 [node name="BoardHolder" type="Node2D" parent="."]
 position = Vector2(576, 324)
