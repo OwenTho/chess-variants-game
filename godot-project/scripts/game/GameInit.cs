@@ -241,7 +241,7 @@ public partial class GameController
         // Set up the Decks
         MinorCardDeck = new CardDeck();
         MinorCardDeck.RemoveCards = false;
-        MinorCardDeck.AddCard(GetCardFactory(CardIds.Promotion), pieceInfoRegistry.GetKeys().Length);
+        MinorCardDeck.AddCard(GetCardFactory(CardIds.Promotion), CardWeights.Common);
         AddChild(MinorCardDeck);
     }
 
