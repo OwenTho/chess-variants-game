@@ -14,4 +14,12 @@ public static class CardIds
     // Minor Cards
     public const string ChangePiece = "minor_change_piece";
     public const string Promotion = "minor_promotion";
+
+    public static class Rules
+    {
+        public const string OneForward = "rule_one_forward";
+        public const string OneLeft = "rule_one_left";
+        public const string OneRight = "rule_one_right";
+        public const string OneBack = "rule_one_back";
+    }
 }

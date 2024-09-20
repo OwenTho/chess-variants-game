@@ -1156,6 +1156,36 @@ public partial class GameState : Node
         return existingCards;
     }
 
+    
+    
+    public void AddActionRule(string ruleId, string pieceId = null)
+    {
+        if (!gameController.actionRuleRegistry.TryGetValue(ruleId, out ActionRuleBase rule))
+        {
+            GD.PushError($"Tried to add an action rule {ruleId} when it has not been registered.");
+            return;
+        }
+        
+        // If target Piece is defined, add directly to the PieceInfo
+        if (pieceId != null)
+        {
+            if (gameController.pieceInfoRegistry.TryGetValue(pieceId, out PieceInfo info))
+            {
+                info.AddActionRule(rule);
+                return;
+            }
+            // If it didn't get the info, error
+            GD.PushError($"Couldn't get the PieceInfo for piece id {pieceId}.");
+            return;
+        }
+        
+        // If no pieceId is defined, add it to all pieceIds
+        foreach (var info in gameController.pieceInfoRegistry.GetValues())
+        {
+            info.AddActionRule(rule);
+        }
+    }
+
     public void AddVerificationRule(string ruleId, string pieceId = null)
     {
         if (!gameController.validationRuleRegistry.TryGetValue(ruleId, out ValidationRuleBase rule))
@@ -1170,6 +1200,7 @@ public partial class GameState : Node
             if (gameController.pieceInfoRegistry.TryGetValue(pieceId, out PieceInfo info))
             {
                 info.AddValidationRule(rule);
+                return;
             }
             // If it didn't get the info, error
             GD.PushError($"Couldn't get the PieceInfo for piece id {pieceId}.");

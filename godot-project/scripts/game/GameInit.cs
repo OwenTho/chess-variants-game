@@ -192,6 +192,10 @@ public partial class GameController
         // Minor Cards
         // Rules
         AddNewCardFactory(CardIds.Promotion, new PomotionCardFactory());
+        AddNewCardFactory(CardIds.Rules.OneForward, new RandomPieceRuleCardFactory(ActionRuleIds.Line.Forward, "Forward", "move and attack  one more space forward."), true);
+        AddNewCardFactory(CardIds.Rules.OneLeft, new RandomPieceRuleCardFactory(ActionRuleIds.Line.Left, "Left", "move and attack  one more space left."), true);
+        AddNewCardFactory(CardIds.Rules.OneRight, new RandomPieceRuleCardFactory(ActionRuleIds.Line.Right, "Right", "move and attack one more space right."), true);
+        AddNewCardFactory(CardIds.Rules.OneBack, new RandomPieceRuleCardFactory(ActionRuleIds.Line.Backward, "Backward", "move and attack  one more space backward."), true);
         
         // Piece
         ChangePieceFactory = AddNewCardFactory(CardIds.ChangePiece, new ChangePieceCardFactory(), true, false);
@@ -242,6 +246,10 @@ public partial class GameController
         MinorCardDeck = new CardDeck();
         MinorCardDeck.RemoveCards = false;
         MinorCardDeck.AddCard(GetCardFactory(CardIds.Promotion), CardWeights.Common);
+        MinorCardDeck.AddCard(GetCardFactory(CardIds.Rules.OneForward), CardWeights.Common);
+        MinorCardDeck.AddCard(GetCardFactory(CardIds.Rules.OneLeft), CardWeights.Common);
+        MinorCardDeck.AddCard(GetCardFactory(CardIds.Rules.OneRight), CardWeights.Common);
+        MinorCardDeck.AddCard(GetCardFactory(CardIds.Rules.OneBack), CardWeights.Common);
         AddChild(MinorCardDeck);
     }
 
