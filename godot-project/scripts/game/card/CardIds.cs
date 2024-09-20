@@ -17,6 +17,9 @@ public static class CardIds
 
     public static class Rules
     {
+        public const string MoveAttack = "rule_move_attack";
+        public const string MoveAttackDiagonal = "rule_move_attack_diagonal";
+        
         public const string OneForward = "rule_one_forward";
         public const string OneLeft = "rule_one_left";
         public const string OneRight = "rule_one_right";

@@ -1215,6 +1215,18 @@ public partial class GameState : Node
     }
 
 
+    public void EnableActionUpdatesForPieceId(string pieceId)
+    {
+        foreach (Piece piece in allPieces)
+        {
+            if (piece.GetPieceInfoId() == pieceId)
+            {
+                piece.EnableActionsUpdate();
+            }
+        }
+    }
+
+
 
 
     public string[] GetAllPieceIds()

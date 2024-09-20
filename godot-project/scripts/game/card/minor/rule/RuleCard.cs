@@ -1,24 +1,29 @@
 ﻿
+using System.Collections.Generic;
 using Godot;
-using Godot.Collections;
 
 public partial class RuleCard : CardBase
 {
     public string PieceId;
-    public string RuleId;
+    public string[] RuleIds;
     public string RuleName;
     public string RuleDescription;
     
-    public RuleCard (string ruleId, string ruleName = "No rule name provided.", string ruleDescription = "No rule description provided.")
+    public RuleCard (string[] ruleIds, string ruleName = "No rule name provided.", string ruleDescription = "No rule description provided.")
     {
-        RuleId = ruleId;
+        RuleIds = ruleIds;
         RuleName = ruleName;
         RuleDescription = ruleDescription;
     }
 
     public override void OnAddCard(GameState game)
     {
-        game.AddActionRule(RuleId, PieceId);
+        foreach (var ruleId in RuleIds)
+        {
+            // GD.Print($"Adding rule {ruleId} to {PieceId}.");
+            game.AddActionRule(ruleId, PieceId);
+            game.EnableActionUpdatesForPieceId(PieceId);
+        }
     }
 
     public override string GetCardName(GameState game)
@@ -34,32 +39,34 @@ public partial class RuleCard : CardBase
 
     protected override CardBase CloneCard()
     {
-        RuleCard newCard = new RuleCard(RuleId, RuleName, RuleDescription);
+        RuleCard newCard = new RuleCard(RuleIds, RuleName, RuleDescription);
         newCard.PieceId = PieceId;
         return newCard;
     }
 
-    protected override Dictionary<string, string> ToDict(GameState game)
+    protected override Godot.Collections.Dictionary<string, string> ToDict(GameState game)
     {
-        return new Dictionary<string, string>
+        Godot.Collections.Dictionary<string, string> cardData = new Godot.Collections.Dictionary<string, string>
         {
             { "piece_id", PieceId },
-            { "rule_id", RuleId },
             { "rule_name", RuleName },
-            { "rule_description", RuleDescription }
+            { "rule_description", RuleDescription },
+            { "rule_id_count", RuleIds.Length.ToString() }
         };
+
+        for (int i = 0; i < RuleIds.Length; i++)
+        {
+            cardData.Add($"rule_{i}_id", RuleIds[i]);
+        }
+        
+        return cardData;
     }
 
-    public override void FromDict(GameState game, Dictionary<string, string> dataDict)
+    public override void FromDict(GameState game, Godot.Collections.Dictionary<string, string> dataDict)
     {
         if (!dataDict.TryGetValue("piece_id", out PieceId))
         {
             GD.PushError("Data did not contain the value for the piece id.");
-        }
-
-        if (!dataDict.TryGetValue("rule_id", out RuleId))
-        {
-            GD.PushError("Data did not contain the value for the rule id.");
         }
 
         if (!dataDict.TryGetValue("rule_name", out RuleName))
@@ -70,6 +77,37 @@ public partial class RuleCard : CardBase
         if (!dataDict.TryGetValue("rule_description", out RuleDescription))
         {
             GD.PushError("Data did not contain the value for the rule description.");
+        }
+
+
+
+        if (dataDict.TryGetValue("rule_id_count", out string ruleCountString))
+        {
+            if (int.TryParse(ruleCountString, out int ruleCount))
+            {
+                List<string> ruleIds = new();
+                for (int i = 0; i < ruleCount; i++)
+                {
+                    if (dataDict.TryGetValue($"rule_{i}_id", out string id))
+                    {
+                        ruleIds.Add(id);
+                    }
+                    else
+                    {
+                        GD.PushError($"Data did not contain the value for the rule {i}.");
+                    }
+                }
+
+                RuleIds = ruleIds.ToArray();
+            }
+            else
+            {
+                GD.PushError("rule_id_count value was not an integer.");
+            }
+        }
+        else
+        {
+            GD.PushError("Data did not contain the number of rule ids.");
         }
     }
 }

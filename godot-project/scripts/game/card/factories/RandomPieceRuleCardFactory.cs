@@ -3,19 +3,25 @@ using System.Collections.Generic;
 
 public partial class RandomPieceRuleCardFactory : CardFactory
 {
-    public string RuleId;
+    public string[] RuleIds;
     public string RuleName;
     public string RuleDescription;
-    public RandomPieceRuleCardFactory(string ruleId, string ruleName, string ruleDescription = "No description provided.")
+
+    public RandomPieceRuleCardFactory(string[] ruleIds, string ruleName, string ruleDescription = "No description provided.")
     {
-        RuleId = ruleId;
+        RuleIds = ruleIds;
         RuleName = ruleName;
         RuleDescription = ruleDescription;
+    }
+    
+    public RandomPieceRuleCardFactory(string ruleId, string ruleName, string ruleDescription = "No description provided.") : this(new []{ ruleId }, ruleName, ruleDescription)
+    {
+
     }
 
     protected override CardBase CreateCard(GameState game)
     {
-        RuleCard newCard = new RuleCard(RuleId, RuleName, RuleDescription);
+        RuleCard newCard = new RuleCard(RuleIds, RuleName, RuleDescription);
         
         List<string> pieceIds = game.GetPieceIdsOnBoard();
         
