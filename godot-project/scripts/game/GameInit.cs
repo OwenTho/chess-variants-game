@@ -100,27 +100,27 @@ public partial class GameController
 
         // Register Rules
         // Generic
-        MakeNewActionRule(LineMoveId.UpLeft, new UpLeftLineMoveRule());
-        MakeNewActionRule(LineMoveId.Up, new UpLineMoveRule());
-        MakeNewActionRule(LineMoveId.UpRight, new UpRightLineMoveRule());
+        MakeNewActionRule(ActionRuleIds.Line.ForwardLeft, new ForwardLeftLineMoveRule());
+        MakeNewActionRule(ActionRuleIds.Line.Forward, new ForwardLineMoveRule());
+        MakeNewActionRule(ActionRuleIds.Line.ForwardRight, new ForwardRightLineMoveRule());
         
-        MakeNewActionRule(LineMoveId.Left, new LeftLineMoveRule());
-        MakeNewActionRule(LineMoveId.Right, new RightLineMoveRule());
+        MakeNewActionRule(ActionRuleIds.Line.Left, new LeftLineMoveRule());
+        MakeNewActionRule(ActionRuleIds.Line.Right, new RightLineMoveRule());
         
-        MakeNewActionRule(LineMoveId.DownLeft, new DownLeftLineMoveRule());
-        MakeNewActionRule(LineMoveId.Down, new DownLineMoveRule());
-        MakeNewActionRule(LineMoveId.DownRight, new DownRightLineMoveRule());
+        MakeNewActionRule(ActionRuleIds.Line.BackwardLeft, new BackwardLeftLineMoveRule());
+        MakeNewActionRule(ActionRuleIds.Line.Backward, new BackwardLineMoveRule());
+        MakeNewActionRule(ActionRuleIds.Line.BackwardRight, new BackwardRightLineMoveRule());
         
-        MakeNewActionRule("nothing", new NothingMoveRule());
+        MakeNewActionRule(ActionRuleIds.Nothing, new NothingMoveRule());
         
         // Piece Specific
-        MakeNewActionRule("pawn_move", new PawnMoveRule());
-        MakeNewActionRule("knight_move", new KnightMoveRule());
-        MakeNewActionRule("king_move", new KingMoveRule());
-        MakeNewActionRule("castle", new CastleRule());
+        MakeNewActionRule(ActionRuleIds.PawnMove, new PawnMoveRule());
+        MakeNewActionRule(ActionRuleIds.KnightMove, new KnightMoveRule());
+        MakeNewActionRule(ActionRuleIds.KingMove, new KingMoveRule());
+        MakeNewActionRule(ActionRuleIds.Castle, new CastleRule());
         
         // Piece Specific - Custom
-        MakeNewActionRule("warp_bishop_move", new WarpBishopMoveRule());
+        MakeNewActionRule(ActionRuleIds.WarpBishopMove, new WarpBishopMoveRule());
     }
 
     internal void InitActionFactories()
@@ -143,35 +143,35 @@ public partial class GameController
         pieceInfoRegistry.Clear();
 
         // Register Piece Info
-        MakeNewPieceInfo("pawn", "Pawn", "pawn.png").AddActionRule(actionRuleRegistry.GetValue("pawn_move"));
+        MakeNewPieceInfo("pawn", "Pawn", "pawn.png").AddActionRule(GetActionRule(ActionRuleIds.PawnMove));
         
         PieceInfo rookInfo = MakeNewPieceInfo("rook", "Rook", "rook.png");
-        rookInfo.AddActionRule(GetActionRule(LineMoveId.Left), 7).AddActionRule(GetActionRule(LineMoveId.Up), 7);
-        rookInfo.AddActionRule(GetActionRule(LineMoveId.Right), 7).AddActionRule(GetActionRule(LineMoveId.Down), 7);
-        MakeNewPieceInfo("knight", "Knight", "knight.png").AddActionRule(actionRuleRegistry.GetValue("knight_move"), 3);
+        rookInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.Left), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.Forward), 7);
+        rookInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.Right), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.Backward), 7);
+        MakeNewPieceInfo("knight", "Knight", "knight.png").AddActionRule(GetActionRule(ActionRuleIds.KnightMove), 3);
         
         PieceInfo bishopInfo = MakeNewPieceInfo("bishop", "Bishop", "bishop.png");
-        bishopInfo.AddActionRule(GetActionRule(LineMoveId.UpLeft), 7).AddActionRule(GetActionRule(LineMoveId.UpRight), 7);
-        bishopInfo.AddActionRule(GetActionRule(LineMoveId.DownLeft), 7).AddActionRule(GetActionRule(LineMoveId.DownRight), 7);
+        bishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.ForwardLeft), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.ForwardRight), 7);
+        bishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.BackwardLeft), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.BackwardRight), 7);
         
         PieceInfo queenInfo = MakeNewPieceInfo("queen", "Queen", "queen.png");
-        queenInfo.AddActionRule(GetActionRule(LineMoveId.Left), 7).AddActionRule(GetActionRule(LineMoveId.Up), 7);
-        queenInfo.AddActionRule(GetActionRule(LineMoveId.Right), 7).AddActionRule(GetActionRule(LineMoveId.Down), 7);
-        queenInfo.AddActionRule(GetActionRule(LineMoveId.UpLeft), 7).AddActionRule(GetActionRule(LineMoveId.UpRight), 7);
-        queenInfo.AddActionRule(GetActionRule(LineMoveId.DownLeft), 7).AddActionRule(GetActionRule(LineMoveId.DownRight), 7);
+        queenInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.Left), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.Forward), 7);
+        queenInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.Right), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.Backward), 7);
+        queenInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.ForwardLeft), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.ForwardRight), 7);
+        queenInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.BackwardLeft), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.BackwardRight), 7);
 
         PieceInfo kingInfo = MakeNewPieceInfo("king", "King", "king.png");
-        kingInfo.AddActionRule(GetActionRule(LineMoveId.Left), 1).AddActionRule(GetActionRule(LineMoveId.Right), 1);
-        kingInfo.AddActionRule(GetActionRule(LineMoveId.Up), 1).AddActionRule(GetActionRule(LineMoveId.Down), 1);
-        kingInfo.AddActionRule(GetActionRule(LineMoveId.UpLeft), 1, true)
-            .AddActionRule(GetActionRule(LineMoveId.UpRight), 1, true);
-        kingInfo.AddActionRule(GetActionRule(LineMoveId.DownLeft), 1, true)
-            .AddActionRule(GetActionRule(LineMoveId.DownRight), 1, true);
-        kingInfo.AddActionRule(actionRuleRegistry.GetValue("castle"));
+        kingInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.Left), 1).AddActionRule(GetActionRule(ActionRuleIds.Line.Right), 1);
+        kingInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.Forward), 1).AddActionRule(GetActionRule(ActionRuleIds.Line.Backward), 1);
+        kingInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.ForwardLeft), 1, true)
+            .AddActionRule(GetActionRule(ActionRuleIds.Line.ForwardRight), 1, true);
+        kingInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.BackwardLeft), 1, true)
+            .AddActionRule(GetActionRule(ActionRuleIds.Line.BackwardRight), 1, true);
+        kingInfo.AddActionRule(GetActionRule(ActionRuleIds.Castle));
         
         // Register custom Piece Info
-        MakeNewPieceInfo("warp_bishop", "Warp Bishop", "warp_bishop.png").AddActionRule(GetActionRule("warp_bishop_move"), 7);
-        MakeNewPieceInfo("rock", "Rock", "rock.png").AddActionRule(GetActionRule("nothing"));
+        MakeNewPieceInfo("warp_bishop", "Warp Bishop", "warp_bishop.png").AddActionRule(GetActionRule(ActionRuleIds.WarpBishopMove), 7);
+        MakeNewPieceInfo("rock", "Rock", "rock.png").AddActionRule(GetActionRule(ActionRuleIds.Nothing));
     }
 
     internal void InitCardFactories()
