@@ -764,7 +764,7 @@ public partial class GameState : Node
                     // only the actions at this location.
                     foreach (var action in location.Value)
                     {
-                        action.MakeInvalid(ActionBase.CarryType.None);
+                        action.MakeInvalid();
                     }
                 }
                 else
