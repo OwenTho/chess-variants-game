@@ -4,24 +4,6 @@ using Godot;
 
 public partial class PomotionCardFactory : CardFactory
 {
-    private List<string> GetPieceIdsOnBoard(GameState game)
-    {
-        List<string> existingPieceIds = new List<string>();
-        
-        // Get the id of the pieces currently in the game
-        foreach (var piece in game.allPieces)
-        {
-            string infoId = piece.GetPieceInfoId();
-            if (existingPieceIds.Contains(infoId))
-            {
-                continue;
-            }
-            existingPieceIds.Add(infoId);
-        }
-
-        return existingPieceIds;
-    }
-    
     private List<string> GetPossiblePromotions(GameState game)
     {
         List<CardBase> existingCards = GetExistingCards(game);
@@ -44,7 +26,7 @@ public partial class PomotionCardFactory : CardFactory
         }
         
         // If all pieces have a matching piece info id, remove it from the options
-        var pieceInfoIds = GetPieceIdsOnBoard(game);
+        var pieceInfoIds = game.GetPieceIdsOnBoard();
         if (pieceInfoIds.Count == 1)
         {
             possiblePromotions.Remove(pieceInfoIds[0]);
@@ -80,7 +62,7 @@ public partial class PomotionCardFactory : CardFactory
         PromotionCard newCard = new PromotionCard();
         
         // Now pick what piece will promote into it
-        List<string> validPieceIds = GetPieceIdsOnBoard(game);
+        List<string> validPieceIds = game.GetPieceIdsOnBoard();
         if (validPieceIds.Count == 0)
         {
             GD.PushError("Tried to make a PromotionCard, but it found no piece ids on the board.");

@@ -1191,6 +1191,24 @@ public partial class GameState : Node
         return gameController.pieceInfoRegistry.GetKeys();
     }
     
+    public List<string> GetPieceIdsOnBoard()
+    {
+        List<string> existingPieceIds = new List<string>();
+        
+        // Get the id of the pieces currently in the game
+        foreach (var piece in allPieces)
+        {
+            string infoId = piece.GetPieceInfoId();
+            if (existingPieceIds.Contains(infoId))
+            {
+                continue;
+            }
+            existingPieceIds.Add(infoId);
+        }
+
+        return existingPieceIds;
+    }
+    
     
     
     public GameState Clone()
