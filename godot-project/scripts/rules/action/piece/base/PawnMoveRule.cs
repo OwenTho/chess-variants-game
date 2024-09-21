@@ -5,52 +5,34 @@ internal partial class PawnMoveRule : ActionRuleBase
 {
     public override void AddPossibleActions(GameState game, Piece piece, int maxForward)
     {
-        // Move forward a number of spaces
+        // Only on first turn, allow an extra space forward past the level.
         Vector2I thisPosition = new Vector2I(piece.cell.x, piece.cell.y);
-        MoveAction lastMove = null;
-        for (int i = 1; i <= maxForward; i++)
-        {
-            Vector2I actionPos = thisPosition + (piece.forwardDirection.AsVector() * i);
-            MoveAction newMove = new MoveAction(piece, actionPos, actionPos);
-            if (lastMove != null)
-            {
-                newMove.AddDependency(lastMove);
-            }
-            piece.AddAction(newMove);
-            lastMove = newMove;
-        }
-
-        // Allow an extra space forward for the first turn
         if (piece.timesMoved == 0)
         {
+            SlideAction lastMove = null;
+            for (int i = 1; i <= maxForward; i++)
+            {
+                Vector2I slidePos = thisPosition + (piece.forwardDirection.AsVector() * i);
+                SlideAction newSlide = new SlideAction(piece, slidePos);
+                if (lastMove != null)
+                {
+                    newSlide.AddDependency(lastMove);
+                }
+
+                piece.AddAction(newSlide);
+                lastMove = newSlide;
+            }
+
+            // Allow an extra space forward for the first turn
             Vector2I actionPos = thisPosition + (piece.forwardDirection.AsVector() * (maxForward + 1));
             PawnMoveAction newMove = new PawnMoveAction(piece, actionPos, actionPos);
             if (lastMove != null)
             {
                 newMove.AddDependency(lastMove);
             }
+
             // The action is unique, due to needing to allow En passant
             piece.AddAction(newMove);
-        }
-
-        
-        // Attacking is possible at diagonals
-        SlideAction prevRight = null;
-        SlideAction prevLeft = null;
-        for (int i = 1; i <= maxForward; i++)
-        {
-            AttackAction newRightAttack = Attack(piece, thisPosition + ((piece.forwardDirection.AsVector() + GridVectors.Right) * i), AttackType.MoveIf, prevRight);
-            AttackAction newLeftAttack = Attack(piece, thisPosition + ((piece.forwardDirection.AsVector() + GridVectors.Left) * i), AttackType.MoveIf, prevLeft);
-            
-            
-            // If there is at least one more attack to place, create a new slide action
-            if (i < maxForward)
-            {
-                prevRight = new SlideAction(piece, newRightAttack.moveAction.moveLocation);
-                prevLeft = new SlideAction(piece, newLeftAttack.moveAction.moveLocation);
-                piece.AddAction(prevRight);
-                piece.AddAction(prevLeft);
-            }
         }
 
         // If next to a piece that moved twice, allow En passant

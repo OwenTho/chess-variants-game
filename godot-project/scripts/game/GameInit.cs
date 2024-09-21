@@ -101,6 +101,18 @@ public partial class GameController
         // Register Rules
         
         // Line
+        // Move
+        MakeNewActionRule(ActionRuleIds.Line.Move.ForwardLeft, new LineMoveRule(RelativePieceDirection.ForwardLeft));
+        MakeNewActionRule(ActionRuleIds.Line.Move.Forward, new LineMoveRule(RelativePieceDirection.Forward));
+        MakeNewActionRule(ActionRuleIds.Line.Move.ForwardRight, new LineMoveRule(RelativePieceDirection.ForwardRight));
+        
+        MakeNewActionRule(ActionRuleIds.Line.Move.Left, new LineMoveRule(RelativePieceDirection.Left));
+        MakeNewActionRule(ActionRuleIds.Line.Move.Right, new LineMoveRule(RelativePieceDirection.Right));
+        
+        MakeNewActionRule(ActionRuleIds.Line.Move.BackwardLeft, new LineMoveRule(RelativePieceDirection.BackwardLeft));
+        MakeNewActionRule(ActionRuleIds.Line.Move.Backward, new LineMoveRule(RelativePieceDirection.Backward));
+        MakeNewActionRule(ActionRuleIds.Line.Move.BackwardRight, new LineMoveRule(RelativePieceDirection.BackwardRight));
+        
         // Move -> Attack
         MakeNewActionRule(ActionRuleIds.Line.MoveAttack.ForwardLeft, new LineMoveAttackRule(RelativePieceDirection.ForwardLeft));
         MakeNewActionRule(ActionRuleIds.Line.MoveAttack.Forward, new LineMoveAttackRule(RelativePieceDirection.Forward));
@@ -121,8 +133,10 @@ public partial class GameController
         MakeNewActionRule(ActionRuleIds.Line.SlideAttack.Left, new SlideAttackMoveRule(RelativePieceDirection.Left));
         MakeNewActionRule(ActionRuleIds.Line.SlideAttack.Right, new SlideAttackMoveRule(RelativePieceDirection.Right));
         
+        MakeNewActionRule(ActionRuleIds.Line.SlideAttack.BackwardLeft, new SlideAttackMoveRule(RelativePieceDirection.BackwardLeft));
         MakeNewActionRule(ActionRuleIds.Line.SlideAttack.Backward, new SlideAttackMoveRule(RelativePieceDirection.Backward));
         MakeNewActionRule(ActionRuleIds.Line.SlideAttack.BackwardRight, new SlideAttackMoveRule(RelativePieceDirection.BackwardRight));
+        
         
         // Generic
         MakeNewActionRule(ActionRuleIds.Nothing, new NothingMoveRule());
@@ -157,7 +171,11 @@ public partial class GameController
         pieceInfoRegistry.Clear();
 
         // Register Piece Info
-        MakeNewPieceInfo("pawn", "Pawn", "pawn.png").AddActionRule(GetActionRule(ActionRuleIds.PawnMove));
+        PieceInfo pawnInfo = MakeNewPieceInfo("pawn", "Pawn", "pawn.png");
+        pawnInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.Move.Forward), 1);
+        pawnInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.SlideAttack.ForwardLeft), 1);
+        pawnInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.SlideAttack.ForwardRight), 1);
+        pawnInfo.AddActionRule(GetActionRule(ActionRuleIds.PawnMove));
         
         PieceInfo rookInfo = MakeNewPieceInfo("rook", "Rook", "rook.png");
         rookInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.Left), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.Forward), 7);
@@ -190,6 +208,7 @@ public partial class GameController
         warpBishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.SlideAttack.ForwardRight), 1, true);
         warpBishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.SlideAttack.BackwardLeft), 1, true);
         warpBishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.SlideAttack.BackwardRight), 1, true);
+        
         MakeNewPieceInfo("rock", "Rock", "rock.png").AddActionRule(GetActionRule(ActionRuleIds.Nothing));
     }
 

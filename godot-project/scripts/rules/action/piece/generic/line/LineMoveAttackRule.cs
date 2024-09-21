@@ -23,7 +23,7 @@ public partial class LineMoveAttackRule : RelativeLineRuleBase
             prevAction = null;
         }
         AttackAction newAttack = Attack(piece, actionLocation, AttackType.IfMove, prevAction);
-        newAttack.moveAction.tags.Add("line_move");
+        newAttack.moveAction.Tag("line_move", ActionBase.CarryType.None);
 
         prevAction = newAttack.moveAction;
         OnNewLineAction(game, piece, newAttack.moveAction, newAttack);

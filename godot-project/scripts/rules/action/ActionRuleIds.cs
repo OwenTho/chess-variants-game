@@ -7,6 +7,20 @@ public static class ActionRuleIds
     // Line rules
     public static class Line
     {
+        public static class Move
+        {
+            public const string ForwardLeft = "slide_move_front_left";
+            public const string Forward = "slide_move_front";
+            public const string ForwardRight = "slide_move_front_right";
+
+            public const string Left = "slide_move_left";
+            public const string Right = "slide_move_right";
+
+            public const string BackwardLeft = "slide_move_back_left";
+            public const string Backward = "slide_move_back";
+            public const string BackwardRight = "slide_move_back_right";
+        }
+        
         public static class MoveAttack
         {
             public const string ForwardLeft = "line_front_left";
