@@ -1,8 +1,22 @@
-﻿using Godot;
+﻿
+using Godot;
 
-public abstract partial class LineMoveRule : LineRuleBase
+public partial class LineMoveAttackRule : RelativeLineRuleBase
 {
-    public override ActionBase MakeActionAt(GameState game, Piece piece, Vector2I actionLocation, ActionBase prevAction)
+    public LineMoveAttackRule(LineDirectionChooserBase chooser) : base(chooser)
+    {
+        
+    }
+    
+    public LineMoveAttackRule(RelativePieceDirection[] dirs) : base(dirs)
+    {
+    }
+
+    public LineMoveAttackRule(RelativePieceDirection dir) : base(dir)
+    {
+    }
+
+    public override ActionBase MakeActionAt(GameState game, Piece piece, Vector2I actionLocation, ActionBase prevAction, bool isLastAction)
     {
         if (prevAction is not MoveAction)
         {

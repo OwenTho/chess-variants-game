@@ -4,18 +4,36 @@ public static class ActionRuleIds
     // Generic
     public const string Nothing = "nothing";
 
+    // Line rules
     public static class Line
     {
-        public const string ForwardLeft = "line_front_left";
-        public const string Forward = "line_front";
-        public const string ForwardRight = "line_front_right";
+        public static class MoveAttack
+        {
+            public const string ForwardLeft = "line_front_left";
+            public const string Forward = "line_front";
+            public const string ForwardRight = "line_front_right";
 
-        public const string Left = "line_left";
-        public const string Right = "line_right";
-            
-        public const string BackwardLeft = "line_back_left";
-        public const string Backward = "line_back";
-        public const string BackwardRight = "line_back_right";
+            public const string Left = "line_left";
+            public const string Right = "line_right";
+
+            public const string BackwardLeft = "line_back_left";
+            public const string Backward = "line_back";
+            public const string BackwardRight = "line_back_right";
+        }
+
+        public static class SlideAttack
+        {
+            public const string ForwardLeft = "slide_attack_front_left";
+            public const string Forward = "slide_attack_front";
+            public const string ForwardRight = "slide_attack_front_right";
+
+            public const string Left = "slide_attack_left";
+            public const string Right = "slide_attack_right";
+
+            public const string BackwardLeft = "slide_attack_back_left";
+            public const string Backward = "slide_attack_back";
+            public const string BackwardRight = "slide_attack_back_right";
+        }
     }
     
     

@@ -1,8 +1,7 @@
 ﻿using Godot;
-using Godot.Collections;
 
 
-internal partial class KingMoveRule : LineMoveRule
+internal partial class KingMoveRule : LineMoveAttackRule
 {
     public override void AddPossibleActions(GameState game, Piece piece, int level)
     {
@@ -17,14 +16,11 @@ internal partial class KingMoveRule : LineMoveRule
         Attack(piece, thisPosition + GridVectors.DownRight, AttackType.IfMove); // Down Right
     }
 
-    public override Vector2I[] GetDirs(GameState game, Piece piece)
+    public KingMoveRule(RelativePieceDirection[] dirs) : base(dirs)
     {
-        return new[]
-        {
-            GridVectors.Up,
-            GridVectors.Left,
-            GridVectors.Right,
-            GridVectors.Down
-        };
+    }
+
+    public KingMoveRule(RelativePieceDirection dir) : base(dir)
+    {
     }
 }

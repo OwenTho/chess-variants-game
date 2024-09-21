@@ -14,12 +14,12 @@ public abstract partial class LineRuleBase : ActionRuleBase
             for (int i = 1; i <= maxForward; i++)
             {
                 Vector2I actionPos = thisPosition + (dir * i);
-                prevAction = MakeActionAt(game, piece, actionPos, prevAction);
+                prevAction = MakeActionAt(game, piece, actionPos, prevAction, i == maxForward);
             }
         }
     }
     
     public abstract Vector2I[] GetDirs(GameState game, Piece piece);
 
-    public abstract ActionBase MakeActionAt(GameState game, Piece piece, Vector2I actionLocation, ActionBase prevAction);
+    public abstract ActionBase MakeActionAt(GameState game, Piece piece, Vector2I actionLocation, ActionBase prevAction, bool isLastAction);
 }

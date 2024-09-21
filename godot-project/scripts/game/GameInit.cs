@@ -99,24 +99,38 @@ public partial class GameController
         actionRuleRegistry.Clear();
 
         // Register Rules
+        
+        // Line
+        // Move -> Attack
+        MakeNewActionRule(ActionRuleIds.Line.MoveAttack.ForwardLeft, new LineMoveAttackRule(RelativePieceDirection.ForwardLeft));
+        MakeNewActionRule(ActionRuleIds.Line.MoveAttack.Forward, new LineMoveAttackRule(RelativePieceDirection.Forward));
+        MakeNewActionRule(ActionRuleIds.Line.MoveAttack.ForwardRight, new LineMoveAttackRule(RelativePieceDirection.ForwardRight));
+        
+        MakeNewActionRule(ActionRuleIds.Line.MoveAttack.Left, new LineMoveAttackRule(RelativePieceDirection.Left));
+        MakeNewActionRule(ActionRuleIds.Line.MoveAttack.Right, new LineMoveAttackRule(RelativePieceDirection.Right));
+        
+        MakeNewActionRule(ActionRuleIds.Line.MoveAttack.BackwardLeft, new LineMoveAttackRule(RelativePieceDirection.BackwardLeft));
+        MakeNewActionRule(ActionRuleIds.Line.MoveAttack.Backward, new LineMoveAttackRule(RelativePieceDirection.Backward));
+        MakeNewActionRule(ActionRuleIds.Line.MoveAttack.BackwardRight, new LineMoveAttackRule(RelativePieceDirection.BackwardRight));
+        
+        // Slide -> Move + Attack
+        MakeNewActionRule(ActionRuleIds.Line.SlideAttack.ForwardLeft, new SlideAttackMoveRule(RelativePieceDirection.ForwardLeft));
+        MakeNewActionRule(ActionRuleIds.Line.SlideAttack.Forward, new SlideAttackMoveRule(RelativePieceDirection.Forward));
+        MakeNewActionRule(ActionRuleIds.Line.SlideAttack.ForwardRight, new SlideAttackMoveRule(RelativePieceDirection.ForwardRight));
+        
+        MakeNewActionRule(ActionRuleIds.Line.SlideAttack.Left, new SlideAttackMoveRule(RelativePieceDirection.Left));
+        MakeNewActionRule(ActionRuleIds.Line.SlideAttack.Right, new SlideAttackMoveRule(RelativePieceDirection.Right));
+        
+        MakeNewActionRule(ActionRuleIds.Line.SlideAttack.Backward, new SlideAttackMoveRule(RelativePieceDirection.Backward));
+        MakeNewActionRule(ActionRuleIds.Line.SlideAttack.BackwardRight, new SlideAttackMoveRule(RelativePieceDirection.BackwardRight));
+        
         // Generic
-        MakeNewActionRule(ActionRuleIds.Line.ForwardLeft, new ForwardLeftLineMoveRule());
-        MakeNewActionRule(ActionRuleIds.Line.Forward, new ForwardLineMoveRule());
-        MakeNewActionRule(ActionRuleIds.Line.ForwardRight, new ForwardRightLineMoveRule());
-        
-        MakeNewActionRule(ActionRuleIds.Line.Left, new LeftLineMoveRule());
-        MakeNewActionRule(ActionRuleIds.Line.Right, new RightLineMoveRule());
-        
-        MakeNewActionRule(ActionRuleIds.Line.BackwardLeft, new BackwardLeftLineMoveRule());
-        MakeNewActionRule(ActionRuleIds.Line.Backward, new BackwardLineMoveRule());
-        MakeNewActionRule(ActionRuleIds.Line.BackwardRight, new BackwardRightLineMoveRule());
-        
         MakeNewActionRule(ActionRuleIds.Nothing, new NothingMoveRule());
+        
         
         // Piece Specific
         MakeNewActionRule(ActionRuleIds.PawnMove, new PawnMoveRule());
         MakeNewActionRule(ActionRuleIds.KnightMove, new KnightMoveRule());
-        MakeNewActionRule(ActionRuleIds.KingMove, new KingMoveRule());
         MakeNewActionRule(ActionRuleIds.Castle, new CastleRule());
         
         // Piece Specific - Custom
@@ -146,31 +160,36 @@ public partial class GameController
         MakeNewPieceInfo("pawn", "Pawn", "pawn.png").AddActionRule(GetActionRule(ActionRuleIds.PawnMove));
         
         PieceInfo rookInfo = MakeNewPieceInfo("rook", "Rook", "rook.png");
-        rookInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.Left), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.Forward), 7);
-        rookInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.Right), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.Backward), 7);
+        rookInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.Left), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.Forward), 7);
+        rookInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.Right), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.Backward), 7);
         MakeNewPieceInfo("knight", "Knight", "knight.png").AddActionRule(GetActionRule(ActionRuleIds.KnightMove), 3);
         
         PieceInfo bishopInfo = MakeNewPieceInfo("bishop", "Bishop", "bishop.png");
-        bishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.ForwardLeft), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.ForwardRight), 7);
-        bishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.BackwardLeft), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.BackwardRight), 7);
+        bishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.ForwardLeft), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.ForwardRight), 7);
+        bishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.BackwardLeft), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.BackwardRight), 7);
         
         PieceInfo queenInfo = MakeNewPieceInfo("queen", "Queen", "queen.png");
-        queenInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.Left), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.Forward), 7);
-        queenInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.Right), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.Backward), 7);
-        queenInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.ForwardLeft), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.ForwardRight), 7);
-        queenInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.BackwardLeft), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.BackwardRight), 7);
+        queenInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.Left), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.Forward), 7);
+        queenInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.Right), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.Backward), 7);
+        queenInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.ForwardLeft), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.ForwardRight), 7);
+        queenInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.BackwardLeft), 7).AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.BackwardRight), 7);
 
         PieceInfo kingInfo = MakeNewPieceInfo("king", "King", "king.png");
-        kingInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.Left), 1).AddActionRule(GetActionRule(ActionRuleIds.Line.Right), 1);
-        kingInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.Forward), 1).AddActionRule(GetActionRule(ActionRuleIds.Line.Backward), 1);
-        kingInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.ForwardLeft), 1, true)
-            .AddActionRule(GetActionRule(ActionRuleIds.Line.ForwardRight), 1, true);
-        kingInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.BackwardLeft), 1, true)
-            .AddActionRule(GetActionRule(ActionRuleIds.Line.BackwardRight), 1, true);
+        kingInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.Left), 1).AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.Right), 1);
+        kingInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.Forward), 1).AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.Backward), 1);
+        kingInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.ForwardLeft), 1, true)
+            .AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.ForwardRight), 1, true);
+        kingInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.BackwardLeft), 1, true)
+            .AddActionRule(GetActionRule(ActionRuleIds.Line.MoveAttack.BackwardRight), 1, true);
         kingInfo.AddActionRule(GetActionRule(ActionRuleIds.Castle));
         
         // Register custom Piece Info
-        MakeNewPieceInfo("warp_bishop", "Warp Bishop", "warp_bishop.png").AddActionRule(GetActionRule(ActionRuleIds.WarpBishopMove), 7);
+        PieceInfo warpBishopInfo = MakeNewPieceInfo("warp_bishop", "Warp Bishop", "warp_bishop.png");
+        warpBishopInfo.AddActionRule(GetActionRule(ActionRuleIds.WarpBishopMove), 7);
+        warpBishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.SlideAttack.ForwardLeft), 1, true);
+        warpBishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.SlideAttack.ForwardRight), 1, true);
+        warpBishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.SlideAttack.BackwardLeft), 1, true);
+        warpBishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.SlideAttack.BackwardRight), 1, true);
         MakeNewPieceInfo("rock", "Rock", "rock.png").AddActionRule(GetActionRule(ActionRuleIds.Nothing));
     }
 
@@ -196,10 +215,10 @@ public partial class GameController
             new RandomPieceRuleCardFactory(
                 new []
                 {
-                    ActionRuleIds.Line.Forward,
-                    ActionRuleIds.Line.Left,
-                    ActionRuleIds.Line.Right,
-                    ActionRuleIds.Line.Backward
+                    ActionRuleIds.Line.MoveAttack.Forward,
+                    ActionRuleIds.Line.MoveAttack.Left,
+                    ActionRuleIds.Line.MoveAttack.Right,
+                    ActionRuleIds.Line.MoveAttack.Backward
                 },
                 "Move Further", "move and attack one further horizontally and vertically."
             ), true, true, true
@@ -208,10 +227,10 @@ public partial class GameController
             new RandomPieceRuleCardFactory(
                 new []
                 {
-                    ActionRuleIds.Line.ForwardLeft,
-                    ActionRuleIds.Line.ForwardRight,
-                    ActionRuleIds.Line.BackwardLeft,
-                    ActionRuleIds.Line.BackwardRight
+                    ActionRuleIds.Line.MoveAttack.ForwardLeft,
+                    ActionRuleIds.Line.MoveAttack.ForwardRight,
+                    ActionRuleIds.Line.MoveAttack.BackwardLeft,
+                    ActionRuleIds.Line.MoveAttack.BackwardRight
                 },
                 "Diag. Move Further", "move and attack one further diagonally."
             ), true, true, true
