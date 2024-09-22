@@ -79,18 +79,18 @@ public partial class GameController
         initialValidationRules.Clear();
 
         // Register Rules
-        MakeNewValidationRule("no_team_attack", new NoTeamAttackRule(), true);
-        MakeNewValidationRule("no_team_overlap", new NoTeamOverlapRule(), true);
-        MakeNewValidationRule("no_enemy_overlap", new NoEnemyOverlapRule(), true);
-        MakeNewValidationRule("enemy_attack_allow_overlap", new EnemyAttackAllowOverlapRule(), true);
-        MakeNewValidationRule("line_move_stop", new LineMoveStopRule(), true);
-        MakeNewValidationRule("inside_board", new InsideBoardRule(), true);
-        MakeNewValidationRule("attack_needs_target", new AttackNeedsTargetRule(), true);
+        MakeNewValidationRule(ValidationRuleIds.NoTeamAttack, new NoTeamAttackRule(), true);
+        MakeNewValidationRule(ValidationRuleIds.NoTeamOverlap, new NoTeamOverlapRule(), true);
+        MakeNewValidationRule(ValidationRuleIds.NoEnemyOverlap, new NoEnemyOverlapRule(), true);
+        MakeNewValidationRule(ValidationRuleIds.EnemyAttackAllowOverlap, new EnemyAttackAllowOverlapRule(), true);
+        MakeNewValidationRule(ValidationRuleIds.LineMoveStop, new LineMoveStopRule(), true);
+        MakeNewValidationRule(ValidationRuleIds.InsideBoard, new InsideBoardRule(), true);
+        MakeNewValidationRule(ValidationRuleIds.AttackNeedsTarget, new AttackNeedsTargetRule(), true);
         
         // Register Major Card Rules
         MakeNewValidationRule(LonelyPiecesStuckCard.RuleId, new LonelyPiecesStuckRule());
-        MakeNewValidationRule("allow_team_attack", new AllowTeamAttackRule());
-        MakeNewValidationRule("team_attack_allow_overlap", new TeamAttackAllowOverlapRule());
+        MakeNewValidationRule(ValidationRuleIds.Counters.AllowTeamAttack, new AllowTeamAttackRule());
+        MakeNewValidationRule(ValidationRuleIds.Counters.TeamAttackAllowOverlap, new TeamAttackAllowOverlapRule());
     }
     
     internal void InitActionRules()
@@ -333,15 +333,16 @@ public partial class GameController
         GD.Print($"Made new Validation Rule: {id}");
     }
 
-    public bool TryGetActionRule(string id, out ActionRuleBase rule)
+    public bool TryGetValidationRule(string id, out ValidationRuleBase rule)
     {
-        return actionRuleRegistry.TryGetValue(id, out rule);
+        return validationRuleRegistry.TryGetValue(id, out rule);
+    }
+
+    public ValidationRuleBase GetValidationRule(string id)
+    {
+        return validationRuleRegistry.GetValue(id);
     }
     
-    public ActionRuleBase GetActionRule(string id)
-    {
-        return actionRuleRegistry.GetValue(id);
-    }
     
     private void MakeNewActionRule(string id, ActionRuleBase newRule, int defaultLevel = 1)
     {
@@ -350,7 +351,17 @@ public partial class GameController
         actionRuleRegistry.Register(id, newRule);
         GD.Print($"Made new Action Rule: {id}");
     }
+    
+    public bool TryGetActionRule(string id, out ActionRuleBase rule)
+    {
+        return actionRuleRegistry.TryGetValue(id, out rule);
+    }
+    public ActionRuleBase GetActionRule(string id) 
+    {
+        return actionRuleRegistry.GetValue(id);
+    }
 
+    
     private ActionFactory RegisterNewAction<T>(string id) where T : ActionBase, new()
     {
         // Update the Action's actionId
