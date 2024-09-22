@@ -96,7 +96,8 @@ func _ready() -> void:
 func _on_init() -> void:
 	cursor.board = GameManager.board
 	
-	Debug.stats.add_property(GameManager.game_controller.currentGameState, "currentPlayerNum")
+	if OS.is_debug_build():
+		Debug.stats.add_property(GameManager.game_controller.currentGameState, "currentPlayerNum")
 
 func _on_cursor_highlight_cell_updated(new_cell: Vector2i) -> void:
 	_update_cursor_visibility()
