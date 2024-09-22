@@ -87,6 +87,11 @@ public partial class GameController
         MakeNewValidationRule(ValidationRuleIds.InsideBoard, new InsideBoardRule(), true);
         MakeNewValidationRule(ValidationRuleIds.AttackNeedsTarget, new AttackNeedsTargetRule(), true);
         
+        MakeNewValidationRule(ValidationRuleIds.Piece.Invincible, new InvinciblePieceRule(), true);
+        
+        // Register Piece rules
+        MakeNewValidationRule(ValidationRuleIds.Piece.BlockadeNoAttack, new BlockadeNoAttackRule());
+        
         // Register Major Card Rules
         MakeNewValidationRule(LonelyPiecesStuckCard.RuleId, new LonelyPiecesStuckRule());
         MakeNewValidationRule(ValidationRuleIds.Counters.AllowTeamAttack, new AllowTeamAttackRule());
@@ -210,6 +215,11 @@ public partial class GameController
         warpBishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.SlideAttack.BackwardRight), 1, true);
         
         MakeNewPieceInfo("rock", "Rock", "rock.png").AddActionRule(GetActionRule(ActionRuleIds.Nothing));
+        
+        PieceInfo blockadeInfo = MakeNewPieceInfo("blockade", "Blockade", "blockade.png");
+        blockadeInfo.tags.Add(InvinciblePieceRule.InvincibleTag);
+        blockadeInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.Move.Left), 2);
+        blockadeInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.Move.Right), 2);
     }
 
     internal void InitCardFactories()
@@ -317,6 +327,7 @@ public partial class GameController
         AddCard(newCard);
     }
 
+    
     private void MakeNewValidationRule(string id, ValidationRuleBase newRule, bool makeInitialRule = false)
     {
         newRule.ruleId = id;

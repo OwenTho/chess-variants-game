@@ -14,6 +14,9 @@ public partial class PieceInfo : Node
 
     // Level for all pieces of this type
     public int level { get; internal set; } = 0;
+    
+    // Tags for the PieceInfo.
+    public Tags tags = new();
 
     internal PieceInfo(string id, string displayName = null, int initialLevel = 1, List<PieceRule> initialRules = null, List<ValidationRuleBase> initialValidationRules = null)
     {

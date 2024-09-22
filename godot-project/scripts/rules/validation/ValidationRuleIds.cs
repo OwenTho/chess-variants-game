@@ -19,4 +19,10 @@ public static class ValidationRuleIds
         public const string TeamAttackAllowOverlap = "team_attack_allow_overlap";
     }
 
+    public static class Piece
+    {
+        public const string Invincible = "invincible_piece";
+        
+        public const string BlockadeNoAttack = "no_blockade_attack";
+    }
 }
