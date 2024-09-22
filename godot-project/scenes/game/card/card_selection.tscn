@@ -14,9 +14,9 @@ script = ExtResource("1_6vab3")
 [node name="CenterContainer" type="CenterContainer" parent="."]
 layout_mode = 0
 offset_left = 575.0
-offset_top = 335.0
+offset_top = 304.49
 offset_right = 596.0
-offset_bottom = 363.0
+offset_bottom = 332.49
 use_top_left = true
 
 [node name="CardContainer" type="HBoxContainer" parent="CenterContainer"]
