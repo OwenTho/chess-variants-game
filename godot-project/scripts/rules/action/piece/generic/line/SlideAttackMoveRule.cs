@@ -22,6 +22,7 @@ public partial class SlideAttackMoveRule : RelativeLineRuleBase
         if (!isLastAction)
         {
             returnAction = new SlideAction(piece, actionLocation);
+            piece.AddAction(returnAction);
         }
         
         AttackAction newAttack = Attack(piece, actionLocation, AttackType.MoveIf, prevAction);
