@@ -70,8 +70,8 @@ top_level = true
 z_index = 3000
 layout_mode = 3
 anchors_preset = 0
-offset_right = 1154.0
-offset_bottom = 649.0
+offset_right = 1152.0
+offset_bottom = 648.0
 
 [node name="GameInput" type="Control" parent="GameUI"]
 layout_mode = 3
@@ -201,5 +201,6 @@ offset_bottom = 648.0
 [connection signal="pressed" from="GameUI/CardSelection/CardSelectButtons/BtnUse" to="." method="_on_btn_use_pressed"]
 [connection signal="pressed" from="GameUI/BtnQuit" to="." method="_on_btn_quit_pressed"]
 [connection signal="pressed" from="GameUI/ResignBtn" to="." method="_on_resign_btn_pressed"]
+[connection signal="pressed" from="GameUI/RequestDrawBtn" to="." method="_on_request_draw_btn_pressed"]
 
 [editable path="DebugOverlay"]

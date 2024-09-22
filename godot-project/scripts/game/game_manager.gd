@@ -749,18 +749,28 @@ func _send_valid_actions() -> void:
 		_send_piece_actions(piece)
 	game_mutex.unlock()
 
-func _send_piece_actions(piece: Piece) -> void:
+func get_piece_actions(piece: Piece) -> Array[Vector2i]:
 	if piece == null:
-		push_error("Tried to send actions of null piece.")
-		return
-	# Get all of the action locations
+		return []
+	
 	var action_locations: Array[Vector2i] = []
 	for action in piece.currentPossibleActions:
+		# Only if action is a valid instance
+		if not is_instance_valid(action):
+			continue
 		# Only process the action if it's acting and valid
 		if not action.valid or not action.acting:
 			continue
 		if action.actionLocation not in action_locations:
 			action_locations.append(action.actionLocation)
+	return action_locations
+
+func _send_piece_actions(piece: Piece) -> void:
+	if piece == null:
+		push_error("Tried to send actions of null piece.")
+		return
+	# Get all of the action locations
+	var action_locations = get_piece_actions(piece)
 	
 	# Now send the action locations for the piece
 	_receive_piece_actions.rpc(piece.id, action_locations)

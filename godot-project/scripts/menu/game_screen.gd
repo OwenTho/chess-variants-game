@@ -19,7 +19,6 @@ class_name Game
 @export var player2_info: Control
 @export var player2_card_display : Control
 
-
 var selected_piece: Piece2D
 
 var game_active: bool = false
