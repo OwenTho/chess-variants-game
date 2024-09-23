@@ -263,6 +263,8 @@ public partial class GameController
                 "Diag. Move Further", "move and attack one further diagonally, up to 3 spaces.", 3
             ), true, true, true
         );
+        AddNewCardFactory(CardIds.Rules.Nothing,
+            new RandomPieceRuleCardFactory(ActionRuleIds.Nothing, "Nothing", "do nothing.", 1));
         
         // Piece
         ChangePieceFactory = AddNewCardFactory(CardIds.ChangePiece, new ChangePieceCardFactory(), true, false);
@@ -315,6 +317,7 @@ public partial class GameController
         MinorCardDeck.AddCard(GetCardFactory(CardIds.Promotion), CardWeights.Common);
         MinorCardDeck.AddCard(GetCardFactory(CardIds.Rules.MoveAttack), CardWeights.Common);
         MinorCardDeck.AddCard(GetCardFactory(CardIds.Rules.MoveAttackDiagonal), CardWeights.Common);
+        MinorCardDeck.AddCard(GetCardFactory(CardIds.Rules.Nothing), CardWeights.Uncommon);
         AddChild(MinorCardDeck);
     }
 
