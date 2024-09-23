@@ -209,10 +209,10 @@ public partial class GameController
         // Register custom Piece Info
         PieceInfo warpBishopInfo = MakeNewPieceInfo("warp_bishop", "Warp Bishop", "warp_bishop.png");
         warpBishopInfo.AddActionRule(GetActionRule(ActionRuleIds.WarpBishopMove), 7);
-        warpBishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.SlideAttack.ForwardLeft), 1, true);
-        warpBishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.SlideAttack.ForwardRight), 1, true);
-        warpBishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.SlideAttack.BackwardLeft), 1, true);
-        warpBishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.SlideAttack.BackwardRight), 1, true);
+        warpBishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.SlideAttack.ForwardLeft), 2, true);
+        warpBishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.SlideAttack.ForwardRight), 2, true);
+        warpBishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.SlideAttack.BackwardLeft), 2, true);
+        warpBishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.SlideAttack.BackwardRight), 2, true);
         
         MakeNewPieceInfo("rock", "Rock", "rock.png").AddActionRule(GetActionRule(ActionRuleIds.Nothing));
         
