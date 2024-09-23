@@ -62,6 +62,7 @@ func _ready() -> void:
 	GameManager.action_processed.connect(_on_action_processed)
 	GameManager.action_was_failed.connect(_on_action_failed)
 	
+	GameManager.players_in_check.connect(_on_players_in_check)
 	GameManager.player_resigned.connect(_on_player_resigned)
 	GameManager.player_has_won.connect(_on_player_won)
 	GameManager.player_lost.connect(_on_player_lost)
@@ -496,6 +497,10 @@ func _on_grid_size_changed(old_lower_bound: Vector2i, old_upper_bound: Vector2i,
 		_remove_cells_in_range(old_lower_bound, Vector2i(new_upper_bound.x, new_lower_bound.y-1))
 	if new_lower_bound.x < old_lower_bound.x:
 		_add_cells_to_range(new_lower_bound, Vector2i(new_upper_bound.x, old_lower_bound.y-1))
+
+
+func _on_players_in_check(players: Array) -> void:
+	$CheckSound.play()
 
 
 func _end_game_message(title: String, message: String) -> void:

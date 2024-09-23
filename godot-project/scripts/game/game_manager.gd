@@ -34,6 +34,7 @@ signal action_processed(action: ActionBase, piece: Piece)
 signal actions_processed_at(success: bool, action_location: Vector2i, piece: Piece)
 signal action_was_failed(reason: String)
 
+signal players_in_check(players: Array)
 signal player_resigned(player_num: int)
 signal player_has_won(player_num: int)
 signal player_lost(player_num: int)
@@ -53,6 +54,7 @@ var piece_scene: PackedScene = preload("res://scenes/game/piece/piece.tscn")
 
 # Game
 var in_game: bool
+var game_started: bool
 var game: Game
 var piece_grid
 var grid_upper_corner: Vector2i
@@ -122,6 +124,7 @@ func reset_game() -> void:
 	if card_selector != null:
 		card_selector.free()
 	in_game = false
+	game_started = false
 	board = null
 	game = null
 	piece_grid = null
@@ -132,6 +135,7 @@ func reset_game() -> void:
 	addons.clear()
 
 func init() -> void:
+	game_started = false
 	if game != null:
 		game.queue_free()
 	
@@ -414,6 +418,7 @@ func start_chess_game() -> void:
 		return
 	clear_cards.emit()
 	game_controller.StartGame()
+	game_started = true
 	game.game_active = true
 
 func init_board() -> void:
@@ -499,7 +504,7 @@ func get_piece_2d(id: int) -> Piece2D:
 func remove_piece_2d(piece: Piece2D) -> void:
 	if piece == null:
 		return
-	piece.queue_free()
+	piece.take_piece()
 	piece_removed.emit(piece)
 
 func remove_piece_2d_by_id(id: int) -> void:
@@ -648,6 +653,11 @@ func _update_card_score(player_num: int, score: int) -> void:
 func _on_turn_started(player_num: int) -> void:
 	current_player_num = player_num
 	turn_started.emit(player_num)
+	
+	# If *any* player is in check, then output the check sound
+	var in_check: Array = game_controller.GetPlayersInCheck()
+	if not in_check.is_empty():
+		players_in_check.emit(in_check)
 	
 	# Then send actions
 	if is_multiplayer_authority():

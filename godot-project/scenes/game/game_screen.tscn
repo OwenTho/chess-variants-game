@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=4 uid="uid://cssq752gr7m3k"]
+[gd_scene load_steps=15 format=4 uid="uid://cssq752gr7m3k"]
 
 [ext_resource type="Script" path="res://scripts/menu/game_screen.gd" id="1_s3pe2"]
 [ext_resource type="PackedScene" uid="uid://isv1sog82mq8" path="res://scenes/game/highlight.tscn" id="2_c2xco"]
@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://dddlxpsqq0pnn" path="res://scenes/game/player_info.tscn" id="8_i3by4"]
 [ext_resource type="Script" path="res://scripts/menu/card/card_display.gd" id="8_o3faa"]
 [ext_resource type="Material" uid="uid://bm4udh55f5dgk" path="res://assets/shaders/game_grid.tres" id="10_axqaj"]
+[ext_resource type="AudioStream" uid="uid://b0lycv1oek0qm" path="res://assets/audio/piece/check.wav" id="14_m7866"]
 
 [node name="GameScreen" type="Node2D" node_paths=PackedStringArray("board", "cursor", "card_selection", "action_highlights", "notices", "major_card_display", "player1_info", "player1_card_display", "player2_info", "player2_card_display") groups=["game_screen"]]
 script = ExtResource("1_s3pe2")
@@ -193,6 +194,9 @@ offset_left = 765.0
 offset_top = 561.0
 offset_right = 1151.0
 offset_bottom = 648.0
+
+[node name="CheckSound" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("14_m7866")
 
 [connection signal="gui_input" from="GameInput" to="." method="_on_game_input_gui_input"]
 [connection signal="mouse_entered" from="GameInput" to="." method="_on_game_input_mouse_entered"]

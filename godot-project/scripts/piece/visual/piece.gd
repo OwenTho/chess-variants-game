@@ -13,11 +13,14 @@ var _cur_info_tween: Tween
 
 var possible_actions: Array[Vector2i] = []
 
+var taken = false
 
 
 func _ready() -> void:
 	piece_data.ChangedCell.connect(_on_move)
 	piece_data.InfoChanged.connect(_on_info_changed)
+	
+	$PieceAnimator.animation_finished.connect(_on_animation_finished)
 
 func _process(delta: float) -> void:
 	sprite_transform_node.z_index = clampi(global_position.y, RenderingServer.CANVAS_ITEM_Z_MIN, RenderingServer.CANVAS_ITEM_Z_MAX)
@@ -29,17 +32,35 @@ func set_actions(action_locations: Array[Vector2i]) -> void:
 	possible_actions = action_locations
 	actions_updated.emit(self)
 
+func take_piece() -> void:
+	# Only take piece if not already taken
+	if taken:
+		return
+	taken = true
+	# Do Take Piece visuals / audio
+	visible = false
+	$PieceAnimator.play("take_animation")
+
+func _on_animation_finished(anim_name: String) -> void:
+	if anim_name == "take_animation":
+		queue_free()
+
 func reset_actions() -> void:
 	set_actions([])
 
 func _on_move(new_cell) -> void:
-	if new_cell != null:
+	if new_cell != null and new_cell.pos != pos:
 		if _cur_move_tween != null:
 			_cur_move_tween.kill()
 		_cur_move_tween = create_tween()
-		var move_pos: Vector2 = board.board_to_world_coord(piece_data.cell.pos)
+		var move_pos: Vector2 = board.board_to_world_coord(new_cell.pos)
 		_cur_move_tween.tween_property(self, "position", move_pos, 0.2)
 		_cur_move_tween.tween_callback(_move_tween_end)
+		pos = new_cell.pos
+		# Only play sound when game has started - This avoids Shuffle
+		# playing the sound for all pieces.
+		if GameManager.game_started:
+			$MoveSound.play()
 
 func update_pos() -> void:
 	if piece_data == null:

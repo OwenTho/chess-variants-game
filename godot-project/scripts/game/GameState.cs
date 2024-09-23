@@ -124,6 +124,20 @@ public partial class GameState : Node
         }
     }
 
+    public Array<int> GetPlayersInCheck()
+    {
+        Array<int> playersInCheck = new Array<int>();
+        for (int i = 0; i < numberOfPlayers; i++)
+        {
+            if (PlayerInCheck(i))
+            {
+                playersInCheck.Add(i);
+            }
+        }
+
+        return playersInCheck;
+    }
+
     public PieceInfo GetPieceInfo(string pieceInfoId)
     {
         return gameController.GetPieceInfo(pieceInfoId);

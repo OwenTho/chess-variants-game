@@ -300,17 +300,31 @@ public partial class GameController : Node
         StartGame(currentGameState.gameRandom.Seed);
     }
 
+    
+    public int UnsafeGetCurrentPlayer()
+    {
+        return currentGameState.currentPlayerNum;
+    }
+
     public int GetCurrentPlayer()
     {
         gameMutex.Lock();
-        int curPlayer = currentGameState.currentPlayerNum;
+        int curPlayer = UnsafeGetCurrentPlayer();
         gameMutex.Unlock();
         return curPlayer;
     }
 
-    public int UnsafeGetCurrentPlayer()
+    public Array<int> UnsafeGetPlayersInCheck()
     {
-        return currentGameState.currentPlayerNum;
+        return currentGameState.GetPlayersInCheck();
+    }
+
+    public Array<int> GetPlayersInCheck()
+    {
+        gameMutex.Lock();
+        Array<int> playersInCheck = UnsafeGetPlayersInCheck();
+        gameMutex.Unlock();
+        return playersInCheck;
     }
 
     
