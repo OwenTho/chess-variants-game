@@ -101,6 +101,7 @@ public partial class PromotionCard : CardBase
         }
 
         promotingPiece = game.lastMovePiece;
+        promotingPiece.tags.Add(promotedTag);
         SendCardNotice(game, "promotion");
     }
 
