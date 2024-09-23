@@ -54,7 +54,7 @@ var piece_scene: PackedScene = preload("res://scenes/game/piece/piece.tscn")
 
 # Game
 var in_game: bool
-var game_started: bool
+var turn_number: int
 var game: Game
 var piece_grid
 var grid_upper_corner: Vector2i
@@ -124,7 +124,7 @@ func reset_game() -> void:
 	if card_selector != null:
 		card_selector.free()
 	in_game = false
-	game_started = false
+	turn_number = 0
 	board = null
 	game = null
 	piece_grid = null
@@ -135,7 +135,7 @@ func reset_game() -> void:
 	addons.clear()
 
 func init() -> void:
-	game_started = false
+	turn_number = 0
 	if game != null:
 		game.queue_free()
 	
@@ -418,7 +418,6 @@ func start_chess_game() -> void:
 		return
 	clear_cards.emit()
 	game_controller.StartGame()
-	game_started = true
 	game.game_active = true
 
 func init_board() -> void:
@@ -653,6 +652,7 @@ func _update_card_score(player_num: int, score: int) -> void:
 func _on_turn_started(player_num: int) -> void:
 	current_player_num = player_num
 	turn_started.emit(player_num)
+	turn_number += 1
 	
 	# If *any* player is in check, then output the check sound
 	var in_check: Array = game_controller.GetPlayersInCheck()

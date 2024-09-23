@@ -57,9 +57,9 @@ func _on_move(new_cell) -> void:
 		_cur_move_tween.tween_property(self, "position", move_pos, 0.2)
 		_cur_move_tween.tween_callback(_move_tween_end)
 		pos = new_cell.pos
-		# Only play sound when game has started - This avoids Shuffle
+		# Only play sound after the start of the game - This avoids Shuffle
 		# playing the sound for all pieces.
-		if GameManager.game_started:
+		if GameManager.turn_number > 0:
 			$MoveSound.play()
 
 func update_pos() -> void:
