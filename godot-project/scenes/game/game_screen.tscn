@@ -34,6 +34,13 @@ offset_top = 99.0
 offset_right = 315.0
 offset_bottom = 601.0
 
+[node name="GameInput" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 1.0
+offset_right = 1152.0
+offset_bottom = 648.0
+
 [node name="BoardHolder" type="Node2D" parent="."]
 position = Vector2(576, 324)
 scale = Vector2(0.35, 0.35)
@@ -72,13 +79,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 1152.0
 offset_bottom = 648.0
-
-[node name="GameInput" type="Control" parent="GameUI"]
-layout_mode = 3
-anchors_preset = 0
-offset_left = 1.0
-offset_right = 1152.0
-offset_bottom = 648.0
+mouse_filter = 2
 
 [node name="GameNotices" type="VBoxContainer" parent="GameUI"]
 layout_mode = 0
@@ -193,10 +194,10 @@ offset_top = 561.0
 offset_right = 1151.0
 offset_bottom = 648.0
 
+[connection signal="gui_input" from="GameInput" to="." method="_on_game_input_gui_input"]
+[connection signal="mouse_entered" from="GameInput" to="." method="_on_game_input_mouse_entered"]
+[connection signal="mouse_exited" from="GameInput" to="." method="_on_game_input_mouse_exited"]
 [connection signal="cell_updated" from="BoardHolder/Board2D/CursorHighlight" to="." method="_on_cursor_highlight_cell_updated"]
-[connection signal="gui_input" from="GameUI/GameInput" to="." method="_on_game_input_gui_input"]
-[connection signal="mouse_entered" from="GameUI/GameInput" to="." method="_on_game_input_mouse_entered"]
-[connection signal="mouse_exited" from="GameUI/GameInput" to="." method="_on_game_input_mouse_exited"]
 [connection signal="card_selected" from="GameUI/CardSelection" to="." method="_on_card_selected"]
 [connection signal="pressed" from="GameUI/CardSelection/CardSelectButtons/BtnUse" to="." method="_on_btn_use_pressed"]
 [connection signal="pressed" from="GameUI/BtnQuit" to="." method="_on_btn_quit_pressed"]
