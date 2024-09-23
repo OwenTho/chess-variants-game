@@ -500,7 +500,8 @@ func _on_grid_size_changed(old_lower_bound: Vector2i, old_upper_bound: Vector2i,
 
 
 func _on_players_in_check(players: Array) -> void:
-	$CheckSound.play()
+	if players.has(GameManager.current_player_num):
+		$CheckSound.play()
 
 
 func _end_game_message(title: String, message: String) -> void:
