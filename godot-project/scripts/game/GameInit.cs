@@ -248,7 +248,7 @@ public partial class GameController
                     ActionRuleIds.Line.MoveAttack.Right,
                     ActionRuleIds.Line.MoveAttack.Backward
                 },
-                "Move Further", "move and attack one further horizontally and vertically."
+                "Move Further", "move and attack one further horizontally and vertically, up to 3 spaces.", 3
             ), true, true, true
         );
         AddNewCardFactory(CardIds.Rules.MoveAttackDiagonal, 
@@ -260,7 +260,7 @@ public partial class GameController
                     ActionRuleIds.Line.MoveAttack.BackwardLeft,
                     ActionRuleIds.Line.MoveAttack.BackwardRight
                 },
-                "Diag. Move Further", "move and attack one further diagonally."
+                "Diag. Move Further", "move and attack one further diagonally, up to 3 spaces.", 3
             ), true, true, true
         );
         

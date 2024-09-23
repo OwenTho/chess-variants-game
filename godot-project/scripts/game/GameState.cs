@@ -148,7 +148,11 @@ public partial class GameState : Node
     {
         return gameController.GetActionId(action);
     }
-    
+
+    public ActionRuleBase GetActionRule(string id)
+    {
+        return gameController.GetActionRule(id);
+    }
     
     public Piece PlacePiece(string pieceInfoId, int linkId, int teamId, int x, int y, int id = -1)
     {
@@ -1250,6 +1254,23 @@ public partial class GameState : Node
         }
 
         return existingPieceIds;
+    }
+
+    public List<PieceInfo> GetPieceInfoOnBoard()
+    {
+        List<PieceInfo> existingPieceInfo = new List<PieceInfo>();
+        
+        // Get the info of the pieces currently in the game
+        foreach (var piece in allPieces)
+        {
+            if (piece.info == null || existingPieceInfo.Contains(piece.info))
+            {
+                continue;
+            }
+            existingPieceInfo.Add(piece.info);
+        }
+
+        return existingPieceInfo;
     }
     
     
