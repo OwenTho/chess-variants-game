@@ -60,4 +60,5 @@ public static class ActionRuleIds
     
     // Unique pieces
     public const string WarpBishopMove = "warp_bishop_move";
+    public const string PrawnMove = "prawn_move";
 }

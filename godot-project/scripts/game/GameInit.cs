@@ -154,6 +154,7 @@ public partial class GameController
         
         // Piece Specific - Custom
         MakeNewActionRule(ActionRuleIds.WarpBishopMove, new WarpBishopMoveRule());
+        MakeNewActionRule(ActionRuleIds.PrawnMove, new LineMoveAttackRule(new PrawnDirectionChooser()));
     }
 
     internal void InitActionFactories()
@@ -215,6 +216,7 @@ public partial class GameController
         warpBishopInfo.AddActionRule(GetActionRule(ActionRuleIds.Line.SlideAttack.BackwardRight), 2, true);
         
         MakeNewPieceInfo("rock", "Rock", "rock.png").AddActionRule(GetActionRule(ActionRuleIds.Nothing));
+        MakeNewPieceInfo("prawn", "Prawn", "prawn.png").AddActionRule(GetActionRule(ActionRuleIds.PrawnMove), 2);
         
         PieceInfo blockadeInfo = MakeNewPieceInfo("blockade", "Blockade", "blockade.png");
         blockadeInfo.tags.Add(InvinciblePieceRule.InvincibleTag);
