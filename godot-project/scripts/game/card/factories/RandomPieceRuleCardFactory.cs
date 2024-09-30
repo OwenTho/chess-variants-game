@@ -30,14 +30,8 @@ public partial class RandomPieceRuleCardFactory : CardFactory
         {
             if (rule.level >= MaxOccurrences)
             {
-                GD.Print($"Invalid! {ruleId}: {rule.level} >= {MaxOccurrences}");
                 return false;
             }
-            GD.Print($"Valid! {ruleId}: {rule.level} < {MaxOccurrences}");
-        }
-        else
-        {
-            GD.Print($"Valid! {ruleId} is not present.");
         }
 
         return true;
@@ -72,12 +66,7 @@ public partial class RandomPieceRuleCardFactory : CardFactory
             // above list
             if (PieceCanGetRule(game, info))
             {
-                GD.Print($"VALID PIECE INFO: {info.pieceId}");
                 validPieceInfo.Add(info);
-            }
-            else
-            {
-                GD.Print($"INVALID PIECE INFO: {info.pieceId}");
             }
         }
 
