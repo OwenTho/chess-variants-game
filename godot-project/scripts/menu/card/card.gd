@@ -46,14 +46,9 @@ func set_card_name(name: String) -> void:
 		font_size -= 1
 	label_settings.font_size = max(font_size, 1)
 
-func set_card_image(image_loc: String) -> void:
+func set_card_image(loc: String) -> void:
 	# Try to get the image
-	var card_texture: Texture
-	if ResourceLoader.exists("res://" + image_loc):
-		card_texture = load("res://" + image_loc)
-	else:
-		push_warning("Could not find sprite at path '%s', so default is being used." % [image_loc])
-		card_texture = load("res://assets/texture/card/missing.png")
+	var card_texture: Texture = GameResources.get_card_texture_from_loc(loc)
 	
 	(%CardImage as TextureRect).texture = card_texture
 
