@@ -485,9 +485,6 @@ func done_init():
 @rpc("authority", "call_local", "reliable")
 func init_game():
 	doing_init = true
-	# Unload current screen
-	print(get_tree())
-	
 	# Then init game
 	GameManager.init()
 	# Done with init. Tell the server.
