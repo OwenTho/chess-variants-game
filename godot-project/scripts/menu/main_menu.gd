@@ -7,6 +7,7 @@ extends Node
 
 func _ready():
 	Lobby.connected_and_registered.connect(_on_connection_successful)
+	Lobby.server_disconnected.connect(_on_server_disconnected)
 
 func check_entries() -> bool:
 	if not ip_entry.text.is_empty() and not ip_entry.text.is_valid_ip_address():
@@ -74,6 +75,8 @@ func _on_connection_successful():
 	if get_tree():
 		get_tree().change_scene_to_file("res://scenes/menu/lobby_menu.tscn")
 
+func _on_server_disconnected():
+	error_dialog("Disconnected", "Unable to join the server. Are you using the same game version?")
 
 
 

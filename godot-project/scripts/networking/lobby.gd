@@ -1,5 +1,13 @@
 extends Node
 
+const MAJOR_VER: int = 0
+const MINOR_VER: int = 4
+const CHANGE_VER: int = 0
+
+const MAJOR_VER_MIN: int = 0
+const MINOR_VER_MIN: int = 4
+const CHANGE_VER_MIN: int = 0
+
 var DEFAULT_SERVER_IP: String = "127.0.0.1"
 var DEFAULT_PORT: int = 9813
 var MAX_CONNECTIONS: int = 5
@@ -22,7 +30,7 @@ var close_on_noone: bool = false
 
 
 signal connection_successful()
-signal connection_failed()
+signal connection_failed(reason: String)
 signal connected_and_registered()
 signal player_connected_server(peer_id: int) 			# Peer joins server
 signal player_connected(player_info: Lobby.PlayerInfo)	# Peer registered
@@ -41,6 +49,10 @@ class PlayerInfo:
 	var id: int = -1
 	var name: String = ""
 	var is_admin: bool = false
+	
+	var major_ver: int
+	var minor_ver: int
+	var change_ver: int
 	
 	func _init(id: int = -1, name: String = "Name", is_admin: bool = false):
 		self.id = id
@@ -142,6 +154,17 @@ func leave_game():
 	remove_multiplayer_peer()
 
 
+func send_rpc(function: Callable) -> void:
+	for key in players:
+		function.rpc_id(key)
+
+func get_valid_players() -> Array[PlayerInfo]:
+	var valid_players: Array[PlayerInfo] = []
+	for key in players:
+		var player: PlayerInfo = players[key]
+		valid_players.append(player)
+	return valid_players
+
 func remove_multiplayer_peer():
 	for i in range(player_nums.size()):
 		player_nums[i] = -1
@@ -151,14 +174,24 @@ func _on_player_connected(id: int):
 	player_connected_server.emit(id)
 	print("Player connected: " + str(id))
 
+func _is_valid_version(major: int, minor: int, change: int) -> bool:
+	if major < MAJOR_VER_MIN or major > MAJOR_VER:
+		return false
+	
+	if minor < MINOR_VER_MIN or minor > MINOR_VER:
+		return false
+	
+	if change < CHANGE_VER_MIN or change > CHANGE_VER:
+		return false
+	return true
 
 func _on_connected_ok():
 	# Tell the server I connected
-	_register_player_server.rpc(player_info.to_dictionary())
+	_register_player_server.rpc(player_info.to_dictionary(), MAJOR_VER, MINOR_VER, CHANGE_VER)
 	connection_successful.emit()
 
 @rpc("any_peer", "call_local", "reliable", 1)
-func _register_player_server(new_player_info: Dictionary):
+func _register_player_server(new_player_info: Dictionary, major_ver: int, minor_ver: int, change_ver: int):
 	# Only server runs this
 	if not is_multiplayer_authority():
 		return
@@ -170,6 +203,14 @@ func _register_player_server(new_player_info: Dictionary):
 	else:
 		# Set the id, just to make sure
 		new_player_info.id = new_player_id
+	
+	# Verify user's version.
+	# Ignore server as it results in an error, though it should never fail
+	if not _is_valid_version(major_ver, minor_ver, change_ver) and new_player_id != 1:
+		print("Invalid game version: %s.%s.%s" % [major_ver, minor_ver, change_ver])
+		# If invalid, disconnect the user
+		multiplayer.multiplayer_peer.disconnect_peer(new_player_id)
+		return
 	
 	# If it's the only player on a dedicated server, make them an admin
 	if players.size() < 1 and not is_player:
@@ -204,6 +245,10 @@ func _register_player(new_player_id: int, new_player_info: Dictionary):
 	
 	player_connected.emit(players[new_player_id])
 
+@rpc("authority", "call_local", "reliable")
+func _invalid_connection(reason: String) -> void:
+	connection_failed.emit(reason)
+
 func _registered():
 	player_connected.emit(player_info)
 	connected_and_registered.emit()
@@ -236,7 +281,7 @@ func _on_player_disconnected(id):
 
 func _on_connected_fail():
 	remove_multiplayer_peer()
-	connection_failed.emit()
+	connection_failed.emit("Couldn't connect.")
 
 func _on_server_disconnected():
 	remove_multiplayer_peer()
@@ -383,9 +428,12 @@ func setup_game():
 	
 	players_loaded = 0
 	
+	var valid_players = get_valid_players()
+	
 	print("Initialising game.")
 	# Tell all clients to Init GameManager
-	init_game.rpc()
+	for player in valid_players:
+		init_game.rpc_id(player.id)
 	
 	# Once game is init, init the board
 	GameManager.init_board()
@@ -394,8 +442,8 @@ func setup_game():
 		await init_done
 	print("Loading board.")
 	# Once game init is done, send the board contents to the players
-	players_loaded = 0 # 1, as server is already loaded
-	done_init()
+	players_loaded = 0
+	done_init() # 1, as server is already loaded
 	
 	var board: Array = GameManager.board_to_array()
 	# Send the array in groups of 5
@@ -403,17 +451,23 @@ func setup_game():
 	const JUMP_IND: int = 5
 	var cur_ind: int = 0
 	while cur_ind <= board.size():
-		init_board.rpc(board.slice(cur_ind, cur_ind + JUMP_IND))
+		for player in valid_players:
+			if player.id != 1:
+				init_board.rpc_id(player.id, board.slice(cur_ind, cur_ind + JUMP_IND))
 		cur_ind += JUMP_IND
 	# Transmit an empty array, indicating the end of the board data
-	init_board.rpc([])
+	for player in valid_players:
+		if player.id != 1:
+			init_board.rpc_id(player.id, [])
 	
 	if players.size() > players_loaded:
 		await init_done
 	
 	print("Starting game.")
 	# Once init is completely done, start the game
-	start_game.rpc(await GameManager.game_controller.GetGameSeed())
+	var game_seed: int = GameManager.game_controller.GetGameSeed()
+	for player in valid_players:
+		start_game.rpc_id(player.id, await GameManager.game_controller.GetGameSeed())
 	
 	# Not that setup is completely done, allow new connections
 	# TODO: Allow new connections to open the game while it's active from the lobby.
@@ -431,6 +485,10 @@ func done_init():
 @rpc("authority", "call_local", "reliable")
 func init_game():
 	doing_init = true
+	# Unload current screen
+	print(get_tree())
+	
+	# Then init game
 	GameManager.init()
 	# Done with init. Tell the server.
 	done_init.rpc()
@@ -474,7 +532,8 @@ func receive_message(message: String):
 
 func _send(message: String, id: int):
 	if id <= -1:
-		receive_message.rpc(message)
+		for player in get_valid_players():
+			receive_message.rpc_id(player.id, message)
 		return
 	receive_message.rpc_id(id, message)
 
