@@ -119,7 +119,7 @@ func _on_server_disconnect() -> void:
 
 func reset_game() -> void:
 	# Before continuing, make sure none of the mutex are locked
-	if game != null:
+	if game_controller != null:
 		game_controller.queue_free()
 	if card_selector != null:
 		card_selector.free()
@@ -138,8 +138,12 @@ func init() -> void:
 	turn_number = 0
 	if game != null:
 		game.queue_free()
+	reset_game()
 	
 	var cur_scene = get_tree().current_scene
+	# If cur_scene is named "GameScreen", rename it.
+	if cur_scene.name == "GameScreen":
+		cur_scene.name = "RENAMED SCENE"
 	game = game_scene.instantiate()
 	get_tree().root.add_child(game)
 	get_tree().current_scene = game
