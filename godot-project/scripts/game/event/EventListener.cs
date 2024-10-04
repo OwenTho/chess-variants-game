@@ -1,38 +1,38 @@
 using System;
 
-public class EventListener
-{
-    // The id of the event being listened for
-    public string eventId { get; private set; }
-    
-    // Function called when the event occurs
-    internal Action<GameState> listen;
-    
-    // When null, defaults to EventResult.Continue
-    public Func<GameState, EventResult> flagFunction;
+public class EventListener {
+  // When calling event listeners, it will only call if this returns true.
+  public Func<bool> EnabledFunction;
 
-    // When calling event listeners, it will only call if this returns true.
-    public Func<bool> enabledFunction;
+  // When null, defaults to EventResult.Continue
+  public Func<GameState, EventResult> FlagFunction;
 
-    public EventListener(string eventId, Action<GameState> listen)
-    {
-        this.eventId = eventId;
-        this.listen = listen;
-    }
+  // Function called when the event occurs
+  internal Action<GameState> Listen;
 
-    public EventListener(string eventId,Action<GameState> listen, Func<GameState, EventResult> flagFunction) : this(eventId, listen)
-    {
-        this.flagFunction = flagFunction;
-    }
+  public EventListener(string eventId, Action<GameState> listen) {
+    EventId = eventId;
+    Listen = listen;
+  }
 
-    public EventListener(string eventId, Action<GameState> listen, Func<bool> enabledFunction) : this(eventId, listen)
-    {
-        this.enabledFunction = enabledFunction;
-    }
+  public EventListener(string eventId, Action<GameState> listen,
+    Func<GameState, EventResult> flagFunction) : this(
+    eventId, listen) {
+    FlagFunction = flagFunction;
+  }
 
-    public EventListener(string eventId, Action<GameState> listen, Func<GameState, EventResult> flagFunction, Func<bool> enabledFunction) : this(
-        eventId, listen, flagFunction)
-    {
-        this.enabledFunction = enabledFunction;
-    }
+  public EventListener(string eventId, Action<GameState> listen, Func<bool> enabledFunction) : this(
+    eventId, listen) {
+    EnabledFunction = enabledFunction;
+  }
+
+  public EventListener(string eventId, Action<GameState> listen,
+    Func<GameState, EventResult> flagFunction,
+    Func<bool> enabledFunction) : this(
+    eventId, listen, flagFunction) {
+    EnabledFunction = enabledFunction;
+  }
+
+  // The id of the event being listened for
+  public string EventId { get; private set; }
 }

@@ -1,24 +1,21 @@
-﻿using System;
-using Godot;
+﻿using Godot;
 
-internal partial class PawnMoveAction : MoveAction
-{
-    public PawnMoveAction() : base()
-    {
-        
-    }
-    
-    public PawnMoveAction(Piece owner, Vector2I actionLocation, Vector2I moveLocation) : base(owner, actionLocation, moveLocation) { }
+internal partial class PawnMoveAction : MoveAction {
+  public PawnMoveAction() {
+  }
 
-    public override void ActOn(GameState game, Piece piece)
-    {
-        base.ActOn(game, piece);
-        piece.tags.Add("pawn_initial");
-    }
+  public PawnMoveAction(Piece owner, Vector2I actionLocation, Vector2I moveLocation) : base(owner,
+    actionLocation,
+    moveLocation) {
+  }
 
-    protected override ActionBase Clone()
-    {
-        PawnMoveAction newAction = new PawnMoveAction(null, actionLocation, moveLocation);
-        return newAction;
-    }
+  public override void ActOn(GameState game, Piece piece) {
+    base.ActOn(game, piece);
+    piece.Tags.Add("pawn_initial");
+  }
+
+  protected override ActionBase Clone() {
+    var newAction = new PawnMoveAction(null, ActionLocation, MoveLocation);
+    return newAction;
+  }
 }

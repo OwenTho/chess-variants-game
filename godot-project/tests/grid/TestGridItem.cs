@@ -1,5 +1,2 @@
-﻿
-public partial class TestGridItem : GridItem<TestGridItem>
-{
-    
+﻿public partial class TestGridItem : GridItem<TestGridItem> {
 }

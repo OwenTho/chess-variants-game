@@ -5,7 +5,7 @@ extends GameTest
 func test_nothing() -> void:
 	
 	# Place nothing on the board, and start the game
-	start_game_with_seed(game_state.gameRandom.seed)
+	start_game_with_seed(game_state.GameRandom.seed)
 	
 	# Both players should immediately be in check
 	assert_true(game_state.PlayerHasNoKing(0), "Player 0 should have the 'NoKing' state.")
@@ -26,7 +26,7 @@ func test_kings() -> void:
 	var king = place_piece("king", 0, 0, 0, 0)
 	var e_king = place_piece("king", 0, 1, 2, 2)
 	
-	start_game_with_seed(game_state.gameRandom.seed)
+	start_game_with_seed(game_state.GameRandom.seed)
 	
 	# Neither should be in check
 	assert_false(game_state.PlayerInCheck(0), "Player 0 should not be in Check.")

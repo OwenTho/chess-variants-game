@@ -36,8 +36,8 @@ func _ready() -> void:
 	# Get the piece ids
 	piece_ids = game_controller.GetPieceKeys()
 	# Make the grid much bigger
-	game_controller.currentGameState.gridUpperCorner = Vector2i(32,32)
-	game_controller.currentGameState.gridLowerCorner = Vector2i(-32,-32)
+	game_controller.CurrentGameState.GridUpperCorner = Vector2i(32,32)
+	game_controller.CurrentGameState.GridLowerCorner = Vector2i(-32,-32)
 	
 	# Add a piece to 0, 0 that uses the first piece id.
 	const piece_scene: PackedScene = preload("res://scenes/game/piece/piece.tscn")
@@ -65,13 +65,13 @@ func set_to_piece_id(index: int) -> void:
 	index %= piece_ids.size()
 	
 	# Default times moved to 0 for new pieces
-	piece.piece_data.timesMoved = 0
+	piece.piece_data.TimesMoved = 0
 	# Default level to 0 for new pieces
-	piece.piece_data.level = 0
+	piece.piece_data.Level = 0
 	
 	var piece_id = piece_ids[index]
 	var piece_info: PieceInfo = game_controller.GetPieceInfo(piece_id)
-	piece.piece_data.info = piece_info
+	piece.piece_data.Info = piece_info
 	
 	print("Showing piece %s (%s)" % [piece_id, index])
 	cur_piece_id_ind = index
@@ -82,16 +82,16 @@ func set_to_piece_id(index: int) -> void:
 
 func set_piece_times_moved(times_moved: int) -> void:
 	updating = true
-	piece.piece_data.timesMoved = times_moved
-	print("Times moved updated to %s" % [piece.piece_data.timesMoved])
+	piece.piece_data.TimesMoved = times_moved
+	print("Times moved updated to %s" % [piece.piece_data.TimesMoved])
 	
 	piece.piece_data.EnableActionsUpdate()
 	game_controller.NextTurn()
 
 func set_piece_level(level: int) -> void:
 	updating = true
-	piece.piece_data.level = level
-	print("Level updated to %s" % [piece.piece_data.level])
+	piece.piece_data.Level = level
+	print("Level updated to %s" % [piece.piece_data.Level])
 	
 	piece.piece_data.EnableActionsUpdate()
 	game_controller.NextTurn()
@@ -109,16 +109,16 @@ func viewer_inputs(event: InputEvent) -> void:
 		set_to_piece_id(cur_piece_id_ind - 1)
 		return
 	if event.is_action_pressed("viewer_increase_times_moved"):
-		set_piece_times_moved(piece.piece_data.timesMoved + 1)
+		set_piece_times_moved(piece.piece_data.TimesMoved + 1)
 		return
 	if event.is_action_pressed("viewer_decrease_times_moved"):
-		set_piece_times_moved(piece.piece_data.timesMoved - 1)
+		set_piece_times_moved(piece.piece_data.TimesMoved - 1)
 		return
 	if event.is_action_pressed("viewer_level_up"):
-		set_piece_level(piece.piece_data.level + 1)
+		set_piece_level(piece.piece_data.Level + 1)
 		return
 	if event.is_action_pressed("viewer_level_down"):
-		set_piece_level(piece.piece_data.level - 1)
+		set_piece_level(piece.piece_data.Level - 1)
 		return
 	updating = false
 

@@ -5,10 +5,10 @@ var card_script: CSharpScript = preload("res://scripts/game/card/major/BiggerBoa
 func test_card() -> void:
 	
 	var card = card_script.new()
-	card.cardId = "bigger_board"
+	card.CardId = "bigger_board"
 	
 	# Place 2 pieces on the board, at the bottom left corner
-	var bottom_corner: Vector2i = game_controller.gridLowerCorner
+	var bottom_corner: Vector2i = game_controller.GridLowerCorner
 	var queen = place_piece("queen", 0, 0, 0, 0)
 	var e_rook = place_piece("rook", 0, 1, 0, 1)
 	

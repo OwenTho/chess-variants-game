@@ -7,9 +7,9 @@ const end_check: int = 7
 
 # Must be left-most and right-most positions to avoid the "OutsideBoardRule"
 func castle_test(king, dir: Vector2i, act_pos: Vector2i) -> void:
-	var king_start: Vector2i = king.cell.pos
+	var king_start: Vector2i = king.Cell.Pos
 	for i in range(start_check, end_check+1):
-		var rook = place_piece("rook", 0, 0, king.cell.x + i * dir.x, king.cell.y + i * dir.y)
+		var rook = place_piece("rook", 0, 0, king.Cell.X + i * dir.x, king.Cell.Y + i * dir.y)
 		# Swap turns twice so it's player 0's turn again (and actions are updated)
 		next_turn(0)
 		
@@ -35,7 +35,7 @@ func castle_test(king, dir: Vector2i, act_pos: Vector2i) -> void:
 		take_piece(rook)
 		# Move the King back
 		move_piece(king, king_start.x, king_start.y)
-		king.timesMoved = 0
+		king.TimesMoved = 0
 
 
 func test_distance_right() -> void:

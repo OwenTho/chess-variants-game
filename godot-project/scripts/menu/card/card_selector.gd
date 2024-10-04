@@ -208,7 +208,7 @@ func _next_select() -> bool:
 			# Temporarily add as a child to avoid possible memory leak
 			add_child(new_card)
 			# Set its team
-			new_card.teamId = cur_selection.team_id
+			new_card.TeamId = cur_selection.team_id
 			player_cards.append(new_card)
 			# Send the card to the player
 			var card_data: Dictionary = game_controller.ConvertCardToDict(new_card)

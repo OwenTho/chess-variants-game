@@ -56,6 +56,6 @@ func _handle_card_notice(card: CardBase, notice: String) -> void:
 			continue
 		
 		# Card ID must match
-		if not card_ids.is_empty() and not listener["card_ids"].has(card.cardId):
+		if not card_ids.is_empty() and not listener["card_ids"].has(card.CardId):
 			continue
 		listener["callback"].call(card)

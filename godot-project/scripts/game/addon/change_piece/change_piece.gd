@@ -17,11 +17,11 @@ func _on_change_piece(card: CardBase) -> void:
 		send_card_notice(card, FIN_NOTICE)
 		return
 	
-	change_piece_info_id = card.toPiece
+	change_piece_info_id = card.ToPiece
 	cur_card = card
 	
 	# Send the selection to the owner of the card
-	_start_change_piece.rpc_id(Lobby.get_player_id_from_num(card.teamId), change_piece_info_id)
+	_start_change_piece.rpc_id(Lobby.get_player_id_from_num(card.TeamId), change_piece_info_id)
 
 @rpc("authority", "call_local", "reliable")
 func _start_change_piece(to_piece_id: String) -> void:
@@ -41,7 +41,7 @@ func _on_cursor_select(pos: Vector2i) -> void:
 	var piece: Piece = GameManager.unsafe_get_first_piece_at(pos.x, pos.y)
 	if piece == null:
 		return
-	_select_change_piece.rpc(piece.id)
+	_select_change_piece.rpc(piece.Id)
 
 @rpc("any_peer", "call_local", "reliable")
 func _select_change_piece(piece_id: int) -> void:
@@ -55,7 +55,7 @@ func _select_change_piece(piece_id: int) -> void:
 		return
 	
 	# Make sure it's the right player selecting
-	var selector_id: int = Lobby.get_player_id_from_num(cur_card.teamId)
+	var selector_id: int = Lobby.get_player_id_from_num(cur_card.TeamId)
 	if selector_id != multiplayer.get_remote_sender_id():
 		# Send no response, as 
 		push_warning("Player %s tried to select for the Change Piece card when they are not the owner.")
@@ -68,7 +68,7 @@ func _select_change_piece(piece_id: int) -> void:
 		return
 	
 	# Only allow if the piece is on this person's team
-	if piece.teamId != cur_card.teamId:
+	if piece.TeamId != cur_card.TeamId:
 		GameManager.receive_notice.rpc_id(multiplayer.get_remote_sender_id(), "You may only select pieces on your team.")
 		return
 	
@@ -84,13 +84,13 @@ func _select_change_piece(piece_id: int) -> void:
 	var valid_teams: Array[int] = []
 	
 	for king in kings:
-		if not teams.has(king.teamId):
-			teams.append(king.teamId)
-		if valid_teams.has(king.teamId):
+		if not teams.has(king.TeamId):
+			teams.append(king.TeamId)
+		if valid_teams.has(king.TeamId):
 			continue
 		# If the link Id is different, the team is valid
-		if king.linkId != piece.linkId:
-			valid_teams.append(king.teamId)
+		if king.LinkId != piece.LinkId:
+			valid_teams.append(king.TeamId)
 	
 	# If the teams array and valid teams array sizes do not match, the change
 	# is invalid.
@@ -99,7 +99,7 @@ func _select_change_piece(piece_id: int) -> void:
 		return
 	
 	# Tell everyone to change the piece
-	_change_piece.rpc(piece.linkId, change_piece_info_id)
+	_change_piece.rpc(piece.LinkId, change_piece_info_id)
 	
 	# Finally send the card notice that it's done changing the piece
 	send_card_notice(cur_card, FIN_NOTICE)
@@ -127,5 +127,5 @@ func _change_piece(link_id: int, to_piece: String) -> void:
 	
 	# Get all pieces by their link id
 	for piece in GameManager.unsafe_get_pieces_by_link_id(link_id):
-		piece.info = info
+		piece.Info = info
 		piece.EnableActionsUpdate()

@@ -5,7 +5,7 @@ var card_script: CSharpScript = preload("res://scripts/game/card/major/FriendlyF
 func test_card() -> void:
 	
 	var card = card_script.new()
-	card.cardId = "friendly_fire"
+	card.CardId = "friendly_fire"
 	
 	# Make the board
 	#  ♟️  🤴

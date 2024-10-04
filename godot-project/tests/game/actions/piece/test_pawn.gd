@@ -426,7 +426,7 @@ func test_initial_not_first_move() -> void:
 	var pawn = place_piece("pawn", 0, 0, 0, 0)
 	
 	# Set pawn to have moved at least once
-	pawn.timesMoved = 1
+	pawn.TimesMoved = 1
 	
 	# Start the game
 	start_game()

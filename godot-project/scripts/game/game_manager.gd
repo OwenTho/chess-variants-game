@@ -167,15 +167,15 @@ func init() -> void:
 	# Initialise the game
 	game_controller.FullInit(is_multiplayer_authority(), PLAYER_COUNT)
 	current_player_num = 0
-	piece_grid = game_controller.pieceGrid
+	piece_grid = game_controller.PieceGrid
 	
-	grid_upper_corner = game_controller.gridUpperCorner
-	grid_lower_corner = game_controller.gridLowerCorner
+	grid_upper_corner = game_controller.GridUpperCorner
+	grid_lower_corner = game_controller.GridLowerCorner
 	
 	# Get the mutex
-	task_mutex = game_controller.taskMutex
-	game_mutex = game_controller.gameMutex
-	thread_mutex = game_controller.threadMutex
+	task_mutex = game_controller.TaskMutex
+	game_mutex = game_controller.GameMutex
+	thread_mutex = game_controller.ThreadMutex
 	
 	card_score.clear()
 	for i in range(PLAYER_COUNT):
@@ -446,23 +446,23 @@ func init_board() -> void:
 func board_to_array() -> Array:
 	var ret_array: Array = []
 	game_mutex.lock()
-	for cell in piece_grid.cells:
-		var cell_pos: Vector2i = cell.pos
-		for item in cell.items:
+	for cell in piece_grid.Cells:
+		var cell_pos: Vector2i = cell.Pos
+		for item in cell.Items:
 			var this_item: Array = []
 			# Add the ID first
-			if item.info != null:
-				this_item.append(item.info.pieceId)
+			if item.Info != null:
+				this_item.append(item.Info.PieceId)
 			else:
 				this_item.append("invalid_id")
 			# Then add the link ID
-			this_item.append(item.linkId)
+			this_item.append(item.LinkId)
 			# The team of the piece
-			this_item.append(item.teamId)
+			this_item.append(item.TeamId)
 			# The position of the item
 			this_item.append(cell_pos)
 			# The id of the item
-			this_item.append(item.id)
+			this_item.append(item.Id)
 			
 			ret_array.append(this_item)
 	game_mutex.unlock()
@@ -500,7 +500,7 @@ func place_piece(piece_id: String, link_id: int, team: int, x: int, y: int, id: 
 
 func get_piece_2d(id: int) -> Piece2D:
 	for piece in get_tree().get_nodes_in_group("piece"):
-		if piece.piece_data != null and piece.piece_data.id == id:
+		if piece.piece_data != null and piece.id == id:
 			return piece
 	return null
 
@@ -768,15 +768,15 @@ func get_piece_actions(piece: Piece) -> Array[Vector2i]:
 		return []
 	
 	var action_locations: Array[Vector2i] = []
-	for action in piece.currentPossibleActions:
+	for action in piece.CurrentPossibleActions:
 		# Only if action is a valid instance
 		if not is_instance_valid(action):
 			continue
 		# Only process the action if it's acting and valid
-		if not action.valid or not action.acting:
+		if not action.Valid or not action.Acting:
 			continue
-		if action.actionLocation not in action_locations:
-			action_locations.append(action.actionLocation)
+		if action.ActionLocation not in action_locations:
+			action_locations.append(action.ActionLocation)
 	return action_locations
 
 func _send_piece_actions(piece: Piece) -> void:
@@ -787,7 +787,7 @@ func _send_piece_actions(piece: Piece) -> void:
 	var action_locations = get_piece_actions(piece)
 	
 	# Now send the action locations for the piece
-	_receive_piece_actions.rpc(piece.id, action_locations)
+	_receive_piece_actions.rpc(piece.Id, action_locations)
 
 @rpc("authority", "call_local", "reliable")
 func _receive_piece_actions(piece_id: int, piece_actions: Array[Vector2i]) -> void:
@@ -799,7 +799,7 @@ func _on_action_processed(action: ActionBase, piece: Piece) -> void:
 	action_processed.emit(action, piece)
 	if not is_multiplayer_authority():
 		return
-	take_action.rpc(game_controller.ActionToDict(action), piece.id)
+	take_action.rpc(game_controller.ActionToDict(action), piece.Id)
 
 func _on_actions_processed_at(success: bool, action_location: Vector2i, piece: Piece) -> void:
 	actions_processed_at.emit(success, action_location, piece)
@@ -829,7 +829,7 @@ func _on_piece_taken(taken_piece: Piece, attacker: Piece) -> void:
 	# It is this way, rather than the person taking the piece, as otherwise
 	# people can aim to take pieces for their benefit, whereas this forces
 	# players to be more cautious about taking pieces.
-	add_card_score(taken_piece.teamId, CARD_SCORE_PER_PIECE_TAKEN)
+	add_card_score(taken_piece.TeamId, CARD_SCORE_PER_PIECE_TAKEN)
 
 
 
@@ -911,7 +911,7 @@ func request_action(action_location: Vector2i, piece_id: int) -> void:
 	
 	# Verify actions at that location
 	var valid_actions: bool = true
-	var possible_actions: Array = piece.currentPossibleActions
+	var possible_actions: Array = piece.CurrentPossibleActions
 	
 	# If there are no actions, ignore
 	if possible_actions.size() == 0:

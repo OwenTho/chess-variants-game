@@ -98,7 +98,7 @@ func _on_init() -> void:
 	cursor.board = GameManager.board
 	
 	if OS.is_debug_build():
-		Debug.stats.add_property(GameManager.game_controller.currentGameState, "currentPlayerNum")
+		Debug.stats.add_property(GameManager.game_controller.CurrentGameState, "CurrentPlayerNum")
 
 func _on_cursor_highlight_cell_updated(new_cell: Vector2i) -> void:
 	_update_cursor_visibility()
@@ -172,7 +172,7 @@ func select_cell(cell_pos: Vector2i) -> void:
 				remove_selection()
 				disabled_selection = true
 				allow_quit = false
-				GameManager.request_action.rpc(cell_pos, selected.piece_data.id)
+				GameManager.request_action.rpc(cell_pos, selected.id)
 				return
 	
 	# Try to get the game mutex
@@ -189,7 +189,7 @@ func select_cell(cell_pos: Vector2i) -> void:
 		remove_selection()
 		return
 	
-	var item_node: Piece2D = GameManager.get_piece_2d(piece.id)
+	var item_node: Piece2D = GameManager.get_piece_2d(piece.Id)
 	set_selection(item_node)
 
 
@@ -302,7 +302,7 @@ func _on_add_active_display_card(card: CardBase) -> void:
 	
 	add_child(new_card)
 	
-	var team_owner: int = card.teamId
+	var team_owner: int = card.TeamId
 	
 	# Tween the card so it appears, and moves onto the screen
 	var tween: Tween = create_tween()
@@ -314,7 +314,7 @@ func _on_add_active_display_card(card: CardBase) -> void:
 	tween.tween_interval(1)
 	
 	# If card is immediate use, hide the card off screen and delete
-	if not card.displayCard:
+	if not card.DisplayCard:
 		tween.tween_property(new_card, "global_position", Vector2(-100, new_card.global_position.y), 0.6)
 		tween.tween_callback(new_card.queue_free)
 		return
@@ -402,7 +402,7 @@ func _on_action_failed(reason: String) -> void:
 	allow_quit = true
 
 func _on_piece_taken(taken_piece: Piece, attacker: Piece) -> void:
-	var remove_piece: Piece2D = GameManager.get_piece_2d(taken_piece.id)
+	var remove_piece: Piece2D = GameManager.get_piece_2d(taken_piece.Id)
 	if remove_piece == null:
 		return
 	GameManager.remove_piece_2d(remove_piece)
@@ -575,6 +575,10 @@ func _on_resign_btn_pressed() -> void:
 	# TODO: Add a warning that the player has to accept.
 	GameManager.resign_game.rpc()
 
+func _on_request_draw_btn_pressed() -> void:
+	if not GameManager.in_game:
+		to_lobby()
+		return
 
 func _on_game_input_mouse_entered() -> void:
 	cursor_over_game = true

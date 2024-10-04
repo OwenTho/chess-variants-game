@@ -5,7 +5,7 @@ var card_script: CSharpScript = preload("res://scripts/game/card/major/Shapeshif
 func test_card() -> void:
 	
 	var card = card_script.new()
-	card.cardId = "shapeshift"
+	card.CardId = "shapeshift"
 	
 	# Create a simple board of pieces
 	#  . 🐴🤴.

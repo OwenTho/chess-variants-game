@@ -20,7 +20,7 @@ func before_all() -> void:
 	
 	# Disable the thread, so that any following code only processes
 	# after the game is done processing
-	game_controller.singleThread = true
+	game_controller.SingleThread = true
 
 
 # Before each test, initialise the board
@@ -29,7 +29,7 @@ func before_each() -> void:
 	game_controller.FullInit(true, 2)
 	
 	# Store the GameController variables so that they're easy to access
-	game_state = game_controller.currentGameState
+	game_state = game_controller.CurrentGameState
 
 
 func after_each() -> void:
@@ -48,7 +48,7 @@ func start_game() -> void:
 	game_state.StartGame()
 
 func start_game_with_seed(seed: int) -> void:
-	game_state.gameRandom.seed = seed
+	game_state.GameRandom.seed = seed
 	start_game()
 
 func next_turn(team_num: int = -1) -> void:
@@ -73,12 +73,12 @@ func move_piece(piece: Node, x: int, y: int, enable_action_update: bool = true) 
 		piece.EnableActionsUpdate()
 
 func piece_on_board(piece: Node) -> bool:
-	return game_state.allPieces.has(piece)
+	return game_state.AllPieces.has(piece)
 
 func piece_on_cell(piece: Node, x: int, y: int) -> bool:
-	if piece.cell == null:
+	if piece.Cell == null:
 		return false
-	return piece.cell.x == x and piece.cell.y == y
+	return piece.Cell.X == x and piece.Cell.Y == y
 
 
 
@@ -99,17 +99,17 @@ func count_piece_actions(piece: Node, must_be_valid: bool = false) -> int:
 	# If either piece or current actions is null, there are no actions
 	if piece == null:
 		return 0
-	if piece.currentPossibleActions == null:
+	if piece.CurrentPossibleActions == null:
 		return 0
 	
 	# If it doesn't need to check for valid actions, return the length
 	if not must_be_valid:
-		return len(piece.currentPossibleActions)
+		return len(piece.CurrentPossibleActions)
 	
 	# Count the number of valid actions
 	var count: int = 0
-	for action in piece.currentPossibleActions:
-		if action.valid:
+	for action in piece.CurrentPossibleActions:
+		if action.Valid:
 			count += 1
 	return count
 
@@ -121,10 +121,10 @@ func piece_has_actions(piece: Node, must_be_valid: bool = false, num_ignored: in
 
 func piece_has_actions_at(piece: Node, x: int, y: int, num_ignored: int = 0) -> bool:
 	var actions_at_pos: int = 0
-	for cell in game_state.actionGrid.cells:
-		if cell.pos.x == x and cell.pos.y == y:
-			for action in cell.items:
-				if piece == null or piece.currentPossibleActions.has(action):
+	for cell in game_state.ActionGrid.Cells:
+		if cell.Pos.x == x and cell.Pos.y == y:
+			for action in cell.Items:
+				if piece == null or piece.CurrentPossibleActions.has(action):
 					actions_at_pos += 1
 					if actions_at_pos > num_ignored:
 						return true
@@ -135,15 +135,15 @@ func piece_has_actions_at_pos(piece: Node, pos: Vector2i, num_ignored: int = 0) 
 	return piece_has_actions_at(piece, pos.x, pos.y, num_ignored)
 
 
-func piece_has_id(piece: Node, id: int) -> bool:
+func piece_has_id(piece: Piece, id: int) -> bool:
 	if piece == null:
 		return false
-	return piece.id == id
+	return piece.Id == id
 
-func piece_has_piece_id(piece: Node, piece_id: String) -> bool:
-	if piece == null or piece.info == null:
+func piece_has_piece_id(piece: Piece, piece_id: String) -> bool:
+	if piece == null or piece.Info == null:
 		return false
-	return piece.info.pieceId == piece_id
+	return piece.Info.PieceId == piece_id
 
 
 
@@ -152,8 +152,8 @@ func print_current_board() -> void:
 	# Get all of the cell positions
 	var min_pos = Vector2i(0,0)
 	var max_pos = Vector2i(7,7)
-	for piece in game_state.allPieces:
-		var cell = piece.cell
+	for piece in game_state.AllPieces:
+		var cell = piece.Cell
 		if min_pos == null:
 			min_pos = cell.pos
 		if max_pos == null:
@@ -181,14 +181,14 @@ func print_current_board() -> void:
 				var skip_empty := false
 				var is_acting := false
 				var is_valid := false
-				for cell in game_state.actionGrid.cells:
+				for cell in game_state.ActionGrid.Cells:
 					# Find at least one active / acting action
-					for action in cell.items:
-						if action.valid:
+					for action in cell.Items:
+						if action.Valid:
 							is_valid = true
-						if action.acting:
+						if action.Acting:
 							is_acting = true
-					if cell.pos.x == x and cell.pos.y == y:
+					if cell.Pos.x == x and cell.Pos.y == y:
 						if is_valid:
 							cur_arr.append("  @  ")
 						elif is_acting:
@@ -197,10 +197,10 @@ func print_current_board() -> void:
 						break
 				if not skip_empty:
 					cur_arr.append("  .  ")
-			elif piece.info == null:
+			elif piece.Info == null:
 				cur_arr.append("X")
 			else:
-				cur_arr.append(get_piece_string(piece.info.pieceId))
+				cur_arr.append(get_piece_string(piece.Info.PieceId))
 	
 	var player_status: Array[String] = []
 	
@@ -211,7 +211,7 @@ func print_current_board() -> void:
 		elif game_state.PlayerHasNoKing(player_num):
 			player_status[player_num] = "No King"
 	
-	print("Player turn: %s" % [game_state.currentPlayerNum])
+	print("Player turn: %s" % [game_state.CurrentPlayerNum])
 	print("P1 status: %s" % [player_status[0]])
 	print("P2 status: %s" % [player_status[1]])
 	

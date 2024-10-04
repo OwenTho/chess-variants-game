@@ -1,127 +1,117 @@
-using Godot;
 using System.Collections.Generic;
+using Godot;
 
 [GlobalClass]
-public partial class PieceInfo : Node
-{
-    internal List<PieceRule> rules;
-    internal List<ValidationRuleBase> validationRules;
+public partial class PieceInfo : Node {
+  internal List<PieceRule> Rules;
 
-    public string pieceId { get; internal set; }
-    // The name that's displayed to users.
-    public string displayName { get; internal set; }
-    public string textureLoc { get; internal set; }
+  // Tags for the PieceInfo.
+  public Tags Tags = new();
+  internal List<ValidationRuleBase> ValidationRules;
 
-    // Level for all pieces of this type
-    public int level { get; internal set; } = 0;
-    
-    // Tags for the PieceInfo.
-    public Tags tags = new();
-
-    internal PieceInfo(string id, string displayName = null, int initialLevel = 1, List<PieceRule> initialRules = null, List<ValidationRuleBase> initialValidationRules = null)
-    {
-        if (displayName == null)
-        {
-            displayName = StringUtil.ToTitleCase(id);
-        }
-        this.displayName = displayName;
-        if (initialRules == null)
-        {
-            initialRules = new List<PieceRule>();
-        }
-        if (initialValidationRules == null)
-        {
-            initialValidationRules = new List<ValidationRuleBase>();
-        }
-        rules = initialRules;
-        validationRules = initialValidationRules;
-        pieceId = id;
-        level = initialLevel;
+  internal PieceInfo(string id, string displayName = null, int initialLevel = 1,
+    List<PieceRule> initialRules = null,
+    List<ValidationRuleBase> initialValidationRules = null) {
+    if (displayName == null) {
+      displayName = StringUtil.ToTitleCase(id);
     }
 
-
-    public bool HasActionRule(ActionRuleBase rule)
-    {
-        if (rule == null)
-        {
-            return false;
-        }
-        foreach (PieceRule pieceRule in rules)
-        {
-            if (pieceRule.rule == rule)
-            {
-                return true;
-            }
-        }
-        return false;
+    DisplayName = displayName;
+    if (initialRules == null) {
+      initialRules = new List<PieceRule>();
     }
 
-    public bool HasValidationRule(ValidationRuleBase rule)
-    {
-        if (rule == null)
-        {
-            return false;
-        }
-        foreach (ValidationRuleBase validationRule in validationRules)
-        {
-            if (validationRule == rule)
-            {
-                return true;
-            }
-        }
-        return false;
+    if (initialValidationRules == null) {
+      initialValidationRules = new List<ValidationRuleBase>();
     }
 
-    public bool TryGetPieceRule(RuleBase rule, out PieceRule pieceRule)
-    {
-        foreach (PieceRule thisRule in rules)
-        {
-            if (thisRule.rule == rule)
-            {
-                pieceRule = thisRule;
-                return true;
-            }
-        }
-        pieceRule = new PieceRule(null);
-        return false;
+    Rules = initialRules;
+    ValidationRules = initialValidationRules;
+    PieceId = id;
+    Level = initialLevel;
+  }
+
+  public string PieceId { get; internal set; }
+
+  // The name that's displayed to users.
+  public string DisplayName { get; internal set; }
+  public string TextureLoc { get; internal set; }
+
+  // Level for all pieces of this type
+  public int Level { get; internal set; }
+
+
+  public bool HasActionRule(ActionRuleBase rule) {
+    if (rule == null) {
+      return false;
     }
 
-    public PieceInfo AddActionRule(ActionRuleBase rule, int customLevel = -1, bool enforceLevel = false)
-    {
-        if (rule == null)
-        {
-            GD.PushWarning($"Tried to give PieceInfo {pieceId} a null rule.");
-            return this;
-        }
-
-        // If it already has the rule, add to count and enable if it's not.
-        if (TryGetPieceRule(rule, out PieceRule pieceRule))
-        {
-            pieceRule.level += 1;
-            pieceRule.isEnabled = true;
-            return this;
-        }
-
-        // If here, then add the rule
-        rules.Add(new PieceRule(rule, customLevel, enforceLevel));
-        return this;
+    foreach (PieceRule pieceRule in Rules) {
+      if (pieceRule.Rule == rule) {
+        return true;
+      }
     }
 
-    public PieceInfo AddValidationRule(ValidationRuleBase rule)
-    {
-        if (rule == null)
-        {
-            GD.PushWarning($"Tried to give PieceInfo {pieceId} a null rule.");
-            return this;
-        }
+    return false;
+  }
 
-        // If it already has the rule, ignore
-        if (HasValidationRule(rule))
-        {
-            return this;
-        }
-
-        validationRules.Add(rule);
-        return this;
+  public bool HasValidationRule(ValidationRuleBase rule) {
+    if (rule == null) {
+      return false;
     }
+
+    foreach (ValidationRuleBase validationRule in ValidationRules) {
+      if (validationRule == rule) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  public bool TryGetPieceRule(RuleBase rule, out PieceRule pieceRule) {
+    foreach (PieceRule thisRule in Rules) {
+      if (thisRule.Rule == rule) {
+        pieceRule = thisRule;
+        return true;
+      }
+    }
+
+    pieceRule = new PieceRule(null);
+    return false;
+  }
+
+  public PieceInfo AddActionRule(ActionRuleBase rule, int customLevel = -1,
+    bool enforceLevel = false) {
+    if (rule == null) {
+      GD.PushWarning($"Tried to give PieceInfo {PieceId} a null rule.");
+      return this;
+    }
+
+    // If it already has the rule, add to count and enable if it's not.
+    if (TryGetPieceRule(rule, out PieceRule pieceRule)) {
+      pieceRule.Level += 1;
+      pieceRule.IsEnabled = true;
+      return this;
+    }
+
+    // If here, then add the rule
+    Rules.Add(new PieceRule(rule, customLevel, enforceLevel));
+    return this;
+  }
+
+  public PieceInfo AddValidationRule(ValidationRuleBase rule) {
+    if (rule == null) {
+      GD.PushWarning($"Tried to give PieceInfo {PieceId} a null rule.");
+      return this;
+    }
+
+    // If it already has the rule, ignore
+    if (HasValidationRule(rule)) {
+      return this;
+    }
+
+    ValidationRules.Add(rule);
+    return this;
+  }
 }

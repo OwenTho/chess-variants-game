@@ -27,13 +27,13 @@ func _on_promotion(card: CardBase) -> void:
 	
 	# Get the promotion options
 	cur_card = card
-	cur_selection = card.toPiece.duplicate(true)
+	cur_selection = card.ToPiece.duplicate(true)
 	
-	cur_promoting_piece = card.promotingPiece
+	cur_promoting_piece = card.PromotingPiece
 	
 	# Send the options to the owner of the promotingPiece
-	var player_id = Lobby.get_player_id_from_num(cur_promoting_piece.teamId)
-	_give_promotion_options.rpc_id(player_id, cur_promoting_piece.id, cur_selection)
+	var player_id = Lobby.get_player_id_from_num(cur_promoting_piece.TeamId)
+	_give_promotion_options.rpc_id(player_id, cur_promoting_piece.Id, cur_selection)
 
 @rpc("authority", "call_local", "reliable")
 func _give_promotion_options(piece_id: int, options: Array) -> void:
@@ -88,7 +88,7 @@ func _pick_option(option_ind: int) -> void:
 	cur_selection.clear()
 	
 	# Send the players the promotion to make
-	_promote_piece.rpc(piece.id, chosen_promotion)
+	_promote_piece.rpc(piece.Id, chosen_promotion)
 	# Finally, send the card notice
 	send_card_notice(card, FIN_NOTICE)
 
@@ -112,5 +112,5 @@ func _promote_piece(piece_id: int, new_piece: String) -> void:
 		push_error("Couldn't promote piece as there is no piece with id %s." % [piece_id])
 		return
 	
-	piece.info = info
+	piece.Info = info
 	

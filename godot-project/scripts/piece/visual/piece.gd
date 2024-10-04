@@ -8,6 +8,12 @@ class_name Piece2D
 signal actions_updated(piece: Piece2D)
 
 var piece_data: Piece
+var id: int:
+	get:
+		if piece_data == null:
+			return -1
+		return piece_data.Id
+
 var _cur_move_tween: Tween
 var _cur_info_tween: Tween
 
@@ -49,14 +55,14 @@ func reset_actions() -> void:
 	set_actions([])
 
 func _on_move(new_cell) -> void:
-	if new_cell != null and new_cell.pos != pos:
+	if new_cell != null and new_cell.Pos != pos:
 		if _cur_move_tween != null:
 			_cur_move_tween.kill()
 		_cur_move_tween = create_tween()
-		var move_pos: Vector2 = board.board_to_world_coord(new_cell.pos)
+		var move_pos: Vector2 = board.board_to_world_coord(new_cell.Pos)
 		_cur_move_tween.tween_property(self, "position", move_pos, 0.2)
 		_cur_move_tween.tween_callback(_move_tween_end)
-		pos = new_cell.pos
+		pos = new_cell.Pos
 		# Only play sound after the start of the game - This avoids Shuffle
 		# playing the sound for all pieces.
 		if GameManager.turn_number > 0:
@@ -65,9 +71,9 @@ func _on_move(new_cell) -> void:
 func update_pos() -> void:
 	if piece_data == null:
 		return
-	if piece_data.cell == null:
+	if piece_data.Cell == null:
 		return
-	set_pos(piece_data.cell.x, piece_data.cell.y)
+	set_pos(piece_data.Cell.X, piece_data.Cell.Y)
 
 func _enter_tree():
 	update_scale()
@@ -95,7 +101,7 @@ func update_sprite() -> void:
 		sprite.material = null
 		return
 	
-	sprite.material = GameManager.get_new_team_material(piece_data.teamId)
+	sprite.material = GameManager.get_new_team_material(piece_data.TeamId)
 
 func set_selected(selected: bool) -> void:
 	sprite.material.set_shader_parameter("outline_enabled", selected)
