@@ -2,7 +2,7 @@ extends Node
 
 const MAJOR_VER: int = 0
 const MINOR_VER: int = 4
-const CHANGE_VER: int = 0
+const CHANGE_VER: int = 1
 
 const MAJOR_VER_MIN: int = 0
 const MINOR_VER_MIN: int = 4
