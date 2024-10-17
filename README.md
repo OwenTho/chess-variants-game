@@ -12,7 +12,7 @@ Look at [How to play online](HowToPlayOnline.md).
 
 ## How to build
 
-To build the game, you'll first need to downloaad the source. There are various ways to do this, the easiest by pressing the "Code" button and pressing "Download ZIP" and extracting the files.
+To build the game, you'll first need to download the source. There are various ways to do this, the easiest by pressing the "Code" button and pressing "Download ZIP" and extracting the files.
 
 - Once you have the source code, you'll need to open it using Godot. The version of Godot that the project uses is **Godot 4.3** (which you can download [here](https://godotengine.org/download/archive/4.3-stable/)). You ***must*** get the .NET version of the engine, otherwise you won't be able to build the game.
 
