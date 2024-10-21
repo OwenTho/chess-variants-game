@@ -40,6 +40,8 @@ To build the game, you'll first need to download the source. There are various w
 
 - Sounds for moving, taking and checking Pieces: <https://pixabay.com/sound-effects/chess-pieces-60890>
 
+- Godot Unit Test for unit tests: <https://github.com/bitwes/Gut>
+
 ### Resources used for learning how to use Godot
 
 - Godot Documentation: <https://docs.godotengine.org/en/stable/index.html>
