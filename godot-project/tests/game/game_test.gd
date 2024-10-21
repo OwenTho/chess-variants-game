@@ -1,4 +1,4 @@
-extends GutTest
+extends Node
 
 class_name GameTest
 
