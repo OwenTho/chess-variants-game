@@ -17,7 +17,7 @@
  "hide_orphans": false,
  "ignore_pause": false,
  "include_subdirs": true,
- "junit_xml_file": "res://tests/cli/scene_test_output.xml",
+ "junit_xml_file": "",
  "junit_xml_timestamp": false,
  "log_level": 3,
  "opacity": 100,
