@@ -9,7 +9,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-
     - name: Unit Test
       uses: croconut/godot-tester@v5.1
       with:
@@ -40,4 +39,4 @@ jobs:
         # URL where a precompiled, custom Godot binary will be downloaded and used instead of an official Godot binary.
         # custom-godot-dl-url: # optional, default is 
         # Filename to store and read results in XML
-        result-output-file: "godot-project/direct_scene_xml_output.xml"
+        result-output-file: "test_results.xml"
