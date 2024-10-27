@@ -99,7 +99,7 @@ You will need to set the Server IP and Server Port if joining, whereas only the 
 By default, the Server Port used is 9813\. *If using playit.gg for a tunnel, remember to use the public playit.gg port to join, not the local port set in the game.*
 
 Similarly to Local Play, Online Play displays who the current player is using an arrow. However, it also displays the name of the player that they set in the server lobby before the game starts:  
-![A screenshot of the player info in the game, with an arrow indicating that it's the player's turn. In addition, the player's "Name" appears under their number](6_online_player_info.png)
+![A screenshot of the player info in the game, with an arrow indicating that it's the player's turn. In addition, the player's "Name" appears under their number](img/htp/6_online_player_info.png)
 
 <a name="playing-the-game"></a>
 
