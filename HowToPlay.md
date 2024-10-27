@@ -64,7 +64,7 @@
 
 ### Downloading
 
-To start playing the game, you first need to download it. This can be found in the [releases](https://github.com/OwenTho/chess-variants-game/releases/) on GitHub or by following the instructions in the "How to build" in the [Read Me](README.md).
+To start playing the game, you first need to download it. This can be found in the [releases](https://github.com/OwenTho/chess-variants-game/releases/) on GitHub or by following the instructions in the "How to build" in the [README](README.md).
 
 The data is stored in a .zip file, and therefore needs to be extracted.  
 ![Zip file of the game](img/htp/1_zip_file.png)  
