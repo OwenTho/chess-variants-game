@@ -28,7 +28,7 @@ To build the game, you'll first need to download the source. There are various w
 
 ### Resources used for making the game
 
-- Godot Engine: <https://godotengine.org/>
+- Godot Engine (MIT): <https://godotengine.org/>
 
 - Visual Studio for initial C#: <https://visualstudio.microsoft.com/vs/>
 
@@ -40,7 +40,7 @@ To build the game, you'll first need to download the source. There are various w
 
 - Sounds for moving, taking and checking Pieces: <https://pixabay.com/sound-effects/chess-pieces-60890>
 
-- Godot Unit Test for unit tests: <https://github.com/bitwes/Gut>
+- Godot Unit Test for unit tests (MIT): <https://github.com/bitwes/Gut>
 
 ### Resources used for learning how to use Godot
 
